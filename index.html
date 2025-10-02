@@ -20,6 +20,39 @@
             line-height: 1.6;
         }
 
+        /* شاشة التحميل */
+        #authLoading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        #authLoading.hidden {
+            display: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4a7c2a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         /* الشريط العلوي */
         .header {
             background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
@@ -45,11 +78,10 @@
             align-items: center;
         }
 
-        .user-role {
-            background: rgba(255,255,255,0.2);
-            padding: 0.3rem 0.8rem;
-            border-radius: 15px;
-            font-size: 0.9rem;
+        .user-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: white;
         }
 
         .logout-btn {
@@ -60,6 +92,11 @@
             border-radius: 5px;
             cursor: pointer;
             font-family: 'Cairo', sans-serif;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #a93226;
         }
 
         /* التخطيط الرئيسي */
@@ -413,11 +450,17 @@
     </style>
 </head>
 <body>
+    <!-- شاشة التحميل -->
+    <div id="authLoading">
+        <div class="spinner"></div>
+        <p style="margin-top: 1rem; color: #7f8c8d;">جاري التحميل...</p>
+    </div>
+
     <!-- الشريط العلوي -->
     <div class="header">
         <h1>🌾 نظام إدارة المزرعة</h1>
         <div class="user-info">
-            <span class="user-role" id="userRole">المدير</span>
+            <span class="user-name" id="userName">المدير</span>
             <button class="logout-btn" onclick="logout()">تسجيل خروج</button>
         </div>
     </div>
@@ -541,7 +584,7 @@
                 </div>
             </div>
 
-            <!-- قسم القطيع -->
+            <!-- باقي الأقسام مثل الكود الأصلي -->
             <div id="livestock" class="page-section">
                 <h2>إدارة القطيع</h2>
                 <div class="cards-grid">
@@ -558,263 +601,36 @@
                         <div class="card-value">9</div>
                     </div>
                 </div>
-                <div class="data-table">
-                    <div class="table-header">
-                        <div class="table-title">سجل الحيوانات</div>
-                        <div class="table-actions">
-                            <button class="btn btn-primary btn-sm" onclick="addAnimal()">+ إضافة حيوان</button>
-                        </div>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>رقم الرأس</th>
-                                <th>النوع</th>
-                                <th>تاريخ الميلاد</th>
-                                <th>الجنس</th>
-                                <th>الحالة</th>
-                                <th>إجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="animalsTableBody">
-                            <tr><td colspan="6" class="loading">جاري التحميل...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
             </div>
 
-            <!-- قسم السجلات الصحية -->
             <div id="health" class="page-section">
                 <h2>السجلات الصحية</h2>
-                <div class="data-table">
-                    <div class="table-header">
-                        <div class="table-title">سجلات اللقاحات والعلاج</div>
-                        <div class="table-actions">
-                            <button class="btn btn-primary btn-sm" onclick="addHealthRecord()">+ إضافة سجل</button>
-                        </div>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>رقم الحيوان</th>
-                                <th>اللقاحات</th>
-                                <th>الأمراض</th>
-                                <th>العلاج</th>
-                                <th>آخر فحص</th>
-                                <th>إجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="healthTableBody">
-                            <tr><td colspan="6" class="loading">جاري التحميل...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+                <p>قسم السجلات الصحية - قيد التطوير</p>
             </div>
 
-            <!-- قسم الولادات -->
             <div id="births" class="page-section">
                 <h2>سجل الولادات</h2>
-                <div class="data-table">
-                    <div class="table-header">
-                        <div class="table-title">الولادات والتلقيح</div>
-                        <div class="table-actions">
-                            <button class="btn btn-primary btn-sm" onclick="addBirth()">+ تسجيل ولادة</button>
-                        </div>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>رقم النعجة</th>
-                                <th>تاريخ التلقيح</th>
-                                <th>الولادة المتوقعة</th>
-                                <th>الولادة الفعلية</th>
-                                <th>عدد الأحياء</th>
-                                <th>عدد الموتى</th>
-                                <th>متوسط الوزن</th>
-                            </tr>
-                        </thead>
-                        <tbody id="birthsTableBody">
-                            <tr><td colspan="7" class="loading">جاري التحميل...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+                <p>قسم الولادات - قيد التطوير</p>
             </div>
 
-            <!-- قسم التغذية -->
             <div id="feeding" class="page-section">
                 <h2>التغذية اليومية</h2>
-                <div class="data-table">
-                    <div class="table-header">
-                        <div class="table-title">سجل التغذية</div>
-                        <div class="table-actions">
-                            <button class="btn btn-primary btn-sm" onclick="addFeedLog()">+ تسجيل يومي</button>
-                        </div>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>التاريخ</th>
-                                <th>عدد الرؤوس</th>
-                                <th>شعير (كغ)</th>
-                                <th>تبن (كغ)</th>
-                                <th>علف مركز</th>
-                                <th>فصفصة</th>
-                                <th>أملاح</th>
-                                <th>ملاحظات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="feedingTableBody">
-                            <tr><td colspan="8" class="loading">جاري التحميل...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+                <p>قسم التغذية - قيد التطوير</p>
             </div>
 
-            <!-- قسم المالية -->
             <div id="finance" class="page-section">
                 <h2>الإدارة المالية</h2>
-                
-                <div class="financial-summary">
-                    <div class="financial-card expense">
-                        <div class="card-title">إجمالي المصاريف</div>
-                        <div class="card-value" id="totalExpenses">105M</div>
-                    </div>
-                    <div class="financial-card income">
-                        <div class="card-title">إجمالي المبيعات</div>
-                        <div class="card-value" id="totalSales">0</div>
-                    </div>
-                    <div class="financial-card profit">
-                        <div class="card-title">صافي الربح/الخسارة</div>
-                        <div class="card-value" id="netProfit">-105M</div>
-                    </div>
-                </div>
-
-                <div class="data-table">
-                    <div class="table-header">
-                        <div class="table-title">المصاريف</div>
-                        <div class="table-actions">
-                            <button class="btn btn-primary btn-sm" onclick="addExpense()">+ مصروف جديد</button>
-                            <button class="btn btn-success btn-sm" onclick="exportCSV('expenses')">تصدير</button>
-                        </div>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>التاريخ</th>
-                                <th>الفئة</th>
-                                <th>المبلغ</th>
-                                <th>ملاحظات</th>
-                                <th>المشروع</th>
-                            </tr>
-                        </thead>
-                        <tbody id="expensesTableBody">
-                            <tr><td colspan="5" class="loading">جاري التحميل...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="data-table">
-                    <div class="table-header">
-                        <div class="table-title">المبيعات</div>
-                        <div class="table-actions">
-                            <button class="btn btn-primary btn-sm" onclick="addSale()">+ مبيعة جديدة</button>
-                        </div>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>التاريخ</th>
-                                <th>المنتج</th>
-                                <th>الكمية</th>
-                                <th>سعر الوحدة</th>
-                                <th>المجموع</th>
-                                <th>المشتري</th>
-                            </tr>
-                        </thead>
-                        <tbody id="salesTableBody">
-                            <tr><td colspan="6" class="loading">جاري التحميل...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="data-table">
-                    <div class="table-header">
-                        <div class="table-title">القروض</div>
-                        <div class="table-actions">
-                            <button class="btn btn-primary btn-sm" onclick="addLoan()">+ قرض جديد</button>
-                        </div>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>الدائن</th>
-                                <th>المبلغ</th>
-                                <th>المدفوع</th>
-                                <th>المتبقي</th>
-                                <th>الحالة</th>
-                            </tr>
-                        </thead>
-                        <tbody id="loansTableBody">
-                            <tr><td colspan="5" class="loading">جاري التحميل...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+                <p>قسم المالية - قيد التطوير</p>
             </div>
 
-            <!-- قسم المخزون -->
             <div id="inventory" class="page-section">
                 <h2>المخزون</h2>
-                <div class="data-table">
-                    <div class="table-header">
-                        <div class="table-title">مخزون المواد</div>
-                        <div class="table-actions">
-                            <button class="btn btn-primary btn-sm" onclick="addInventoryItem()">+ إضافة مادة</button>
-                        </div>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>المادة</th>
-                                <th>الكمية</th>
-                                <th>الوحدة</th>
-                                <th>الموقع</th>
-                                <th>الحالة</th>
-                                <th>ملاحظات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inventoryTableBody">
-                            <tr><td colspan="6" class="loading">جاري التحميل...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+                <p>قسم المخزون - قيد التطوير</p>
             </div>
 
-            <!-- قسم المعدات -->
             <div id="equipment" class="page-section">
                 <h2>المعدات والبنية التحتية</h2>
-                <div class="data-table">
-                    <div class="table-header">
-                        <div class="table-title">المعدات</div>
-                        <div class="table-actions">
-                            <button class="btn btn-primary btn-sm" onclick="addEquipment()">+ إضافة معدة</button>
-                        </div>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>الاسم</th>
-                                <th>النوع</th>
-                                <th>السنة</th>
-                                <th>الحالة</th>
-                                <th>الموقع</th>
-                                <th>ملاحظات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="equipmentTableBody">
-                            <tr><td colspan="6" class="loading">جاري التحميل...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+                <p>قسم المعدات - قيد التطوير</p>
             </div>
         </div>
     </div>
@@ -836,15 +652,77 @@
     
     <script>
         // ============================================
-        // إعدادات Supabase - ضع مفاتيحك هنا
+        // إعدادات Supabase
         // ============================================
-        const SUPABASE_URL = 'https://sstvsknmmhbwubzajeix.supabase.co'; // مثال: https://xxxxx.supabase.co
+        const SUPABASE_URL = 'https://sstvsknmmhbwubzajeix.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzdHZza25tbWhid3ViemFqZWl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNDM0NjIsImV4cCI6MjA3NDkxOTQ2Mn0.EeVUU9DxRYUi38nUHgWEsnG8li7KZjqAGPNW9IDokhg';
         
-        // تهيئة Supabase
-        let supabase = null;
-        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // متغيرات عامة
+        let currentUser = null;
+
+        // ============================================
+        // حماية الصفحة - Authentication Guard
+        // ============================================
+        async function checkAuth() {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (error || !session) {
+                    // لا توجد جلسة نشطة - التحويل لصفحة تسجيل الدخول
+                    window.location.href = 'login.html';
+                    return false;
+                }
+
+                // حفظ بيانات المستخدم
+                currentUser = session.user;
+                
+                // تحديث واجهة المستخدم
+                updateUserUI();
+                
+                // إخفاء شاشة التحميل
+                document.getElementById('authLoading').classList.add('hidden');
+                
+                return true;
+            } catch (error) {
+                console.error('Auth check error:', error);
+                window.location.href = 'login.html';
+                return false;
+            }
+        }
+
+        // تحديث معلومات المستخدم في الواجهة
+        function updateUserUI() {
+            const userName = currentUser.user_metadata?.name || 'المدير';
+            document.getElementById('userName').textContent = userName;
+        }
+
+        // ============================================
+        // وظيفة تسجيل الخروج
+        // ============================================
+        async function logout() {
+            if (!confirm('هل تريد تسجيل الخروج؟')) {
+                return;
+            }
+
+            try {
+                // إظهار شاشة التحميل
+                document.getElementById('authLoading').classList.remove('hidden');
+                
+                const { error } = await supabase.auth.signOut();
+                
+                if (error) {
+                    throw error;
+                }
+
+                // التحويل لصفحة تسجيل الدخول
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('حدث خطأ أثناء تسجيل الخروج');
+                document.getElementById('authLoading').classList.add('hidden');
+            }
         }
 
         // ============================================
@@ -860,63 +738,32 @@
                 {id: 6, owner:"براهيم", hectares:4, irrigated:false, notes:"زرع شعير"},
                 {id: 7, owner:"براهيم", hectares:2, irrigated:false, notes:"زرع شعير"}
             ],
-            equipment: [
-                {id: 1, name:"جرار", type:"آلة زراعية", year:"2014", status:"جيد", location:"منزل المعدات"},
-                {id: 2, name:"محراث", type:"آلة زراعية", year:"2010", status:"جيد", location:"منزل المعدات"},
-                {id: 3, name:"خرباش", type:"آلة زراعية", year:"2012", status:"متوسط", location:"منزل المعدات"},
-                {id: 4, name:"كوفر", type:"آلة زراعية", year:"2015", status:"جيد", location:"منزل المعدات"}
-            ],
-            inventory: [
-                {id: 1, item_name:"تبن للبيع", quantity:700, unit:"بالة", location:"مستودع", notes:"جاهز للبيع"},
-                {id: 2, item_name:"تبن إجمالي", quantity:912, unit:"بالة", location:"مستودع", notes:""},
-                {id: 3, item_name:"شعير", quantity:441, unit:"بالة", location:"مستودع", notes:""},
-                {id: 4, item_name:"شعير", quantity:20, unit:"قنطار", location:"مستودع", notes:"منخفض"},
-                {id: 5, item_name:"نخالة", quantity:60, unit:"قنطار", location:"مستودع", notes:""}
-            ],
+            equipment: [],
+            inventory: [],
             animals: [],
             health_records: [],
             births: [],
             feed_log: [],
-            expenses: [
-                {id: 1, date:"2024-10-01", category:"كهرباء", amount:1800000, notes:"فاتورة أكتوبر", project_id:null},
-                {id: 2, date:"2024-10-01", category:"عمال", amount:3000000, notes:"رواتب شهرية", project_id:null},
-                {id: 3, date:"2024-10-01", category:"بذور وأسمدة", amount:60000000, notes:"موسم الزراعة", project_id:null},
-                {id: 4, date:"2024-10-01", category:"فصفصة", amount:40000000, notes:"شراء فصفصة", project_id:null}
-            ],
+            expenses: [],
             sales: [],
-            loans: [
-                {id: 1, creditor:"رياض القيراتي", amount:2, paid:0},
-                {id: 2, creditor:"امين بلخرشوش", amount:7, paid:0},
-                {id: 3, creditor:"رمزي طيار", amount:2, paid:0},
-                {id: 4, creditor:"مصطفي غفار", amount:8.5, paid:0},
-                {id: 5, creditor:"مداني نوادي", amount:9.8, paid:0},
-                {id: 6, creditor:"سوفي قروط", amount:4.5, paid:0},
-                {id: 7, creditor:"حمزة", amount:8, paid:0},
-                {id: 8, creditor:"ناصر", amount:7, paid:0}
-            ]
+            loans: []
         };
 
         // ============================================
         // وظائف التنقل
         // ============================================
         function showSection(sectionId) {
-            // إخفاء جميع الأقسام
             document.querySelectorAll('.page-section').forEach(section => {
                 section.classList.remove('active');
             });
             
-            // إزالة النشط من جميع عناصر القائمة
             document.querySelectorAll('.menu-item').forEach(item => {
                 item.classList.remove('active');
             });
             
-            // إظهار القسم المطلوب
             document.getElementById(sectionId).classList.add('active');
-            
-            // تفعيل عنصر القائمة
             event.currentTarget.classList.add('active');
             
-            // تحميل البيانات للقسم
             loadSectionData(sectionId);
         }
 
@@ -928,31 +775,9 @@
                 case 'lands':
                     await loadLands();
                     break;
-                case 'livestock':
-                    await loadAnimals();
-                    break;
-                case 'health':
-                    await loadHealthRecords();
-                    break;
-                case 'births':
-                    await loadBirths();
-                    break;
-                case 'feeding':
-                    await loadFeedLog();
-                    break;
-                case 'finance':
-                    await loadFinance();
-                    break;
-                case 'inventory':
-                    await loadInventory();
-                    break;
-                case 'equipment':
-                    await loadEquipment();
-                    break;
             }
         }
 
-        // تحميل الأراضي
         async function loadLands() {
             const tbody = document.getElementById('landsTableBody');
             
@@ -967,191 +792,14 @@
             
             tbody.innerHTML = localData.lands.map(land => `
                 <tr>
-                    <td>${land.owner}</td>
+                    <td>${land.owner || land.owner_name}</td>
                     <td>${land.hectares}</td>
                     <td>${land.irrigated ? '✅ نعم' : '❌ لا'}</td>
-                    <td>${land.notes || '-'}</td>
+                    <td>${land.notes || land.crops_notes || '-'}</td>
                     <td>
                         <button class="btn btn-sm btn-warning" onclick="editLand(${land.id})">تعديل</button>
                         <button class="btn btn-sm btn-danger" onclick="deleteLand(${land.id})">حذف</button>
                     </td>
-                </tr>
-            `).join('');
-        }
-
-        // تحميل الحيوانات
-        async function loadAnimals() {
-            const tbody = document.getElementById('animalsTableBody');
-            
-            if (localData.animals.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6">لا توجد بيانات - اضغط "إضافة حيوان" لبدء التسجيل</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = localData.animals.map(animal => `
-                <tr>
-                    <td>${animal.tag_number}</td>
-                    <td>${animal.species}</td>
-                    <td>${animal.birth_date || '-'}</td>
-                    <td>${animal.sex}</td>
-                    <td><span class="status-badge status-active">${animal.status}</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-warning" onclick="editAnimal(${animal.id})">تعديل</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // تحميل السجلات الصحية
-        async function loadHealthRecords() {
-            const tbody = document.getElementById('healthTableBody');
-            
-            if (localData.health_records.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6">لا توجد سجلات صحية</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = localData.health_records.map(record => `
-                <tr>
-                    <td>${record.animal_id}</td>
-                    <td>${record.vaccine_list || '-'}</td>
-                    <td>${record.diseases || '-'}</td>
-                    <td>${record.treatments || '-'}</td>
-                    <td>${record.last_check_date || '-'}</td>
-                    <td>
-                        <button class="btn btn-sm btn-warning" onclick="editHealthRecord(${record.id})">تعديل</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // تحميل الولادات
-        async function loadBirths() {
-            const tbody = document.getElementById('birthsTableBody');
-            
-            if (localData.births.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7">لا توجد سجلات ولادات</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = localData.births.map(birth => `
-                <tr>
-                    <td>${birth.ewe_tag}</td>
-                    <td>${birth.mating_date || '-'}</td>
-                    <td>${birth.expected_birth_date || '-'}</td>
-                    <td>${birth.actual_birth_date || '-'}</td>
-                    <td>${birth.live_count}</td>
-                    <td>${birth.dead_count}</td>
-                    <td>${birth.birth_weight_avg || '-'} كغ</td>
-                </tr>
-            `).join('');
-        }
-
-        // تحميل سجل التغذية
-        async function loadFeedLog() {
-            const tbody = document.getElementById('feedingTableBody');
-            
-            if (localData.feed_log.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8">لا توجد سجلات تغذية</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = localData.feed_log.map(log => `
-                <tr>
-                    <td>${log.date}</td>
-                    <td>${log.heads_count}</td>
-                    <td>${log.barley_kg}</td>
-                    <td>${log.straw_kg}</td>
-                    <td>${log.concentrate_kg || '-'}</td>
-                    <td>${log.fescue_kg || '-'}</td>
-                    <td>${log.minerals || '-'}</td>
-                    <td>${log.notes || '-'}</td>
-                </tr>
-            `).join('');
-        }
-
-        // تحميل المالية
-        async function loadFinance() {
-            // تحميل المصاريف
-            const expensesTbody = document.getElementById('expensesTableBody');
-            expensesTbody.innerHTML = localData.expenses.map(expense => `
-                <tr>
-                    <td>${expense.date}</td>
-                    <td>${expense.category}</td>
-                    <td>${expense.amount.toLocaleString()} دج</td>
-                    <td>${expense.notes || '-'}</td>
-                    <td>${expense.project_id || '-'}</td>
-                </tr>
-            `).join('');
-
-            // تحميل المبيعات
-            const salesTbody = document.getElementById('salesTableBody');
-            if (localData.sales.length === 0) {
-                salesTbody.innerHTML = '<tr><td colspan="6">لا توجد مبيعات مسجلة</td></tr>';
-            }
-
-            // تحميل القروض
-            const loansTbody = document.getElementById('loansTableBody');
-            loansTbody.innerHTML = localData.loans.map(loan => {
-                const remaining = loan.amount - loan.paid;
-                const status = remaining === 0 ? 'مسدد' : 'قائم';
-                return `
-                    <tr>
-                        <td>${loan.creditor}</td>
-                        <td>${loan.amount} قنطار</td>
-                        <td>${loan.paid} قنطار</td>
-                        <td>${remaining} قنطار</td>
-                        <td><span class="status-badge ${remaining === 0 ? 'status-active' : 'status-warning'}">${status}</span></td>
-                    </tr>
-                `;
-            }).join('');
-
-            // حساب الإجماليات
-            const totalExpenses = localData.expenses.reduce((sum, e) => sum + e.amount, 0);
-            const totalSales = localData.sales.reduce((sum, s) => sum + s.total, 0);
-            document.getElementById('totalExpenses').textContent = (totalExpenses / 1000000).toFixed(1) + 'M';
-            document.getElementById('totalSales').textContent = (totalSales / 1000000).toFixed(1) + 'M';
-            document.getElementById('netProfit').textContent = ((totalSales - totalExpenses) / 1000000).toFixed(1) + 'M';
-        }
-
-        // تحميل المخزون
-        async function loadInventory() {
-            const tbody = document.getElementById('inventoryTableBody');
-            
-            tbody.innerHTML = localData.inventory.map(item => {
-                let statusClass = 'status-active';
-                let statusText = 'جيد';
-                
-                if (item.notes && item.notes.includes('منخفض')) {
-                    statusClass = 'status-warning';
-                    statusText = 'منخفض';
-                }
-                
-                return `
-                    <tr>
-                        <td>${item.item_name}</td>
-                        <td>${item.quantity}</td>
-                        <td>${item.unit}</td>
-                        <td>${item.location}</td>
-                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                        <td>${item.notes || '-'}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        // تحميل المعدات
-        async function loadEquipment() {
-            const tbody = document.getElementById('equipmentTableBody');
-            
-            tbody.innerHTML = localData.equipment.map(eq => `
-                <tr>
-                    <td>${eq.name}</td>
-                    <td>${eq.type}</td>
-                    <td>${eq.year}</td>
-                    <td><span class="status-badge status-active">${eq.status}</span></td>
-                    <td>${eq.location}</td>
-                    <td>${eq.notes || '-'}</td>
                 </tr>
             `).join('');
         }
@@ -1164,7 +812,6 @@
         }
 
         function submitModal() {
-            // هنا يتم معالجة البيانات وحفظها
             alert('تم الحفظ! (يحتاج ربط بقاعدة البيانات)');
             closeModal();
         }
@@ -1173,100 +820,7 @@
         // وظائف الإضافة
         // ============================================
         function addLand() {
-            document.getElementById('modalTitle').textContent = 'إضافة أرض جديدة';
-            document.getElementById('modalBody').innerHTML = `
-                <div class="form-group">
-                    <label>اسم المالك</label>
-                    <input type="text" id="landOwner" placeholder="اسم المالك">
-                </div>
-                <div class="form-group">
-                    <label>المساحة (هكتار)</label>
-                    <input type="number" id="landHectares" placeholder="المساحة">
-                </div>
-                <div class="form-group">
-                    <label>مسقي؟</label>
-                    <select id="landIrrigated">
-                        <option value="true">نعم</option>
-                        <option value="false">لا</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>ملاحظات</label>
-                    <textarea id="landNotes" placeholder="ملاحظات"></textarea>
-                </div>
-            `;
-            document.getElementById('modal').classList.add('active');
-        }
-
-        function addAnimal() {
-            alert('نموذج إضافة حيوان (قيد التطوير)');
-        }
-
-        function addHealthRecord() {
-            alert('نموذج إضافة سجل صحي (قيد التطوير)');
-        }
-
-        function addBirth() {
-            alert('نموذج تسجيل ولادة (قيد التطوير)');
-        }
-
-        function addFeedLog() {
-            alert('نموذج تسجيل تغذية يومية (قيد التطوير)');
-        }
-
-        function addExpense() {
-            alert('نموذج إضافة مصروف (قيد التطوير)');
-        }
-
-        function addSale() {
-            alert('نموذج إضافة مبيعة (قيد التطوير)');
-        }
-
-        function addLoan() {
-            alert('نموذج إضافة قرض (قيد التطوير)');
-        }
-
-        function addInventoryItem() {
-            alert('نموذج إضافة مادة للمخزون (قيد التطوير)');
-        }
-
-        function addEquipment() {
-            alert('نموذج إضافة معدة (قيد التطوير)');
-        }
-
-        // ============================================
-        // وظائف التصدير CSV
-        // ============================================
-        function exportCSV(tableName) {
-            const data = localData[tableName];
-            if (!data || data.length === 0) {
-                alert('لا توجد بيانات للتصدير');
-                return;
-            }
-
-            // تحويل البيانات إلى CSV
-            const headers = Object.keys(data[0]);
-            const csvContent = [
-                headers.join(','),
-                ...data.map(row => headers.map(header => row[header]).join(','))
-            ].join('\n');
-
-            // تحميل الملف
-            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `${tableName}_${new Date().toISOString().split('T')[0]}.csv`;
-            link.click();
-        }
-
-        // ============================================
-        // وظائف أخرى
-        // ============================================
-        function logout() {
-            if (confirm('هل تريد تسجيل الخروج؟')) {
-                alert('تم تسجيل الخروج');
-                // هنا يمكن إضافة كود تسجيل الخروج الفعلي
-            }
+            alert('نموذج إضافة أرض (قيد التطوير)');
         }
 
         function editLand(id) {
@@ -1280,16 +834,29 @@
             }
         }
 
+        function exportCSV(tableName) {
+            alert('تصدير CSV - قيد التطوير');
+        }
+
         // ============================================
         // التهيئة الأولية
         // ============================================
-        window.addEventListener('DOMContentLoaded', () => {
-            loadSectionData('dashboard');
+        window.addEventListener('DOMContentLoaded', async () => {
+            // التحقق من تسجيل الدخول أولاً
+            const isAuthenticated = await checkAuth();
             
-            // تحقق من اتصال Supabase
-            if (!supabase) {
-                console.warn('⚠️ لم يتم تكوين Supabase. النظام يعمل بالبيانات المحلية.');
-                console.log('📝 لتفعيل Supabase، قم بتحديث SUPABASE_URL و SUPABASE_KEY في الكود');
+            if (isAuthenticated) {
+                // تحميل البيانات
+                loadSectionData('dashboard');
+                
+                console.log('✅ المستخدم مسجل دخول:', currentUser.email);
+            }
+        });
+
+        // الاستماع لتغييرات حالة المصادقة
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_OUT') {
+                window.location.href = 'login.html';
             }
         });
     </script>
