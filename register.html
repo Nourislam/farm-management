@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل حساب جديد - نظام إدارة المزرعة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .register-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+            max-width: 1000px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .register-side {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .welcome-side {
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
+            color: white;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-side h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-side p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .register-header h2 {
+            font-size: 1.8rem;
+            color: #2d5016;
+            margin-bottom: 0.5rem;
+        }
+
+        .register-header p {
+            color: #7f8c8d;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4a7c2a;
+        }
+
+        .form-group input.error {
+            border-color: #e74c3c;
+        }
+
+        .form-group .helper-text {
+            font-size: 0.8rem;
+            color: #95a5a6;
+            margin-top: 0.3rem;
+        }
+
+        .form-group .error-text {
+            font-size: 0.8rem;
+            color: #e74c3c;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        .form-group .error-text.show {
+            display: block;
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-top: 1rem;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(45, 80, 22, 0.3);
+        }
+
+        .btn-register:active {
+            transform: translateY(0);
+        }
+
+        .btn-register:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            color: #7f8c8d;
+            position: relative;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 42%;
+            height: 1px;
+            background: #ecf0f1;
+        }
+
+        .divider::before {
+            right: 0;
+        }
+
+        .divider::after {
+            left: 0;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 1rem;
+            color: #7f8c8d;
+        }
+
+        .login-link a {
+            color: #4a7c2a;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideDown 0.3s;
+        }
+
+        .alert-error {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+
+        .alert-success {
+            background: #efe;
+            color: #3c3;
+            border: 1px solid #cfc;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .password-strength {
+            height: 4px;
+            background: #ecf0f1;
+            border-radius: 2px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s, background 0.3s;
+        }
+
+        .password-strength-bar.weak {
+            width: 33%;
+            background: #e74c3c;
+        }
+
+        .password-strength-bar.medium {
+            width: 66%;
+            background: #f39c12;
+        }
+
+        .password-strength-bar.strong {
+            width: 100%;
+            background: #27ae60;
+        }
+
+        @media (max-width: 768px) {
+            .register-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .welcome-side {
+                display: none;
+            }
+            
+            .register-side {
+                padding: 2rem;
+            }
+
+            .register-header h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .features {
+            margin-top: 2rem;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+        }
+
+        .feature-text h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .feature-text p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <!-- جانب التسجيل -->
+        <div class="register-side">
+            <div class="register-header">
+                <h2>🌾 إنشاء حساب جديد</h2>
+                <p>ابدأ في إدارة مزرعتك بكفاءة</p>
+            </div>
+
+            <div id="alertBox" class="alert"></div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="fullName">الاسم الكامل *</label>
+                    <input 
+                        type="text" 
+                        id="fullName" 
+                        name="fullName" 
+                        placeholder="أحمد محمد"
+                        required
+                    >
+                    <span class="error-text" id="nameError">الرجاء إدخال الاسم الكامل</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">البريد الإلكتروني *</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        placeholder="example@farm.com"
+                        required
+                        autocomplete="email"
+                    >
+                    <span class="error-text" id="emailError">الرجاء إدخال بريد إلكتروني صحيح</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">كلمة المرور *</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="••••••••"
+                        required
+                        autocomplete="new-password"
+                    >
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                    </div>
+                    <span class="helper-text">يجب أن تحتوي على 8 أحرف على الأقل</span>
+                    <span class="error-text" id="passwordError">كلمة المرور ضعيفة جداً</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">تأكيد كلمة المرور *</label>
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        name="confirmPassword" 
+                        placeholder="••••••••"
+                        required
+                        autocomplete="new-password"
+                    >
+                    <span class="error-text" id="confirmPasswordError">كلمتا المرور غير متطابقتين</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="farmName">اسم المزرعة (اختياري)</label>
+                    <input 
+                        type="text" 
+                        id="farmName" 
+                        name="farmName" 
+                        placeholder="مزرعة الأمل"
+                    >
+                    <span class="helper-text">يمكنك تغييره لاحقاً من الإعدادات</span>
+                </div>
+
+                <button type="submit" class="btn-register" id="registerBtn">
+                    إنشاء الحساب
+                </button>
+            </form>
+
+            <div class="divider">أو</div>
+
+            <div class="login-link">
+                لديك حساب بالفعل؟ <a href="login.html">سجل دخولك</a>
+            </div>
+        </div>
+
+        <!-- جانب الترحيب -->
+        <div class="welcome-side">
+            <div class="logo">🌾</div>
+            <h1>نظام إدارة المزرعة</h1>
+            <p>نظام متكامل لإدارة الأراضي، القطيع، المالية، والمخزون</p>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-text">
+                        <h3>لوحة تحكم ذكية</h3>
+                        <p>متابعة كل شيء في مكان واحد</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🐑</div>
+                    <div class="feature-text">
+                        <h3>إدارة القطيع</h3>
+                        <p>سجل صحي وتتبع شامل</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">💰</div>
+                    <div class="feature-text">
+                        <h3>الإدارة المالية</h3>
+                        <p>تتبع المصاريف والأرباح</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // إعدادات Supabase
+        const SUPABASE_URL = 'https://sstvsknmmhbwubzajeix.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzdHZza25tbWhid3ViemFqZWl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNDM0NjIsImV4cCI6MjA3NDkxOTQ2Mn0.EeVUU9DxRYUi38nUHgWEsnG8li7KZjqAGPNW9IDokhg';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // عناصر الصفحة
+        const registerForm = document.getElementById('registerForm');
+        const fullNameInput = document.getElementById('fullName');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const farmNameInput = document.getElementById('farmName');
+        const registerBtn = document.getElementById('registerBtn');
+        const alertBox = document.getElementById('alertBox');
+        const passwordStrengthBar = document.getElementById('passwordStrengthBar');
+
+        // التحقق من وجود جلسة نشطة
+        checkExistingSession();
+
+        async function checkExistingSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // مؤشر قوة كلمة المرور
+        passwordInput.addEventListener('input', () => {
+            const password = passwordInput.value;
+            const strength = calculatePasswordStrength(password);
+            
+            passwordStrengthBar.className = 'password-strength-bar';
+            
+            if (password.length === 0) {
+                passwordStrengthBar.style.width = '0%';
+            } else if (strength < 3) {
+                passwordStrengthBar.classList.add('weak');
+            } else if (strength < 5) {
+                passwordStrengthBar.classList.add('medium');
+            } else {
+                passwordStrengthBar.classList.add('strong');
+            }
+        });
+
+        // حساب قوة كلمة المرور
+        function calculatePasswordStrength(password) {
+            let strength = 0;
+            
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+            
+            return strength;
+        }
+
+        // التحقق من البيانات في الوقت الفعلي
+        fullNameInput.addEventListener('blur', () => {
+            validateFullName();
+        });
+
+        emailInput.addEventListener('blur', () => {
+            validateEmail();
+        });
+
+        passwordInput.addEventListener('blur', () => {
+            validatePassword();
+        });
+
+        confirmPasswordInput.addEventListener('blur', () => {
+            validateConfirmPassword();
+        });
+
+        // دالة التحقق من الاسم
+        function validateFullName() {
+            const name = fullNameInput.value.trim();
+            const nameError = document.getElementById('nameError');
+            
+            if (name.length < 2) {
+                fullNameInput.classList.add('error');
+                nameError.classList.add('show');
+                return false;
+            }
+            
+            fullNameInput.classList.remove('error');
+            nameError.classList.remove('show');
+            return true;
+        }
+
+        // دالة التحقق من البريد
+        function validateEmail() {
+            const email = emailInput.value.trim();
+            const emailError = document.getElementById('emailError');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (!emailRegex.test(email)) {
+                emailInput.classList.add('error');
+                emailError.classList.add('show');
+                return false;
+            }
+            
+            emailInput.classList.remove('error');
+            emailError.classList.remove('show');
+            return true;
+        }
+
+        // دالة التحقق من كلمة المرور
+        function validatePassword() {
+            const password = passwordInput.value;
+            const passwordError = document.getElementById('passwordError');
+            
+            if (password.length < 8) {
+                passwordInput.classList.add('error');
+                passwordError.textContent = 'كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل';
+                passwordError.classList.add('show');
+                return false;
+            }
+            
+            const strength = calculatePasswordStrength(password);
+            if (strength < 3) {
+                passwordInput.classList.add('error');
+                passwordError.textContent = 'كلمة المرور ضعيفة جداً. استخدم أحرف كبيرة وصغيرة وأرقام';
+                passwordError.classList.add('show');
+                return false;
+            }
+            
+            passwordInput.classList.remove('error');
+            passwordError.classList.remove('show');
+            return true;
+        }
+
+        // دالة التحقق من تطابق كلمة المرور
+        function validateConfirmPassword() {
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            const confirmPasswordError = document.getElementById('confirmPasswordError');
+            
+            if (password !== confirmPassword) {
+                confirmPasswordInput.classList.add('error');
+                confirmPasswordError.classList.add('show');
+                return false;
+            }
+            
+            confirmPasswordInput.classList.remove('error');
+            confirmPasswordError.classList.remove('show');
+            return true;
+        }
+
+        // التحقق من جميع الحقول
+        function validateForm() {
+            const isNameValid = validateFullName();
+            const isEmailValid = validateEmail();
+            const isPasswordValid = validatePassword();
+            const isConfirmPasswordValid = validateConfirmPassword();
+            
+            return isNameValid && isEmailValid && isPasswordValid && isConfirmPasswordValid;
+        }
+
+        // معالج تسجيل الحساب
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!validateForm()) {
+                showAlert('الرجاء تصحيح الأخطاء في النموذج', 'error');
+                return;
+            }
+
+            const fullName = fullNameInput.value.trim();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            const farmName = farmNameInput.value.trim();
+
+            // تعطيل الزر وإظهار التحميل
+            registerBtn.disabled = true;
+            registerBtn.innerHTML = 'جارٍ إنشاء الحساب<span class="loading-spinner"></span>';
+
+            try {
+                // محاولة التسجيل عبر Supabase Auth
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            name: fullName,
+                            farm_name: farmName || null
+                        }
+                    }
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                // نجاح التسجيل
+                showAlert('تم إنشاء الحساب بنجاح! جارٍ التحويل لتسجيل الدخول...', 'success');
+                
+                // التحويل لصفحة تسجيل الدخول
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Registration error:', error);
+                
+                // رسائل خطأ مخصصة
+                let errorMessage = 'فشل إنشاء الحساب';
+                
+                if (error.message.includes('User already registered')) {
+                    errorMessage = 'البريد الإلكتروني مستخدم بالفعل. جرب تسجيل الدخول';
+                } else if (error.message.includes('Password should be at least')) {
+                    errorMessage = 'كلمة المرور قصيرة جداً';
+                } else if (error.message.includes('Invalid email')) {
+                    errorMessage = 'البريد الإلكتروني غير صحيح';
+                } else if (error.message.includes('network')) {
+                    errorMessage = 'خطأ في الاتصال بالإنترنت';
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                showAlert(errorMessage, 'error');
+                
+                // إعادة تفعيل الزر
+                registerBtn.disabled = false;
+                registerBtn.innerHTML = 'إنشاء الحساب';
+            }
+        });
+
+        // دالة إظهار التنبيهات
+        function showAlert(message, type) {
+            alertBox.textContent = message;
+            alertBox.className = `alert alert-${type} show`;
+            
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

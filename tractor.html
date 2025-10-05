@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة مشروع الجرار - نظام إدارة المزرعة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; direction: rtl; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        .spinner { width: 50px; height: 50px; border: 4px solid #e0e0e0; border-top-color: #2d5016; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .header { background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white; padding: 20px 30px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(45, 80, 22, 0.3); }
+        .header-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .header h1 { font-size: 28px; font-weight: 700; }
+        .header p { margin-top: 8px; opacity: 0.9; font-size: 14px; }
+        .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 600; font-size: 14px; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: #4a7c2a; color: white; }
+        .btn-primary:hover { background: #2d5016; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(74, 124, 42, 0.4); }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-warning:hover { background: #e0a800; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-info:hover { background: #138496; }
+        .btn-sm { padding: 5px 12px; font-size: 12px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); transition: transform 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
+        .stat-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .stat-card-icon { font-size: 32px; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+        .stat-card-title { font-size: 14px; color: #6c757d; font-weight: 600; }
+        .stat-card-value { font-size: 32px; font-weight: 700; color: #2d5016; }
+        .stat-card-subtitle { font-size: 12px; color: #6c757d; margin-top: 5px; }
+        .equipment-info-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 30px; }
+        .equipment-info-card h2 { color: #2d5016; font-size: 20px; margin-bottom: 20px; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .info-item { padding: 15px; background: #f8f9fa; border-radius: 8px; border-right: 4px solid #4a7c2a; }
+        .info-label { color: #6c757d; font-size: 12px; margin-bottom: 5px; font-weight: 600; }
+        .info-value { font-size: 18px; font-weight: 700; color: #2d5016; }
+        .tabs-container { background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); overflow: hidden; }
+        .tabs-header { display: flex; border-bottom: 2px solid #f0f0f0; overflow-x: auto; background: #f8f9fa; }
+        .tab-btn { padding: 15px 25px; background: transparent; border: none; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 14px; color: #6c757d; transition: all 0.3s; white-space: nowrap; font-weight: 600; border-bottom: 3px solid transparent; }
+        .tab-btn.active { color: #2d5016; background: white; border-bottom-color: #4a7c2a; }
+        .tab-btn:hover { background: rgba(74, 124, 42, 0.05); }
+        .tab-content { padding: 25px; display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .tab-content h3 { color: #2d5016; font-size: 18px; margin-bottom: 20px; }
+        .table-container { background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); overflow: hidden; margin-top: 20px; }
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%); color: white; }
+        thead th { padding: 15px; text-align: right; font-weight: 600; font-size: 14px; white-space: nowrap; }
+        tbody tr { border-bottom: 1px solid #f0f0f0; transition: background 0.3s; }
+        tbody tr:hover { background: #f8f9fa; }
+        tbody td { padding: 15px; font-size: 14px; }
+        .badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+        .badge-info { background: #d1ecf1; color: #0c5460; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background: rgba(0,0,0,0.5); animation: fadeIn 0.3s; }
+        .modal.active { display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto; animation: slideDown 0.3s; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0; }
+        .modal-header h3 { color: #2d5016; font-size: 20px; }
+        .close { font-size: 28px; font-weight: 700; color: #999; cursor: pointer; border: none; background: none; line-height: 1; }
+        .close:hover { color: #333; }
+        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { font-weight: 600; color: #2d5016; font-size: 14px; }
+        .form-control { padding: 10px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 14px; transition: border-color 0.3s; }
+        .form-control:focus { outline: none; border-color: #4a7c2a; }
+        textarea.form-control { resize: vertical; min-height: 80px; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #f0f0f0; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #6c757d; }
+        .empty-state-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.3; }
+        .empty-state h4 { margin-bottom: 10px; color: #495057; }
+        .alert { padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; display: none; animation: slideDown 0.3s; }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .action-buttons { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .header h1 { font-size: 20px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .info-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            table { font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="authLoading" class="loading">
+        <div class="spinner"></div>
+        <p style="margin-top: 20px; color: #2d5016; font-weight: 600;">جاري تحميل البيانات...</p>
+    </div>
+
+    <div id="alertContainer" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; width: 90%; max-width: 500px;"></div>
+
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div>
+                    <h1 id="projectName">🚜 إدارة مشروع الجرار</h1>
+                    <p>إدارة شاملة لمعدات الجرارات والصيانة والتشغيل</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="window.location.href='../../index.html'">↩️ رجوع للرئيسية</button>
+                    <button class="btn btn-danger" onclick="deleteProject()">🗑️ حذف المشروع</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="equipment-info-card">
+            <h2>📋 معلومات المعدة</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">نوع المعدة</div>
+                    <div class="info-value" id="equipmentType">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">الموديل</div>
+                    <div class="info-value" id="model">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">سنة الصنع</div>
+                    <div class="info-value" id="manufactureYear">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">الرقم التسلسلي</div>
+                    <div class="info-value" id="serialNumber">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">الحالة</div>
+                    <div class="info-value" id="condition">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">ساعات العمل الإجمالية</div>
+                    <div class="info-value" id="workingHours">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-card-title">عدد المشغلين</div>
+                        <div class="stat-card-value" id="operatorsCount">0</div>
+                        <div class="stat-card-subtitle">مشغلين وسائقين</div>
+                    </div>
+                    <div class="stat-card-icon" style="background: #e3f2fd; color: #1976d2;">👨‍🔧</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-card-title">إجمالي ساعات التشغيل</div>
+                        <div class="stat-card-value" id="totalHours">0</div>
+                        <div class="stat-card-subtitle">ساعة عمل</div>
+                    </div>
+                    <div class="stat-card-icon" style="background: #fff3e0; color: #f57c00;">⏱️</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-card-title">إجمالي الإيرادات</div>
+                        <div class="stat-card-value" id="totalRevenue" style="color: #28a745;">0 دج</div>
+                        <div class="stat-card-subtitle">من الخدمات</div>
+                    </div>
+                    <div class="stat-card-icon" style="background: #e8f5e9; color: #4caf50;">💰</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <div class="stat-card-title">إجمالي المصاريف</div>
+                        <div class="stat-card-value" id="totalExpenses" style="color: #dc3545;">0 دج</div>
+                        <div class="stat-card-subtitle">صيانة وتشغيل</div>
+                    </div>
+                    <div class="stat-card-icon" style="background: #ffebee; color: #e53935;">💸</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab-btn active" onclick="switchTab('operators')">👨‍🔧 المشغلين</button>
+                <button class="tab-btn" onclick="switchTab('maintenance')">🔧 الصيانة</button>
+                <button class="tab-btn" onclick="switchTab('operations')">⚙️ التشغيل</button>
+                <button class="tab-btn" onclick="switchTab('services')">💼 الخدمات</button>
+                <button class="tab-btn" onclick="switchTab('finance')">💰 المالية</button>
+            </div>
+
+            <div class="tab-content active" id="operators">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>👨‍🔧 قائمة المشغلين والسائقين</h3>
+                    <button class="btn btn-success btn-sm" onclick="openAddOperatorModal()">➕ إضافة مشغل</button>
+                </div>
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>الاسم</th>
+                                    <th>الهاتف</th>
+                                    <th>النوع</th>
+                                    <th>إجمالي ساعات العمل</th>
+                                    <th>إجمالي الأجور</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="operatorsTableBody">
+                                <tr><td colspan="6" class="empty-state"><div class="empty-state-icon">👨‍🔧</div><h4>لا يوجد مشغلين مسجلين</h4><p>ابدأ بإضافة المشغلين والسائقين</p></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="maintenance">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>🔧 سجل الصيانة</h3>
+                    <button class="btn btn-success btn-sm" onclick="openAddMaintenanceModal()">➕ إضافة صيانة</button>
+                </div>
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>التاريخ</th>
+                                    <th>النوع</th>
+                                    <th>الوصف</th>
+                                    <th>التكلفة</th>
+                                    <th>الفني</th>
+                                    <th>الصيانة القادمة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="maintenanceTableBody">
+                                <tr><td colspan="7" class="empty-state"><div class="empty-state-icon">🔧</div><h4>لا توجد سجلات صيانة</h4><p>ابدأ بتسجيل عمليات الصيانة</p></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="operations">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>⚙️ سجل التشغيل اليومي</h3>
+                    <button class="btn btn-success btn-sm" onclick="openAddOperationModal()">➕ إضافة عملية</button>
+                </div>
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>التاريخ</th>
+                                    <th>نوع العمل</th>
+                                    <th>المشغل</th>
+                                    <th>الساعات</th>
+                                    <th>الوقود (لتر)</th>
+                                    <th>التكلفة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="operationsTableBody">
+                                <tr><td colspan="7" class="empty-state"><div class="empty-state-icon">⚙️</div><h4>لا توجد عمليات تشغيل</h4><p>ابدأ بتسجيل العمليات اليومية</p></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="services">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>💼 سجل الخدمات للعملاء</h3>
+                    <button class="btn btn-success btn-sm" onclick="openAddServiceModal()">➕ إضافة خدمة</button>
+                </div>
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>التاريخ</th>
+                                    <th>العميل</th>
+                                    <th>نوع الخدمة</th>
+                                    <th>المبلغ</th>
+                                    <th>المدفوع</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="servicesTableBody">
+                                <tr><td colspan="7" class="empty-state"><div class="empty-state-icon">💼</div><h4>لا توجد خدمات مسجلة</h4><p>ابدأ بتسجيل خدماتك للعملاء</p></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="finance">
+                <h3>💰 الملخص المالي</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-title">إجمالي الإيرادات</div>
+                        <div class="stat-card-value" id="financeRevenue" style="color: #28a745;">0 دج</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-title">إجمالي المصاريف</div>
+                        <div class="stat-card-value" id="financeExpenses" style="color: #dc3545;">0 دج</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-title">صافي الربح</div>
+                        <div class="stat-card-value" id="financeProfit">0 دج</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="operatorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>➕ إضافة مشغل</h3>
+                <button class="close" onclick="closeModal('operatorModal')">&times;</button>
+            </div>
+            <form id="operatorForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>الاسم *</label>
+                        <input type="text" class="form-control" id="operatorName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>رقم الهاتف *</label>
+                        <input type="tel" class="form-control" id="operatorPhone" required>
+                    </div>
+                    <div class="form-group">
+                        <label>النوع *</label>
+                        <select class="form-control" id="operatorType" required>
+                            <option value="">اختر النوع</option>
+                            <option value="operator">مشغل</option>
+                            <option value="driver">سائق</option>
+                            <option value="both">مشغل وسائق</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ملاحظات</label>
+                    <textarea class="form-control" id="operatorNotes"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('operatorModal')">إلغاء</button>
+                    <button type="submit" class="btn btn-success">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="maintenanceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>➕ إضافة صيانة</h3>
+                <button class="close" onclick="closeModal('maintenanceModal')">&times;</button>
+            </div>
+            <form id="maintenanceForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>تاريخ الصيانة *</label>
+                        <input type="date" class="form-control" id="maintenanceDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>نوع الصيانة *</label>
+                        <select class="form-control" id="maintenanceType" required>
+                            <option value="">اختر النوع</option>
+                            <option value="preventive">وقائية</option>
+                            <option value="corrective">إصلاحية</option>
+                            <option value="emergency">طارئة</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>الصيانة القادمة</label>
+                        <input type="date" class="form-control" id="nextMaintenanceDate">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>الوصف *</label>
+                    <textarea class="form-control" id="maintenanceDescription" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>القطع المستبدلة</label>
+                    <textarea class="form-control" id="partsReplaced"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>تكلفة العمالة (دج)</label>
+                        <input type="number" step="0.01" class="form-control" id="laborCost" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>تكلفة القطع (دج)</label>
+                        <input type="number" step="0.01" class="form-control" id="partsCost" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>اسم الفني</label>
+                        <input type="text" class="form-control" id="technicianName">
+                    </div>
+                    <div class="form-group">
+                        <label>هاتف الفني</label>
+                        <input type="tel" class="form-control" id="technicianPhone">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ملاحظات</label>
+                    <textarea class="form-control" id="maintenanceNotes"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('maintenanceModal')">إلغاء</button>
+                    <button type="submit" class="btn btn-success">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="operationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>➕ إضافة عملية تشغيل</h3>
+                <button class="close" onclick="closeModal('operationModal')">&times;</button>
+            </div>
+            <form id="operationForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>التاريخ *</label>
+                        <input type="date" class="form-control" id="operationDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>المشغل *</label>
+                        <select class="form-control" id="operatorSelect" required>
+                            <option value="">اختر المشغل</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>نوع العمل *</label>
+                        <input type="text" class="form-control" id="operationType" placeholder="حرث، بذر، حصاد، نقل..." required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ساعات العمل</label>
+                        <input type="number" step="0.1" class="form-control" id="durationHours" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>استهلاك الوقود (لتر)</label>
+                        <input type="number" step="0.1" class="form-control" id="fuelConsumption" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>المسافة (كم)</label>
+                        <input type="number" step="0.1" class="form-control" id="distanceKm" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>المساحة المغطاة (هكتار)</label>
+                        <input type="number" step="0.1" class="form-control" id="areaCovered" value="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>الموقع</label>
+                    <input type="text" class="form-control" id="operationLocation">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>تكلفة الوقود (دج)</label>
+                        <input type="number" step="0.01" class="form-control" id="fuelCost" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>أجر المشغل (دج)</label>
+                        <input type="number" step="0.01" class="form-control" id="operatorPayment" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>تكاليف أخرى (دج)</label>
+                        <input type="number" step="0.01" class="form-control" id="otherCosts" value="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ملاحظات</label>
+                    <textarea class="form-control" id="operationNotes"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('operationModal')">إلغاء</button>
+                    <button type="submit" class="btn btn-success">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="serviceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>➕ إضافة خدمة</h3>
+                <button class="close" onclick="closeModal('serviceModal')">&times;</button>
+            </div>
+            <form id="serviceForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>التاريخ *</label>
+                        <input type="date" class="form-control" id="serviceDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>اسم العميل *</label>
+                        <input type="text" class="form-control" id="customerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>هاتف العميل</label>
+                        <input type="tel" class="form-control" id="customerPhone">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>عنوان العميل</label>
+                    <textarea class="form-control" id="customerAddress" rows="2"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>نوع الخدمة *</label>
+                        <input type="text" class="form-control" id="serviceType" placeholder="حرث، حصاد، نقل..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>المشغل</label>
+                        <select class="form-control" id="serviceOperatorSelect">
+                            <option value="">اختر المشغل</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>المدة (ساعات)</label>
+                        <input type="number" step="0.1" class="form-control" id="serviceDuration" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>المساحة (هكتار)</label>
+                        <input type="number" step="0.1" class="form-control" id="serviceArea" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>المسافة (كم)</label>
+                        <input type="number" step="0.1" class="form-control" id="serviceDistance" value="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>المبلغ الإجمالي *</label>
+                        <input type="number" step="0.01" class="form-control" id="serviceAmount" required>
+                    </div>
+                    <div class="form-group">
+                        <label>المدفوع</label>
+                        <input type="number" step="0.01" class="form-control" id="servicePaidAmount" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>حالة الدفع</label>
+                        <select class="form-control" id="servicePaymentStatus">
+                            <option value="unpaid">غير مدفوع</option>
+                            <option value="partial">دفع جزئي</option>
+                            <option value="paid">مدفوع</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ملاحظات</label>
+                    <textarea class="form-control" id="serviceNotes"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('serviceModal')">إلغاء</button>
+                    <button type="submit" class="btn btn-success">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://sstvsknmmhbwubzajeix.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzdHZza25tbWhid3ViemFqZWl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNDM0NjIsImV4cCI6MjA3NDkxOTQ2Mn0.EeVUU9DxRYUi38nUHgWEsnG8li7KZjqAGPNW9IDokhg';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let currentUser = null;
+        let currentProjectId = null;
+        let currentProject = null;
+        let operators = [];
+
+        async function initPage() {
+            try {
+                const { data: { user }, error } = await supabase.auth.getUser();
+                if (error || !user) {
+                    window.location.href = '../../login.html';
+                    return;
+                }
+                
+                currentUser = user;
+                const urlParams = new URLSearchParams(window.location.search);
+                currentProjectId = urlParams.get('id');
+                
+                if (!currentProjectId) {
+                    showAlert('معرف المشروع غير موجود', 'error');
+                    setTimeout(() => window.location.href = '../../index.html', 2000);
+                    return;
+                }
+                
+                await loadProject();
+                await loadOperators();
+                await loadAllData();
+                document.getElementById('authLoading').style.display = 'none';
+            } catch (error) {
+                console.error('Error initializing:', error);
+                showAlert('حدث خطأ أثناء التحميل', 'error');
+            }
+        }
+
+        async function loadProject() {
+            try {
+                const { data, error } = await supabase
+                    .from('projects')
+                    .select('*')
+                    .eq('id', currentProjectId)
+                    .eq('user_id', currentUser.id)
+                    .single();
+                
+                if (error) throw error;
+                
+                currentProject = data;
+                const projectData = data.project_data || {};
+                
+                document.getElementById('projectName').textContent = `🚜 ${data.name}`;
+                document.getElementById('equipmentType').textContent = projectData.equipment_type || '-';
+                document.getElementById('model').textContent = projectData.model || '-';
+                document.getElementById('manufactureYear').textContent = projectData.manufacture_year || '-';
+                document.getElementById('serialNumber').textContent = projectData.serial_number || '-';
+                document.getElementById('condition').textContent = translateCondition(projectData.condition) || '-';
+                document.getElementById('workingHours').textContent = projectData.working_hours || 0;
+            } catch (error) {
+                console.error('Error loading project:', error);
+                showAlert('فشل تحميل بيانات المشروع', 'error');
+            }
+        }
+
+        async function loadAllData() {
+            await Promise.all([
+                loadStats(),
+                loadMaintenanceRecords(),
+                loadOperations(),
+                loadServices(),
+                loadFinanceSummary()
+            ]);
+        }
+
+        async function loadStats() {
+            try {
+                const [operatorsResult, operationsResult, servicesResult, maintenanceResult] = await Promise.all([
+                    supabase.from('project_employees').select('*').eq('project_id', currentProjectId),
+                    supabase.from('equipment_operations').select('*').eq('project_id', currentProjectId),
+                    supabase.from('equipment_services').select('*').eq('project_id', currentProjectId),
+                    supabase.from('equipment_maintenance').select('*').eq('project_id', currentProjectId)
+                ]);
+
+                const totalHours = (operationsResult.data || []).reduce((sum, op) => sum + (parseFloat(op.working_hours) || 0), 0);
+                const totalRevenue = (servicesResult.data || []).reduce((sum, s) => sum + (parseFloat(s.paid_amount) || 0), 0);
+                
+                let totalExpenses = 0;
+                (operationsResult.data || []).forEach(op => {
+                    totalExpenses += parseFloat(op.fuel_cost || 0);
+                    totalExpenses += parseFloat(op.operator_payment || 0);
+                    totalExpenses += parseFloat(op.other_costs || 0);
+                });
+                (maintenanceResult.data || []).forEach(m => {
+                    totalExpenses += parseFloat(m.labor_cost || 0);
+                    totalExpenses += parseFloat(m.parts_cost || 0);
+                });
+
+                document.getElementById('operatorsCount').textContent = (operatorsResult.data || []).length;
+                document.getElementById('totalHours').textContent = totalHours.toFixed(1);
+                document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
+                document.getElementById('totalExpenses').textContent = formatCurrency(totalExpenses);
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadOperators() {
+            try {
+                const { data, error } = await supabase
+                    .from('project_employees')
+                    .select('*')
+                    .eq('project_id', currentProjectId)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                operators = data || [];
+                const tbody = document.getElementById('operatorsTableBody');
+                
+                if (operators.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="empty-state-icon">👨‍🔧</div><h4>لا يوجد مشغلين مسجلين</h4><p>ابدأ بإضافة المشغلين والسائقين</p></td></tr>`;
+                    updateOperatorSelects();
+                    return;
+                }
+                
+                const operationsData = await supabase
+                    .from('equipment_operations')
+                    .select('*')
+                    .eq('project_id', currentProjectId);
+                
+                tbody.innerHTML = operators.map(op => {
+                    const opHours = (operationsData.data || [])
+                        .filter(o => o.operator_id === op.id)
+                        .reduce((sum, o) => sum + (parseFloat(o.working_hours) || 0), 0);
+                    
+                    const opPayments = (operationsData.data || [])
+                        .filter(o => o.operator_id === op.id)
+                        .reduce((sum, o) => sum + (parseFloat(o.operator_payment) || 0), 0);
+                    
+                    return `
+                        <tr>
+                            <td><strong>${op.name}</strong></td>
+                            <td>${op.phone || '-'}</td>
+                            <td><span class="badge badge-info">${translateRole(op.role)}</span></td>
+                            <td>${opHours.toFixed(1)} ساعة</td>
+                            <td><strong>${formatCurrency(opPayments)}</strong></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-danger btn-sm" onclick="deleteOperator('${op.id}')">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+                
+                updateOperatorSelects();
+            } catch (error) {
+                console.error('Error loading operators:', error);
+                showAlert('فشل تحميل المشغلين', 'error');
+            }
+        }
+
+        function updateOperatorSelects() {
+            const operatorSelect = document.getElementById('operatorSelect');
+            const serviceOperatorSelect = document.getElementById('serviceOperatorSelect');
+            const options = operators.map(op => `<option value="${op.id}">${op.name}</option>`).join('');
+            operatorSelect.innerHTML = '<option value="">اختر المشغل</option>' + options;
+            serviceOperatorSelect.innerHTML = '<option value="">اختر المشغل</option>' + options;
+        }
+
+        function openAddOperatorModal() {
+            document.getElementById('operatorForm').reset();
+            document.getElementById('operatorModal').classList.add('active');
+        }
+
+        document.getElementById('operatorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const { error } = await supabase
+                    .from('project_employees')
+                    .insert({
+                        user_id: currentUser.id,
+                        project_id: currentProjectId,
+                        name: document.getElementById('operatorName').value,
+                        phone: document.getElementById('operatorPhone').value,
+                        role: document.getElementById('operatorType').value,
+                        notes: document.getElementById('operatorNotes').value
+                    });
+                
+                if (error) throw error;
+                closeModal('operatorModal');
+                await loadOperators();
+                await loadStats();
+                showAlert('تم إضافة المشغل بنجاح', 'success');
+            } catch (error) {
+                console.error('Error adding operator:', error);
+                showAlert('فشل إضافة المشغل', 'error');
+            }
+        });
+
+        async function deleteOperator(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا المشغل؟')) return;
+            try {
+                const { error } = await supabase.from('project_employees').delete().eq('id', id).eq('user_id', currentUser.id);
+                if (error) throw error;
+                await loadOperators();
+                await loadStats();
+                showAlert('تم حذف المشغل بنجاح', 'success');
+            } catch (error) {
+                console.error('Error deleting operator:', error);
+                showAlert('فشل حذف المشغل', 'error');
+            }
+        }
+
+        async function loadMaintenanceRecords() {
+            try {
+                const { data, error } = await supabase
+                    .from('equipment_maintenance')
+                    .select('*')
+                    .eq('project_id', currentProjectId)
+                    .order('maintenance_date', { ascending: false });
+                
+                if (error) throw error;
+                const tbody = document.getElementById('maintenanceTableBody');
+                
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><div class="empty-state-icon">🔧</div><h4>لا توجد سجلات صيانة</h4><p>ابدأ بتسجيل عمليات الصيانة</p></td></tr>`;
+                    return;
+                }
+                
+                tbody.innerHTML = data.map(m => {
+                    const totalCost = (parseFloat(m.labor_cost) || 0) + (parseFloat(m.parts_cost) || 0);
+                    return `
+                        <tr>
+                            <td>${formatDate(m.maintenance_date)}</td>
+                            <td><span class="badge ${getMaintenanceTypeBadge(m.maintenance_type)}">${translateMaintenanceType(m.maintenance_type)}</span></td>
+                            <td>${m.description || '-'}</td>
+                            <td><strong>${formatCurrency(totalCost)}</strong></td>
+                            <td>${m.technician_name || '-'}</td>
+                            <td>${m.next_maintenance_date ? formatDate(m.next_maintenance_date) : '-'}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-danger btn-sm" onclick="deleteMaintenance('${m.id}')">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading maintenance:', error);
+            }
+        }
+
+        function openAddMaintenanceModal() {
+            document.getElementById('maintenanceForm').reset();
+            document.getElementById('maintenanceDate').valueAsDate = new Date();
+            document.getElementById('maintenanceModal').classList.add('active');
+        }
+
+        document.getElementById('maintenanceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const { error } = await supabase
+                    .from('equipment_maintenance')
+                    .insert({
+                        user_id: currentUser.id,
+                        project_id: currentProjectId,
+                        maintenance_date: document.getElementById('maintenanceDate').value,
+                        maintenance_type: document.getElementById('maintenanceType').value,
+                        next_maintenance_date: document.getElementById('nextMaintenanceDate').value || null,
+                        description: document.getElementById('maintenanceDescription').value,
+                        parts_replaced: document.getElementById('partsReplaced').value,
+                        labor_cost: parseFloat(document.getElementById('laborCost').value) || 0,
+                        parts_cost: parseFloat(document.getElementById('partsCost').value) || 0,
+                        technician_name: document.getElementById('technicianName').value,
+                        technician_phone: document.getElementById('technicianPhone').value,
+                        notes: document.getElementById('maintenanceNotes').value
+                    });
+                
+                if (error) throw error;
+                closeModal('maintenanceModal');
+                await loadMaintenanceRecords();
+                await loadStats();
+                await loadFinanceSummary();
+                showAlert('تم إضافة سجل الصيانة بنجاح', 'success');
+            } catch (error) {
+                console.error('Error adding maintenance:', error);
+                showAlert('فشل إضافة سجل الصيانة', 'error');
+            }
+        });
+
+        async function deleteMaintenance(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا السجل؟')) return;
+            try {
+                const { error } = await supabase.from('equipment_maintenance').delete().eq('id', id).eq('user_id', currentUser.id);
+                if (error) throw error;
+                await loadMaintenanceRecords();
+                await loadStats();
+                await loadFinanceSummary();
+                showAlert('تم حذف السجل بنجاح', 'success');
+            } catch (error) {
+                console.error('Error deleting maintenance:', error);
+                showAlert('فشل حذف السجل', 'error');
+            }
+        }
+
+        async function loadOperations() {
+            try {
+                const { data, error } = await supabase
+                    .from('equipment_operations')
+                    .select(`*, operator:project_employees(name)`)
+                    .eq('project_id', currentProjectId)
+                    .order('operation_date', { ascending: false });
+                
+                if (error) throw error;
+                const tbody = document.getElementById('operationsTableBody');
+                
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><div class="empty-state-icon">⚙️</div><h4>لا توجد عمليات تشغيل</h4><p>ابدأ بتسجيل العمليات اليومية</p></td></tr>`;
+                    return;
+                }
+                
+                tbody.innerHTML = data.map(op => {
+                    const totalCost = (parseFloat(op.fuel_cost) || 0) + (parseFloat(op.operator_payment) || 0) + (parseFloat(op.other_costs) || 0);
+                    return `
+                        <tr>
+                            <td>${formatDate(op.operation_date)}</td>
+                            <td><span class="badge badge-info">${op.work_type}</span></td>
+                            <td>${op.operator?.name || '-'}</td>
+                            <td>${op.working_hours || 0} ساعة</td>
+                            <td>${op.fuel_consumption || 0} لتر</td>
+                            <td><strong>${formatCurrency(totalCost)}</strong></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-danger btn-sm" onclick="deleteOperation('${op.id}')">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading operations:', error);
+            }
+        }
+
+        function openAddOperationModal() {
+            document.getElementById('operationForm').reset();
+            document.getElementById('operationDate').valueAsDate = new Date();
+            document.getElementById('operationModal').classList.add('active');
+        }
+
+        document.getElementById('operationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const operatorId = document.getElementById('operatorSelect').value || null;
+                const workingHours = parseFloat(document.getElementById('durationHours').value) || 0;
+                
+                const { error } = await supabase
+                    .from('equipment_operations')
+                    .insert({
+                        user_id: currentUser.id,
+                        project_id: currentProjectId,
+                        operation_date: document.getElementById('operationDate').value,
+                        operator_id: operatorId,
+                        work_type: document.getElementById('operationType').value,
+                        working_hours: workingHours,
+                        fuel_consumption: parseFloat(document.getElementById('fuelConsumption').value) || 0,
+                        distance_km: parseFloat(document.getElementById('distanceKm').value) || 0,
+                        area_hectares: parseFloat(document.getElementById('areaCovered').value) || 0,
+                        location: document.getElementById('operationLocation').value,
+                        fuel_cost: parseFloat(document.getElementById('fuelCost').value) || 0,
+                        operator_payment: parseFloat(document.getElementById('operatorPayment').value) || 0,
+                        other_costs: parseFloat(document.getElementById('otherCosts').value) || 0,
+                        notes: document.getElementById('operationNotes').value
+                    });
+                
+                if (error) {
+                    console.error('Insert error:', error);
+                    throw error;
+                }
+                
+                const newWorkingHours = (parseFloat(currentProject.project_data?.working_hours) || 0) + workingHours;
+                await supabase.from('projects').update({
+                    project_data: { ...currentProject.project_data, working_hours: newWorkingHours }
+                }).eq('id', currentProjectId);
+                
+                closeModal('operationModal');
+                await loadProject();
+                await loadOperations();
+                await loadOperators();
+                await loadStats();
+                await loadFinanceSummary();
+                showAlert('تم إضافة عملية التشغيل بنجاح', 'success');
+            } catch (error) {
+                console.error('Error adding operation:', error);
+                showAlert('فشل إضافة عملية التشغيل', 'error');
+            }
+        });
+
+        async function deleteOperation(id) {
+            if (!confirm('هل أنت متأكد من حذف هذه العملية؟')) return;
+            try {
+                const { error } = await supabase.from('equipment_operations').delete().eq('id', id).eq('user_id', currentUser.id);
+                if (error) throw error;
+                await loadOperations();
+                await loadOperators();
+                await loadStats();
+                await loadFinanceSummary();
+                showAlert('تم حذف العملية بنجاح', 'success');
+            } catch (error) {
+                console.error('Error deleting operation:', error);
+                showAlert('فشل حذف العملية', 'error');
+            }
+        }
+
+        async function loadServices() {
+            try {
+                const { data, error } = await supabase
+                    .from('equipment_services')
+                    .select('*')
+                    .eq('project_id', currentProjectId)
+                    .order('service_date', { ascending: false });
+                
+                if (error) throw error;
+                const tbody = document.getElementById('servicesTableBody');
+                
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><div class="empty-state-icon">💼</div><h4>لا توجد خدمات مسجلة</h4><p>ابدأ بتسجيل خدماتك للعملاء</p></td></tr>`;
+                    return;
+                }
+                
+                tbody.innerHTML = data.map(s => {
+                    return `
+                        <tr>
+                            <td>${formatDate(s.service_date)}</td>
+                            <td>${s.customer_name}</td>
+                            <td>${s.service_type}</td>
+                            <td><strong>${formatCurrency(s.amount)}</strong></td>
+                            <td>${formatCurrency(s.paid_amount)}</td>
+                            <td><span class="badge ${getPaymentStatusBadge(s.payment_status)}">${translatePaymentStatus(s.payment_status)}</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-danger btn-sm" onclick="deleteService('${s.id}')">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading services:', error);
+            }
+        }
+
+        function openAddServiceModal() {
+            document.getElementById('serviceForm').reset();
+            document.getElementById('serviceDate').valueAsDate = new Date();
+            document.getElementById('serviceModal').classList.add('active');
+        }
+
+        document.getElementById('serviceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const amount = parseFloat(document.getElementById('serviceAmount').value);
+                const paidAmount = parseFloat(document.getElementById('servicePaidAmount').value) || 0;
+                
+                const { error } = await supabase
+                    .from('equipment_services')
+                    .insert({
+                        user_id: currentUser.id,
+                        project_id: currentProjectId,
+                        service_date: document.getElementById('serviceDate').value,
+                        customer_name: document.getElementById('customerName').value,
+                        customer_phone: document.getElementById('customerPhone').value,
+                        customer_address: document.getElementById('customerAddress').value,
+                        service_type: document.getElementById('serviceType').value,
+                        operator_id: document.getElementById('serviceOperatorSelect').value || null,
+                        duration_hours: parseFloat(document.getElementById('serviceDuration').value) || 0,
+                        area_hectares: parseFloat(document.getElementById('serviceArea').value) || 0,
+                        distance_km: parseFloat(document.getElementById('serviceDistance').value) || 0,
+                        amount: amount,
+                        paid_amount: paidAmount,
+                        remaining_amount: amount - paidAmount,
+                        payment_status: document.getElementById('servicePaymentStatus').value,
+                        notes: document.getElementById('serviceNotes').value
+                    });
+                
+                if (error) throw error;
+                closeModal('serviceModal');
+                await loadServices();
+                await loadStats();
+                await loadFinanceSummary();
+                showAlert('تم إضافة الخدمة بنجاح', 'success');
+            } catch (error) {
+                console.error('Error adding service:', error);
+                showAlert('فشل إضافة الخدمة', 'error');
+            }
+        });
+
+        async function deleteService(id) {
+            if (!confirm('هل أنت متأكد من حذف هذه الخدمة؟')) return;
+            try {
+                const { error } = await supabase.from('equipment_services').delete().eq('id', id).eq('user_id', currentUser.id);
+                if (error) throw error;
+                await loadServices();
+                await loadStats();
+                await loadFinanceSummary();
+                showAlert('تم حذف الخدمة بنجاح', 'success');
+            } catch (error) {
+                console.error('Error deleting service:', error);
+                showAlert('فشل حذف الخدمة', 'error');
+            }
+        }
+
+        async function loadFinanceSummary() {
+            try {
+                const [servicesResult, operationsResult, maintenanceResult] = await Promise.all([
+                    supabase.from('equipment_services').select('*').eq('project_id', currentProjectId),
+                    supabase.from('equipment_operations').select('*').eq('project_id', currentProjectId),
+                    supabase.from('equipment_maintenance').select('*').eq('project_id', currentProjectId)
+                ]);
+
+                const totalRevenue = (servicesResult.data || []).reduce((sum, s) => sum + (parseFloat(s.paid_amount) || 0), 0);
+                
+                let totalExpenses = 0;
+                (operationsResult.data || []).forEach(op => {
+                    totalExpenses += parseFloat(op.fuel_cost || 0);
+                    totalExpenses += parseFloat(op.operator_payment || 0);
+                    totalExpenses += parseFloat(op.other_costs || 0);
+                });
+                (maintenanceResult.data || []).forEach(m => {
+                    totalExpenses += parseFloat(m.labor_cost || 0);
+                    totalExpenses += parseFloat(m.parts_cost || 0);
+                });
+
+                const netProfit = totalRevenue - totalExpenses;
+
+                document.getElementById('financeRevenue').textContent = formatCurrency(totalRevenue);
+                document.getElementById('financeExpenses').textContent = formatCurrency(totalExpenses);
+                document.getElementById('financeProfit').textContent = formatCurrency(netProfit);
+                document.getElementById('financeProfit').style.color = netProfit >= 0 ? '#28a745' : '#dc3545';
+            } catch (error) {
+                console.error('Error loading finance summary:', error);
+            }
+        }
+
+        async function deleteProject() {
+            if (!confirm('⚠️ هل أنت متأكد من حذف هذا المشروع؟ سيتم حذف جميع البيانات المرتبطة به!')) return;
+            try {
+                const { error } = await supabase.from('projects').delete().eq('id', currentProjectId).eq('user_id', currentUser.id);
+                if (error) throw error;
+                showAlert('تم حذف المشروع بنجاح', 'success');
+                setTimeout(() => window.location.href = '../../index.html', 1500);
+            } catch (error) {
+                console.error('Error deleting project:', error);
+                showAlert('فشل حذف المشروع', 'error');
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('ar-DZ', {
+                style: 'decimal',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount || 0) + ' دج';
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('ar-DZ');
+        }
+
+        function translateCondition(condition) {
+            const translations = { 'excellent': 'ممتازة', 'good': 'جيدة', 'fair': 'متوسطة', 'poor': 'سيئة' };
+            return translations[condition] || condition;
+        }
+
+        function translateRole(role) {
+            const translations = { 'operator': 'مشغل', 'driver': 'سائق', 'both': 'مشغل وسائق' };
+            return translations[role] || role || '-';
+        }
+
+        function translateMaintenanceType(type) {
+            const translations = { 'preventive': 'وقائية', 'corrective': 'إصلاحية', 'emergency': 'طارئة' };
+            return translations[type] || type;
+        }
+
+        function getMaintenanceTypeBadge(type) {
+            const badges = { 'preventive': 'badge-info', 'corrective': 'badge-warning', 'emergency': 'badge-danger' };
+            return badges[type] || 'badge-info';
+        }
+
+        function translatePaymentStatus(status) {
+            const translations = { 'paid': 'مدفوع', 'partial': 'جزئي', 'unpaid': 'غير مدفوع' };
+            return translations[status] || status;
+        }
+
+        function getPaymentStatusBadge(status) {
+            const badges = { 'paid': 'badge-success', 'partial': 'badge-warning', 'unpaid': 'badge-danger' };
+            return badges[status] || 'badge-info';
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'error'}`;
+            alertDiv.textContent = (type === 'success' ? '✅ ' : '❌ ') + message;
+            alertDiv.style.display = 'block';
+            
+            container.innerHTML = '';
+            container.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        window.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+</html>

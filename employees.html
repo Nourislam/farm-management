@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الموظفين - نظام إدارة المزرعة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        /* Loading Screen */
+        #authLoading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        #authLoading.hidden {
+            display: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4a7c2a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+        }
+
+        .stat-card-title {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d5016;
+        }
+
+        .stat-card.warning .stat-card-value {
+            color: #e74c3c;
+        }
+
+        /* Filters */
+        .filters-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 0.7rem;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.95rem;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #4a7c2a;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(45, 80, 22, 0.3);
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        /* Table */
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 2px solid #ecf0f1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2d5016;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8f9fa;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: right;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        th {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+
+        td {
+            font-size: 0.95rem;
+        }
+
+        tbody tr {
+            transition: background 0.3s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .payment-badge {
+            display: inline-block;
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .payment-fixed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .payment-percentage {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .payment-hourly {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .payment-daily {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d5016;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #95a5a6;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.7rem;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4a7c2a;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 2px solid #ecf0f1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #7f8c8d;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Alert */
+        .alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .alert.show {
+            display: flex;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 800px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="authLoading">
+        <div class="spinner"></div>
+        <p style="margin-top: 1rem; color: #7f8c8d;">جاري التحميل...</p>
+    </div>
+
+    <!-- Alert -->
+    <div id="alert" class="alert"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-right">
+            <button class="back-btn" onclick="goBack()">
+                ← رجوع
+            </button>
+            <h1>👥 إدارة الموظفين</h1>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-title">إجمالي الموظفين</div>
+                <div class="stat-card-value" id="totalEmployees">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-title">✅ موظفين نشطين</div>
+                <div class="stat-card-value" id="activeEmployees">0</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-card-title">⏸️ موظفين غير نشطين</div>
+                <div class="stat-card-value" id="inactiveEmployees">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-title">إجمالي الرواتب الشهرية</div>
+                <div class="stat-card-value" id="totalSalaries">0</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="searchInput">🔍 البحث</label>
+                    <input type="text" id="searchInput" placeholder="ابحث بالاسم أو الوظيفة...">
+                </div>
+                <div class="filter-group">
+                    <label for="projectFilter">المشروع</label>
+                    <select id="projectFilter">
+                        <option value="">جميع المشاريع</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="statusFilter">الحالة</label>
+                    <select id="statusFilter">
+                        <option value="">الكل</option>
+                        <option value="active">نشط</option>
+                        <option value="inactive">غير نشط</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-success" onclick="openAddEmployeeModal()">
+                        ➕ إضافة موظف
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employees Table -->
+        <div class="table-container">
+            <div class="table-header">
+                <h2 class="table-title">قائمة الموظفين</h2>
+            </div>
+            <div style="overflow-x: auto;">
+                <table id="employeesTable">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>الوظيفة</th>
+                            <th>المشروع</th>
+                            <th>نوع الأجر</th>
+                            <th>المبلغ/النسبة</th>
+                            <th>الهاتف</th>
+                            <th>تاريخ التعيين</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeesTableBody">
+                        <tr>
+                            <td colspan="9" class="empty-state">
+                                <div class="empty-state-icon">👥</div>
+                                <p>جاري تحميل الموظفين...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Employee Modal -->
+    <div id="employeeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">إضافة موظف جديد</h3>
+                <button class="close-btn" onclick="closeEmployeeModal()">×</button>
+            </div>
+            <form id="employeeForm" class="form-grid">
+                <input type="hidden" id="employeeId">
+                
+                <div class="form-group">
+                    <label for="employeeName">الاسم *</label>
+                    <input type="text" id="employeeName" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="employeeRole">الوظيفة</label>
+                        <input type="text" id="employeeRole" placeholder="مثال: مشغل جرار، راعي، مهندس زراعي">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="employeeProject">المشروع *</label>
+                        <select id="employeeProject" required>
+                            <option value="">اختر المشروع</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="paymentType">نوع الأجر *</label>
+                        <select id="paymentType" required onchange="updatePaymentFields()">
+                            <option value="fixed">راتب ثابت</option>
+                            <option value="percentage">نسبة مئوية</option>
+                            <option value="hourly">بالساعة</option>
+                            <option value="daily">يومي</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="amountGroup">
+                        <label for="paymentAmount" id="amountLabel">المبلغ (دج) *</label>
+                        <input type="number" id="paymentAmount" step="0.01" min="0">
+                    </div>
+
+                    <div class="form-group" id="percentageGroup" style="display: none;">
+                        <label for="paymentPercentage">النسبة المئوية % *</label>
+                        <input type="number" id="paymentPercentage" step="0.01" min="0" max="100">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="employeePhone">الهاتف</label>
+                        <input type="tel" id="employeePhone" placeholder="0555123456">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hireDate">تاريخ التعيين</label>
+                        <input type="date" id="hireDate">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="employeeAddress">العنوان</label>
+                    <textarea id="employeeAddress" rows="2"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="employeeNotes">ملاحظات</label>
+                    <textarea id="employeeNotes" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="isActive" checked>
+                        <span>موظف نشط</span>
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" onclick="saveEmployee()" style="flex: 1;">
+                        💾 حفظ
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="closeEmployeeModal()" style="flex: 1;">
+                        ✖️ إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://sstvsknmmhbwubzajeix.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzdHZza25tbWhid3ViemFqZWl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNDM0NjIsImV4cCI6MjA3NDkxOTQ2Mn0.EeVUU9DxRYUi38nUHgWEsnG8li7KZjqAGPNW9IDokhg';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentUser = null;
+        let employees = [];
+        let projects = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            await loadProjects();
+            await loadEmployees();
+            setupEventListeners();
+        });
+
+        // Authentication
+        async function checkAuth() {
+            try {
+                const { data: { user }, error } = await supabase.auth.getUser();
+                
+                if (error || !user) {
+                    window.location.href = '../../login.html';
+                    return;
+                }
+                
+                currentUser = user;
+                document.getElementById('authLoading').classList.add('hidden');
+            } catch (error) {
+                console.error('Auth error:', error);
+                window.location.href = '../../login.html';
+            }
+        }
+
+        // Load Projects
+        async function loadProjects() {
+            try {
+                const { data, error } = await supabase
+                    .from('projects')
+                    .select('id, name, project_type')
+                    .eq('user_id', currentUser.id)
+                    .order('name');
+
+                if (error) throw error;
+
+                projects = data || [];
+                populateProjectFilters();
+            } catch (error) {
+                console.error('Error loading projects:', error);
+            }
+        }
+
+        function populateProjectFilters() {
+            const projectFilter = document.getElementById('projectFilter');
+            const employeeProject = document.getElementById('employeeProject');
+
+            projectFilter.innerHTML = '<option value="">جميع المشاريع</option>';
+            employeeProject.innerHTML = '<option value="">اختر المشروع</option>';
+
+            projects.forEach(project => {
+                const option1 = document.createElement('option');
+                option1.value = project.id;
+                option1.textContent = project.name;
+                projectFilter.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = project.id;
+                option2.textContent = project.name;
+                employeeProject.appendChild(option2);
+            });
+        }
+
+        // Load Employees
+        async function loadEmployees() {
+            try {
+                const { data, error } = await supabase
+                    .from('project_employees')
+                    .select(`
+                        *,
+                        projects:project_id (name, project_type)
+                    `)
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                employees = data || [];
+                updateStats();
+                renderEmployeesTable();
+            } catch (error) {
+                console.error('Error loading employees:', error);
+                showAlert('حدث خطأ في تحميل الموظفين', 'error');
+            }
+        }
+
+        // Update Statistics
+        function updateStats() {
+            const totalEmployees = employees.length;
+            const activeEmployees = employees.filter(e => e.is_active).length;
+            const inactiveEmployees = totalEmployees - activeEmployees;
+            
+            let totalSalaries = 0;
+            employees.forEach(emp => {
+                if (emp.is_active && emp.payment_type === 'fixed') {
+                    totalSalaries += parseFloat(emp.payment_amount || 0);
+                }
+            });
+
+            document.getElementById('totalEmployees').textContent = totalEmployees;
+            document.getElementById('activeEmployees').textContent = activeEmployees;
+            document.getElementById('inactiveEmployees').textContent = inactiveEmployees;
+            document.getElementById('totalSalaries').textContent = totalSalaries.toLocaleString('ar-DZ') + ' دج';
+        }
+
+        // Render Table
+        function renderEmployeesTable() {
+            const tbody = document.getElementById('employeesTableBody');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const projectFilter = document.getElementById('projectFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            let filteredEmployees = employees.filter(emp => {
+                const matchSearch = emp.name.toLowerCase().includes(searchTerm) || 
+                                  (emp.role && emp.role.toLowerCase().includes(searchTerm));
+                const matchProject = !projectFilter || emp.project_id === projectFilter;
+                const matchStatus = !statusFilter || 
+                                  (statusFilter === 'active' && emp.is_active) ||
+                                  (statusFilter === 'inactive' && !emp.is_active);
+                
+                return matchSearch && matchProject && matchStatus;
+            });
+
+            if (filteredEmployees.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="empty-state">
+                            <div class="empty-state-icon">👥</div>
+                            <p>لا يوجد موظفين</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filteredEmployees.map(emp => {
+                const paymentTypeLabels = {
+                    'fixed': 'ثابت',
+                    'percentage': 'نسبة',
+                    'hourly': 'ساعي',
+                    'daily': 'يومي'
+                };
+
+                let paymentDisplay = '';
+                if (emp.payment_type === 'percentage') {
+                    paymentDisplay = `${emp.payment_percentage || 0}%`;
+                } else {
+                    paymentDisplay = `${parseFloat(emp.payment_amount || 0).toLocaleString('ar-DZ')} دج`;
+                }
+
+                return `
+                    <tr>
+                        <td><strong>${emp.name}</strong></td>
+                        <td>${emp.role || '-'}</td>
+                        <td>${emp.projects?.name || '-'}</td>
+                        <td>
+                            <span class="payment-badge payment-${emp.payment_type}">
+                                ${paymentTypeLabels[emp.payment_type] || emp.payment_type}
+                            </span>
+                        </td>
+                        <td>${paymentDisplay}</td>
+                        <td>${emp.phone || '-'}</td>
+                        <td>${emp.hire_date ? new Date(emp.hire_date).toLocaleDateString('ar-DZ') : '-'}</td>
+                        <td>
+                            <span class="status-badge ${emp.is_active ? 'status-active' : 'status-inactive'}">
+                                ${emp.is_active ? '✅ نشط' : '⏸️ غير نشط'}
+                            </span>
+                        </td>
+                        <td class="actions-cell">
+                            <button class="btn btn-primary btn-sm" onclick="editEmployee('${emp.id}')">
+                                ✏️
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteEmployee('${emp.id}')">
+                                🗑️
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Modal Functions
+        function openAddEmployeeModal() {
+            document.getElementById('modalTitle').textContent = 'إضافة موظف جديد';
+            document.getElementById('employeeForm').reset();
+            document.getElementById('employeeId').value = '';
+            document.getElementById('isActive').checked = true;
+            document.getElementById('hireDate').value = new Date().toISOString().split('T')[0];
+            updatePaymentFields();
+            document.getElementById('employeeModal').classList.add('active');
+        }
+
+        function closeEmployeeModal() {
+            document.getElementById('employeeModal').classList.remove('active');
+        }
+
+        function updatePaymentFields() {
+            const paymentType = document.getElementById('paymentType').value;
+            const amountGroup = document.getElementById('amountGroup');
+            const percentageGroup = document.getElementById('percentageGroup');
+            const amountLabel = document.getElementById('amountLabel');
+
+            if (paymentType === 'percentage') {
+                amountGroup.style.display = 'none';
+                percentageGroup.style.display = 'block';
+            } else {
+                amountGroup.style.display = 'block';
+                percentageGroup.style.display = 'none';
+
+                const labels = {
+                    'fixed': 'الراتب الشهري (دج) *',
+                    'hourly': 'أجر الساعة (دج) *',
+                    'daily': 'الأجر اليومي (دج) *'
+                };
+                amountLabel.textContent = labels[paymentType] || 'المبلغ (دج) *';
+            }
+        }
+
+        async function editEmployee(id) {
+            const employee = employees.find(e => e.id === id);
+            if (!employee) return;
+
+            document.getElementById('modalTitle').textContent = 'تعديل بيانات الموظف';
+            document.getElementById('employeeId').value = employee.id;
+            document.getElementById('employeeName').value = employee.name;
+            document.getElementById('employeeRole').value = employee.role || '';
+            document.getElementById('employeeProject').value = employee.project_id;
+            document.getElementById('paymentType').value = employee.payment_type;
+            document.getElementById('paymentAmount').value = employee.payment_amount || '';
+            document.getElementById('paymentPercentage').value = employee.payment_percentage || '';
+            document.getElementById('employeePhone').value = employee.phone || '';
+            document.getElementById('hireDate').value = employee.hire_date || '';
+            document.getElementById('employeeAddress').value = employee.address || '';
+            document.getElementById('employeeNotes').value = employee.notes || '';
+            document.getElementById('isActive').checked = employee.is_active;
+
+            updatePaymentFields();
+            document.getElementById('employeeModal').classList.add('active');
+        }
+
+        async function saveEmployee() {
+            try {
+                const id = document.getElementById('employeeId').value;
+                const name = document.getElementById('employeeName').value.trim();
+                const projectId = document.getElementById('employeeProject').value;
+
+                if (!name || !projectId) {
+                    showAlert('الرجاء ملء الحقول المطلوبة', 'error');
+                    return;
+                }
+
+                const paymentType = document.getElementById('paymentType').value;
+                const employeeData = {
+                    user_id: currentUser.id,
+                    project_id: projectId,
+                    name: name,
+                    role: document.getElementById('employeeRole').value,
+                    payment_type: paymentType,
+                    payment_amount: paymentType !== 'percentage' ? parseFloat(document.getElementById('paymentAmount').value) || null : null,
+                    payment_percentage: paymentType === 'percentage' ? parseFloat(document.getElementById('paymentPercentage').value) || null : null,
+                    phone: document.getElementById('employeePhone').value,
+                    hire_date: document.getElementById('hireDate').value || null,
+                    address: document.getElementById('employeeAddress').value,
+                    notes: document.getElementById('employeeNotes').value,
+                    is_active: document.getElementById('isActive').checked
+                };
+
+                let error;
+                if (id) {
+                    ({ error } = await supabase
+                        .from('project_employees')
+                        .update(employeeData)
+                        .eq('id', id));
+                } else {
+                    ({ error } = await supabase
+                        .from('project_employees')
+                        .insert(employeeData));
+                }
+
+                if (error) throw error;
+
+                showAlert(id ? 'تم تحديث بيانات الموظف بنجاح' : 'تم إضافة الموظف بنجاح', 'success');
+                closeEmployeeModal();
+                await loadEmployees();
+            } catch (error) {
+                console.error('Error saving employee:', error);
+                showAlert('حدث خطأ في حفظ البيانات', 'error');
+            }
+        }
+
+        async function deleteEmployee(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا الموظف؟')) return;
+
+            try {
+                const { error } = await supabase
+                    .from('project_employees')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                showAlert('تم حذف الموظف بنجاح', 'success');
+                await loadEmployees();
+            } catch (error) {
+                console.error('Error deleting employee:', error);
+                showAlert('حدث خطأ في الحذف', 'error');
+            }
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', renderEmployeesTable);
+            document.getElementById('projectFilter').addEventListener('change', renderEmployeesTable);
+            document.getElementById('statusFilter').addEventListener('change', renderEmployeesTable);
+        }
+
+        // Helper Functions
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type} show`;
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 3000);
+        }
+
+        function goBack() {
+            window.location.href = '../../index.html';
+        }
+    </script>
+</body>
+</html>
