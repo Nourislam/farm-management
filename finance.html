@@ -657,7 +657,7 @@
     <div class="header">
         <h1>💰 إدارة المالية</h1>
         <div class="header-right">
-            <button class="back-btn" onclick="window.location.href='../index.html'">
+            <button class="back-btn" onclick="window.location.href='index.html'">
                 ← العودة للرئيسية
             </button>
         </div>
@@ -1338,7 +1338,7 @@
         async function checkAuth() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
-                window.location.href = '../login.html';
+                window.location.href = 'login.html';
                 return;
             }
             currentUser = user;
