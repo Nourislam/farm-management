@@ -680,7 +680,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <a href="../index.html" class="back-btn">
+            <a href="index.html" class="back-btn">
                 ← العودة للوحة التحكم
             </a>
             <h1>🌾 إنشاء مشروع جديد</h1>
@@ -1021,7 +1021,7 @@
         async function checkAuth() {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
-                window.location.href = '../login.html';
+                window.location.href = 'login.html';
                 return;
             }
             currentUser = session.user;
