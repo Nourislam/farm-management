@@ -117,7 +117,7 @@
                     </div>
                 </div>
                 <div class="header-actions">
-                    <button class="btn btn-info btn-sm" onclick="window.location.href='index.html'">🏠 الرجوع للرئيسية</button>
+                    <button class="btn btn-info btn-sm" onclick="window.location.href='../../index.html'">🏠 الرجوع للرئيسية</button>
                     <button class="btn btn-warning btn-sm" onclick="editProject()">✏️ تعديل المشروع</button>
                     <button class="btn btn-warning btn-sm" id="toggleStatusBtn" onclick="toggleProjectStatus()">⏸️ إيقاف</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteProject()">🗑️ حذف</button>
@@ -148,10 +148,50 @@
                     <button class="btn btn-primary" onclick="openAddAnimalModal()">➕ إضافة حيوان</button>
                 </div>
                 <div class="filters-row">
-                    <div class="form-group"><label class="form-label">حالة الحيوان</label><select class="form-control" id="filterStatus" onchange="loadAnimals()"><option value="">الكل</option><option value="alive" selected>حي</option><option value="sold">مباع</option><option value="died">نافق</option><option value="slaughtered">مذبوح</option></select></div>
-                    <div class="form-group"><label class="form-label">الجنس</label><select class="form-control" id="filterSex" onchange="loadAnimals()"><option value="">الكل</option><option value="male">ذكر</option><option value="female">أنثى</option></select></div>
+
+                    <div class="form-group">
+                        <label class="form-label">حالة الحيوان</label>
+                        <select class="form-control" id="filterStatus" onchange="loadAnimals()">
+                            <option value="">الكل</option>
+                            <option value="alive" selected>حي</option>
+                            <option value="sold">مباع</option>
+                            <option value="died">نافق</option>
+                            <option value="slaughtered">مذبوح</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">الجنس</label>
+                        <select class="form-control" id="filterSex" onchange="loadAnimals()">
+                            <option value="">الكل</option>
+                            <option value="male">ذكر</option>
+                            <option value="female">أنثى</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="table-container"><table><thead><tr><th>رقم العلامة</th><th>النوع</th><th>الجنس</th><th>تاريخ الميلاد</th><th>العمر</th><th>الوزن (كجم)</th><th>الحالة</th><th>الحالة الصحية</th><th>الإجراءات</th></tr></thead><tbody id="animalsTableBody"><tr><td colspan="9" style="text-align: center; padding: 40px;">جاري التحميل...</td></tr></tbody></table></div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>رقم العلامة</th>
+                                <th>النوع</th>
+                                
+                                
+                                <th>العمر</th>
+                                
+                                
+                                <th>الحالة الصحية</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="animalsTableBody">
+                            <tr>
+                                <td colspan="9" style="text-align: center; padding: 40px;">جاري التحميل...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <div id="healthTab" class="tab-content tab-pane">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -221,7 +261,7 @@
         
         async function checkAuth(){
             const{data:{user},error}=await supabase.auth.getUser();
-            if(error||!user){window.location.href='login.html';return;}
+            if(error||!user){window.location.href='../../login.html';return;}
             currentUser=user;
         }
         
@@ -327,7 +367,23 @@
                     tbody.innerHTML='<tr><td colspan="9" style="text-align: center;">لا توجد حيوانات</td></tr>';
                     return;
                 }
-                tbody.innerHTML=data.map(animal=>`<tr><td>${animal.tag_number}</td><td>${translateSpecies(animal.species)}</td><td>${translateSex(animal.sex)}</td><td>${animal.birth_date?formatDate(animal.birth_date):'-'}</td><td>${animal.birth_date?calculateAge(animal.birth_date):'-'}</td><td>${animal.weight_kg||'-'}</td><td><span class="badge badge-${getStatusColor(animal.status)}">${translateStatus(animal.status)}</span></td><td><span class="badge badge-${getHealthColor(animal.health_status)}">${translateHealthStatus(animal.health_status)}</span></td><td><button class="btn btn-warning btn-sm" onclick='editAnimal(${JSON.stringify(animal).replace(/'/g,"&apos;")})'>✏️ تعديل</button> <button class="btn btn-danger btn-sm" onclick="deleteAnimal('${animal.id}')">🗑️ حذف</button></td></tr>`).join('');
+                tbody.innerHTML=data.map(animal=>`
+                <tr>
+                    <td>${animal.tag_number}</td>
+                    <td>${translateSpecies(animal.species)}</td>
+                    
+                    
+                    <td>${animal.birth_date?calculateAge(animal.birth_date):'-'}</td>
+                    
+                    
+                    <td>
+                        <span class="badge badge-${getHealthColor(animal.health_status)}">${translateHealthStatus(animal.health_status)}</span>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick='editAnimal(${JSON.stringify(animal).replace(/'/g,"&apos;")})'>✏️ تعديل</button> 
+                        <button class="btn btn-danger btn-sm" onclick="deleteAnimal('${animal.id}')">🗑️ حذف</button>
+                    </td>
+                </tr>`).join('');
             }catch(error){
                 console.error('Error:',error);
                 tbody.innerHTML='<tr><td colspan="9" style="text-align: center; color: red;">حدث خطأ في التحميل</td></tr>';
