@@ -261,7 +261,7 @@
         
         async function checkAuth(){
             const{data:{user},error}=await supabase.auth.getUser();
-            if(error||!user){window.location.href='../../login.html';return;}
+            if(error||!user){window.location.href='login.html';return;}
             currentUser=user;
         }
         
@@ -380,8 +380,8 @@
                         <span class="badge badge-${getHealthColor(animal.health_status)}">${translateHealthStatus(animal.health_status)}</span>
                     </td>
                     <td>
-                        <button class="btn btn-warning btn-sm" onclick='editAnimal(${JSON.stringify(animal).replace(/'/g,"&apos;")})'>✏️ تعديل</button> 
-                        <button class="btn btn-danger btn-sm" onclick="deleteAnimal('${animal.id}')">🗑️ حذف</button>
+                        <button class="btn btn-warning btn-sm" onclick='editAnimal(${JSON.stringify(animal).replace(/'/g,"&apos;")})'>✏️</button> 
+                        <button class="btn btn-danger btn-sm" onclick="deleteAnimal('${animal.id}')">🗑️</button>
                     </td>
                 </tr>`).join('');
             }catch(error){
