@@ -1027,7 +1027,7 @@
                 
                 if (error || !session) {
                     console.error('❌ No valid session');
-                    window.location.href = '../login.html';
+                    window.location.href = 'login.html';
                     return false;
                 }
 
@@ -1036,7 +1036,7 @@
                 return true;
             } catch (error) {
                 console.error('❌ Auth check error:', error);
-                window.location.href = '../login.html';
+                window.location.href = 'login.html';
                 return false;
             }
         }
@@ -1649,7 +1649,7 @@
         }
 
         function goBack() {
-            window.location.href = '../index.html';
+            window.location.href = 'index.html';
         }
 
         // Close modals when clicking outside
