@@ -687,7 +687,7 @@
     <div class="header">
         <div class="header-content">
             <div class="header-title">
-                <button class="btn btn-back" onclick="window.location.href='../../index.html'">
+                <button class="btn btn-back" onclick="window.location.href='index.html'">
                     ← رجوع
                 </button>
                 <h1>🌍 إدارة الأراضي</h1>
@@ -911,7 +911,7 @@
                 const { data: { session }, error } = await supabase.auth.getSession();
                 
                 if (error || !session) {
-                    window.location.href = '../login.html';
+                    window.location.href = 'login.html';
                     return false;
                 }
 
@@ -919,7 +919,7 @@
                 return true;
             } catch (error) {
                 console.error('Auth check error:', error);
-                window.location.href = '../login.html';
+                window.location.href = 'login.html';
                 return false;
             }
         }
