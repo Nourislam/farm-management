@@ -117,7 +117,7 @@
                     </div>
                 </div>
                 <div class="header-actions">
-                    <button class="btn btn-info btn-sm" onclick="window.location.href='../../index.html'">🏠 الرجوع للرئيسية</button>
+                    <button class="btn btn-info btn-sm" onclick="window.location.href='index.html'">🏠 الرجوع للرئيسية</button>
                     <button class="btn btn-warning btn-sm" onclick="editProject()">✏️ تعديل المشروع</button>
                     <button class="btn btn-warning btn-sm" id="toggleStatusBtn" onclick="toggleProjectStatus()">⏸️ إيقاف</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteProject()">🗑️ حذف</button>
@@ -221,7 +221,7 @@
         
         async function checkAuth(){
             const{data:{user},error}=await supabase.auth.getUser();
-            if(error||!user){window.location.href='../../login.html';return;}
+            if(error||!user){window.location.href='login.html';return;}
             currentUser=user;
         }
         
