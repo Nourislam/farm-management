@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشروع جديد - نظام إدارة المزرعة</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>إضافة مشروع جديد</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -17,571 +16,390 @@
 
         body {
             font-family: 'Cairo', sans-serif;
-            background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
-            min-height: 100vh;
-            padding: 20px;
+            background-color: #ffffff;
+            padding: 0;
+            overflow-x: hidden;
         }
 
         .container {
-            max-width: 900px;
-            margin: 0 auto;
+            max-width: 100%;
+            padding: 20px;
         }
 
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .header h1 {
-            color: #2d5016;
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
-
-        .header p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: #f5f5f5;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            color: #2d5016;
-            font-weight: 600;
-            margin-bottom: 15px;
-            transition: all 0.3s;
-        }
-
-        .back-btn:hover {
-            background: #e0e0e0;
-            transform: translateX(5px);
-        }
-
-        .wizard-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Progress Bar */
-        .progress-bar {
+        .step-indicator {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             position: relative;
+            padding: 0 10px;
         }
 
-        .progress-bar::before {
+        .step-indicator::before {
             content: '';
             position: absolute;
-            top: 20px;
-            right: 0;
-            width: 100%;
-            height: 3px;
+            top: 15px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
             background: #e0e0e0;
             z-index: 0;
         }
 
-        .progress-line {
-            position: absolute;
-            top: 20px;
-            right: 0;
-            height: 3px;
-            background: #4a7c2a;
-            z-index: 1;
-            transition: width 0.3s;
-            width: 0%;
-        }
-
         .step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            flex: 1;
+            text-align: center;
             position: relative;
-            z-index: 2;
+            z-index: 1;
         }
 
-        .step-number {
-            width: 40px;
-            height: 40px;
+        .step-circle {
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
             background: #e0e0e0;
-            color: #999;
+            margin: 0 auto 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            margin-bottom: 8px;
             transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .step.active .step-number {
-            background: #4a7c2a;
+        .step.active .step-circle {
+            background: linear-gradient(135deg, #4a7c2a 0%, #2d5016 100%);
             color: white;
-            box-shadow: 0 0 0 4px rgba(74, 124, 42, 0.2);
+            transform: scale(1.1);
         }
 
-        .step.completed .step-number {
-            background: #27ae60;
+        .step.completed .step-circle {
+            background: #2d5016;
             color: white;
         }
 
         .step-label {
             font-size: 13px;
             color: #666;
-            text-align: center;
+            font-weight: 500;
         }
 
         .step.active .step-label {
-            color: #2d5016;
-            font-weight: 600;
-        }
-
-        /* Wizard Steps */
-        .wizard-step {
-            display: none;
-        }
-
-        .wizard-step.active {
-            display: block;
-            animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .step-title {
-            font-size: 24px;
-            color: #2d5016;
-            margin-bottom: 10px;
+            color: #4a7c2a;
             font-weight: 700;
         }
 
-        .step-subtitle {
-            color: #666;
-            margin-bottom: 30px;
+        .step-content {
+            display: none;
+            min-height: 450px;
+            padding-bottom: 20px;
         }
 
-        /* Category Cards */
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d5016;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .category-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
-            margin-bottom: 30px;
+            margin-top: 20px;
         }
 
         .category-card {
-            background: #f8f9fa;
-            border: 3px solid transparent;
-            border-radius: 15px;
-            padding: 30px 20px;
+            padding: 30px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
+            background: #fafafa;
         }
 
         .category-card:hover {
             border-color: #4a7c2a;
-            background: #f0f7ed;
-            transform: translateY(-5px);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(74, 124, 42, 0.2);
+            background: white;
         }
 
         .category-card.selected {
-            border-color: #2d5016;
-            background: #e8f5e9;
+            border-color: #4a7c2a;
+            background: #f0f8f0;
+            box-shadow: 0 5px 15px rgba(74, 124, 42, 0.3);
         }
 
         .category-icon {
-            font-size: 50px;
+            font-size: 60px;
             margin-bottom: 15px;
         }
 
         .category-name {
             font-size: 18px;
             font-weight: 700;
-            color: #2d5016;
+            color: #333;
         }
 
-        /* Type List */
         .type-list {
             display: grid;
             gap: 15px;
-            margin-bottom: 30px;
+            margin-top: 20px;
         }
 
         .type-item {
-            background: #f8f9fa;
-            border: 2px solid transparent;
-            border-radius: 12px;
             padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 15px;
+            background: #fafafa;
         }
 
         .type-item:hover {
             border-color: #4a7c2a;
-            background: #f0f7ed;
+            background: white;
+            transform: translateX(-5px);
         }
 
         .type-item.selected {
-            border-color: #2d5016;
-            background: #e8f5e9;
+            border-color: #4a7c2a;
+            background: #f0f8f0;
+            box-shadow: 0 3px 10px rgba(74, 124, 42, 0.2);
+        }
+
+        .type-icon {
+            font-size: 40px;
+            min-width: 50px;
         }
 
         .type-info h3 {
-            color: #2d5016;
+            font-size: 18px;
             margin-bottom: 5px;
+            color: #2d5016;
         }
 
         .type-info p {
-            color: #666;
             font-size: 14px;
+            color: #666;
         }
 
-        .type-badge {
-            background: #ffc107;
-            color: #000;
+        .coming-soon {
+            opacity: 0.6;
+            position: relative;
+            pointer-events: none;
+        }
+
+        .coming-soon::after {
+            content: 'قريباً';
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
             padding: 5px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
-        }
-
-        /* Form Elements */
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         .form-group {
             margin-bottom: 20px;
         }
 
-        .form-label {
+        .form-group label {
             display: block;
-            color: #2d5016;
-            font-weight: 600;
             margin-bottom: 8px;
-            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
         }
 
-        .form-label .required {
-            color: #dc3545;
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-family: 'Cairo', sans-serif;
-            font-size: 15px;
+            font-size: 14px;
             transition: all 0.3s;
         }
 
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
             outline: none;
             border-color: #4a7c2a;
             box-shadow: 0 0 0 3px rgba(74, 124, 42, 0.1);
         }
 
-        .form-textarea {
-            resize: vertical;
+        .form-group textarea {
             min-height: 100px;
+            resize: vertical;
         }
 
-        .form-help {
-            font-size: 13px;
-            color: #999;
-            margin-top: 5px;
-        }
-
-        /* Equipment Specific Fields */
-        .equipment-fields {
-            background: #f0f7ed;
-            border: 2px dashed #4a7c2a;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        .equipment-fields .section-title {
-            color: #2d5016;
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* Employee Step Styles */
-        .employee-choice {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .choice-card {
-            background: #f8f9fa;
-            border: 3px solid transparent;
-            border-radius: 12px;
-            padding: 30px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .choice-card:hover {
-            border-color: #4a7c2a;
-            background: #f0f7ed;
-            transform: translateY(-3px);
-        }
-
-        .choice-card.selected {
-            border-color: #2d5016;
-            background: #e8f5e9;
-        }
-
-        .choice-icon {
-            font-size: 40px;
-            margin-bottom: 15px;
-        }
-
-        .choice-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #2d5016;
-            margin-bottom: 5px;
-        }
-
-        .choice-subtitle {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .employee-form-container {
-            display: none;
-            background: #f0f7ed;
-            border: 2px solid #4a7c2a;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-        }
-
-        .employee-form-container.active {
-            display: block;
-        }
-
-        .employee-form-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .employee-form-title {
-            color: #2d5016;
-            font-size: 18px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .add-another-btn {
-            background: #4a7c2a;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-family: 'Cairo', sans-serif;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-        }
-
-        .add-another-btn:hover {
-            background: #2d5016;
-            transform: translateY(-2px);
-        }
-
-        .employees-list {
-            margin-top: 30px;
-        }
-
-        .employees-list-title {
-            color: #2d5016;
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .employee-card {
-            background: white;
+        .multi-select {
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s;
+            border-radius: 8px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #fafafa;
         }
 
-        .employee-card:hover {
-            border-color: #4a7c2a;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .employee-info h4 {
-            color: #2d5016;
-            font-size: 16px;
-            margin-bottom: 8px;
-        }
-
-        .employee-details {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .employee-detail {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .employee-detail strong {
-            color: #2d5016;
-        }
-
-        .delete-employee-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 8px 16px;
+        .multi-select-item {
+            padding: 12px;
+            margin-bottom: 5px;
             border-radius: 6px;
-            font-family: 'Cairo', sans-serif;
-            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            background: white;
+            border: 1px solid #e0e0e0;
         }
 
-        .delete-employee-btn:hover {
-            background: #c82333;
+        .multi-select-item:hover {
+            background: #f5f5f5;
+            border-color: #4a7c2a;
         }
 
-        .empty-employees {
-            text-align: center;
-            padding: 30px;
-            color: #999;
-            font-style: italic;
+        .multi-select-item.selected {
+            background: #f0f8f0;
+            border: 2px solid #4a7c2a;
+            font-weight: 600;
         }
 
-        /* Buttons */
-        .wizard-actions {
+        .footer {
+            padding: 20px;
+            border-top: 2px solid #e0e0e0;
             display: flex;
+            justify-content: space-between;
             gap: 15px;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #f0f0f0;
+            background: #fafafa;
+            position: sticky;
+            bottom: 0;
         }
 
         .btn {
-            padding: 12px 30px;
+            padding: 12px 25px;
             border: none;
             border-radius: 8px;
             font-family: 'Cairo', sans-serif;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .btn-primary {
-            background: #4a7c2a;
-            color: white;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            background: #2d5016;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(74, 124, 42, 0.3);
-        }
-
         .btn-secondary {
-            background: #6c757d;
-            color: white;
+            background: #e0e0e0;
+            color: #333;
         }
 
         .btn-secondary:hover {
-            background: #5a6268;
+            background: #d0d0d0;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4a7c2a 0%, #2d5016 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(74, 124, 42, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 124, 42, 0.4);
         }
 
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            transform: none !important;
         }
 
-        /* Loading Overlay */
-        .loading-overlay {
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
+            align-items: flex-start;
+            gap: 10px;
+            font-weight: 500;
+            line-height: 1.6;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
-        .loading-overlay.active {
+        .alert.show {
             display: flex;
         }
 
-        .loading-content {
-            background: white;
-            padding: 30px 50px;
-            border-radius: 15px;
+        .alert i {
+            margin-top: 2px;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .alert-error {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+
+        .alert-error code {
+            background: #fff;
+            color: #333;
+            padding: 8px;
+            border-radius: 4px;
+            display: block;
+            margin-top: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            border: 1px solid #ddd;
+            direction: ltr;
+            text-align: left;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .alert-success {
+            background: #efe;
+            color: #2a7c2a;
+            border: 1px solid #cfc;
+        }
+
+        .loading {
+            display: none;
             text-align: center;
+            padding: 40px;
+        }
+
+        .loading.show {
+            display: block;
         }
 
         .spinner {
@@ -591,7 +409,7 @@
             width: 50px;
             height: 50px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            margin: 0 auto 15px;
         }
 
         @keyframes spin {
@@ -599,807 +417,1191 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Alerts */
-        .alert {
-            padding: 15px 20px;
+        .optional-badge {
+            display: inline-block;
+            background: #ffa726;
+            color: white;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-left: 5px;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 30px;
+            color: #999;
+            background: #fafafa;
             border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
+            border: 2px dashed #e0e0e0;
         }
 
-        .alert.show {
+        .empty-state i {
             display: block;
-            animation: slideDown 0.3s;
+            font-size: 3rem;
+            color: #4a7c2a;
+            margin-bottom: 1rem;
         }
 
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        #sheepData, #wheatData, #otherProjectData {
+            animation: fadeIn 0.4s ease;
         }
 
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        /* Responsive */
         @media (max-width: 768px) {
-            .category-grid,
-            .employee-choice {
+            .category-grid {
                 grid-template-columns: 1fr;
             }
 
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .progress-bar {
-                overflow-x: auto;
-                padding-bottom: 10px;
+            .container {
+                padding: 15px;
             }
 
             .step-label {
                 font-size: 11px;
             }
-
-            .employee-card {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
-            .employee-details {
-                flex-direction: column;
-                gap: 8px;
-            }
         }
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-content">
-            <div class="spinner"></div>
-            <p>جاري الحفظ...</p>
-        </div>
-    </div>
-
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <a href="index.html" class="back-btn">
-                ← العودة للوحة التحكم
-            </a>
-            <h1>🌾 إنشاء مشروع جديد</h1>
-            <p>اتبع الخطوات لإنشاء مشروع جديد في مزرعتك</p>
+        <!-- Alert -->
+        <div id="alert" class="alert"></div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p style="color: #666; font-weight: 600;">جاري الحفظ...</p>
         </div>
 
-        <!-- Wizard Container -->
-        <div class="wizard-container">
-            <!-- Alert Messages -->
-            <div id="alertBox"></div>
-
-            <!-- Progress Bar -->
-            <div class="progress-bar">
-                <div class="progress-line" id="progressLine"></div>
-                <div class="step active">
-                    <div class="step-number">1</div>
-                    <div class="step-label">اختر الفئة</div>
+        <!-- Content -->
+        <div id="mainContent">
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step active" data-step="1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">الفئة</div>
                 </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <div class="step-label">اختر النوع</div>
+                <div class="step" data-step="2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">النوع</div>
                 </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <div class="step-label">البيانات الأساسية</div>
+                <div class="step" data-step="3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">البيانات</div>
                 </div>
-                <div class="step" id="step4Indicator">
-                    <div class="step-number">4</div>
+                <div class="step" data-step="4">
+                    <div class="step-circle">4</div>
                     <div class="step-label">التفاصيل</div>
                 </div>
-                <div class="step" id="step5Indicator">
-                    <div class="step-number">5</div>
-                    <div class="step-label">الموظفين</div>
+                <div class="step" data-step="5">
+                    <div class="step-circle">5</div>
+                    <div class="step-label">الموارد</div>
                 </div>
             </div>
 
-            <!-- Step 1: Category Selection -->
-            <div class="wizard-step active" id="step1">
-                <h2 class="step-title">اختر فئة المشروع</h2>
-                <p class="step-subtitle">حدد نوع المشروع الذي تريد إنشاءه</p>
-
+            <!-- Step 1: Category -->
+            <div class="step-content active" data-content="1">
+                <h3 class="section-title">
+                    <i class="fas fa-layer-group"></i>
+                    اختر فئة المشروع
+                </h3>
                 <div class="category-grid">
-                    <div class="category-card" onclick="selectCategory('animal')">
+                    <div class="category-card" data-category="animal" onclick="selectCategory('animal')">
                         <div class="category-icon">🐑</div>
                         <div class="category-name">حيواني</div>
                     </div>
-                    <div class="category-card" onclick="selectCategory('plant')">
+                    <div class="category-card" data-category="plant" onclick="selectCategory('plant')">
                         <div class="category-icon">🌾</div>
                         <div class="category-name">نباتي</div>
                     </div>
-                    <div class="category-card" onclick="selectCategory('equipment')">
-                        <div class="category-icon">🚜</div>
-                        <div class="category-name">معدات</div>
-                    </div>
                 </div>
             </div>
 
-            <!-- Step 2: Type Selection -->
-            <div class="wizard-step" id="step2">
-                <h2 class="step-title">اختر نوع المشروع</h2>
-                <p class="step-subtitle">حدد النوع المحدد للمشروع</p>
+            <!-- Step 2: Type -->
+            <div class="step-content" data-content="2">
+                <h3 class="section-title">
+                    <i class="fas fa-tags"></i>
+                    اختر نوع المشروع
+                </h3>
+                <div id="typeList" class="type-list"></div>
+            </div>
 
-                <div class="type-list" id="typeList">
-                    <!-- Will be populated dynamically -->
+            <!-- Step 3: Basic Data -->
+            <div class="step-content" data-content="3">
+                <h3 class="section-title">
+                    <i class="fas fa-edit"></i>
+                    بيانات المشروع الأساسية
+                </h3>
+                <div class="form-group">
+                    <label><i class="fas fa-asterisk" style="color: #e74c3c; font-size: 8px;"></i> اسم المشروع</label>
+                    <input type="text" id="projectName" placeholder="مثال: تربية الأغنام 2025" required>
                 </div>
-
-                <div class="wizard-actions">
-                    <button class="btn btn-secondary" onclick="prevStep()">
-                        ← السابق
-                    </button>
-                    <button class="btn btn-primary" id="nextBtn" onclick="nextStep()" disabled>
-                        التالي →
-                    </button>
+                <div class="form-group">
+                    <label><i class="fas fa-asterisk" style="color: #e74c3c; font-size: 8px;"></i> تاريخ البدء</label>
+                    <input type="date" id="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label>الميزانية (دج)</label>
+                    <input type="number" id="budget" placeholder="مثال: 500000" step="1000">
+                </div>
+                <div class="form-group">
+                    <label>الوصف</label>
+                    <textarea id="description" placeholder="وصف المشروع وأهدافه..."></textarea>
                 </div>
             </div>
 
-            <!-- Step 3: Basic Information -->
-            <div class="wizard-step" id="step3">
-                <h2 class="step-title">البيانات الأساسية</h2>
-                <p class="step-subtitle">أدخل المعلومات الأساسية للمشروع</p>
-
-                <form id="projectForm">
+            <!-- Step 4: Project Specific Data -->
+            <div class="step-content" data-content="4">
+                <h3 class="section-title">
+                    <i class="fas fa-clipboard-list"></i>
+                    البيانات الخاصة بالمشروع
+                </h3>
+                
+                <!-- Sheep Project Data -->
+                <div id="sheepData" style="display: none;">
+                    <p style="background: #f0f8f0; padding: 15px; border-radius: 8px; margin-bottom: 20px; color: #2d5016; font-size: 14px;">
+                        <i class="fas fa-info-circle"></i>
+                        أدخل أعداد القطيع الأولية. سيتم إنشاء سجلات تلقائية لكل حيوان في المشروع.
+                    </p>
                     <div class="form-group">
-                        <label class="form-label">
-                            اسم المشروع <span class="required">*</span>
-                        </label>
-                        <input type="text" class="form-input" id="projectName" required 
-                               placeholder="مثال: مشروع تربية الأغنام 2025">
+                        <label>عدد النعاج الأولي</label>
+                        <input type="number" id="sheepEwesCount" placeholder="مثال: 40" min="0" value="0">
                     </div>
-
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">تاريخ البدء</label>
-                            <input type="date" class="form-input" id="startDate">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">الميزانية المتوقعة (دج)</label>
-                            <input type="number" class="form-input" id="budget" 
-                                   placeholder="0" step="0.01" min="0">
-                        </div>
-                    </div>
-
                     <div class="form-group">
-                        <label class="form-label">الأرض المرتبطة (اختياري)</label>
-                        <select class="form-select" id="landId">
-                            <option value="">اختر الأرض...</option>
+                        <label>عدد الكباش الأولي</label>
+                        <input type="number" id="sheepRamsCount" placeholder="مثال: 5" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>عدد الحملان الأولي</label>
+                        <input type="number" id="sheepLambsCount" placeholder="مثال: 20" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>السلالة</label>
+                        <input type="text" id="sheepBreed" placeholder="مثال: العواسي، الرحماني">
+                    </div>
+                    <div class="form-group">
+                        <label>الهدف من المشروع</label>
+                        <select id="sheepPurpose">
+                            <option value="">-- اختر الهدف --</option>
+                            <option value="meat">إنتاج اللحوم</option>
+                            <option value="milk">إنتاج الحليب</option>
+                            <option value="both">اللحوم والحليب</option>
+                            <option value="breeding">التربية والتكاثر</option>
                         </select>
-                        <div class="form-help">يمكنك ربط المشروع بإحدى الأراضي المسجلة</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">الوصف</label>
-                        <textarea class="form-textarea" id="description" 
-                                  placeholder="وصف تفصيلي للمشروع..."></textarea>
-                    </div>
-
-                    <div class="wizard-actions">
-                        <button type="button" class="btn btn-secondary" onclick="prevStep()">
-                            ← السابق
-                        </button>
-                        <button type="button" class="btn btn-primary" id="step3NextBtn" onclick="handleStep3Next()">
-                            <span id="step3NextText">التالي →</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Step 4: Equipment Specific (Only for Tractor) -->
-            <div class="wizard-step" id="step4">
-                <h2 class="step-title">معلومات الجرار</h2>
-                <p class="step-subtitle">أدخل التفاصيل الفنية للجرار</p>
-
-                <div class="equipment-fields">
-                    <div class="section-title">
-                        🚜 المواصفات التقنية
-                    </div>
-
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">نوع المعدة</label>
-                            <input type="text" class="form-input" id="equipmentType" 
-                                   value="جرار زراعي" readonly>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">الموديل / الماركة</label>
-                            <input type="text" class="form-input" id="model" 
-                                   placeholder="مثال: فيات 80، ماسي فيرجسون 390">
-                        </div>
-                    </div>
-
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">سنة الصنع</label>
-                            <input type="number" class="form-input" id="manufactureYear" 
-                                   placeholder="2015" min="1970" max="2025">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">الرقم التسلسلي</label>
-                            <input type="text" class="form-input" id="serialNumber" 
-                                   placeholder="FT2015-123456">
-                        </div>
-                    </div>
-
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">الحالة</label>
-                            <select class="form-select" id="condition">
-                                <option value="excellent">ممتاز</option>
-                                <option value="good" selected>جيد</option>
-                                <option value="fair">متوسط</option>
-                                <option value="poor">يحتاج صيانة</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">ساعات العمل الحالية</label>
-                            <input type="number" class="form-input" id="workingHours" 
-                                   value="0" min="0" placeholder="0">
-                            <div class="form-help">إجمالي ساعات التشغيل</div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">موقع التخزين</label>
-                        <input type="text" class="form-input" id="location" 
-                               placeholder="مثال: مخزن المعدات، الحظيرة الرئيسية">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">ملاحظات إضافية</label>
-                        <textarea class="form-textarea" id="equipmentNotes" 
-                                  placeholder="أي معلومات إضافية عن الجرار..."></textarea>
                     </div>
                 </div>
 
-                <div class="wizard-actions">
-                    <button type="button" class="btn btn-secondary" onclick="prevStep()">
-                        ← السابق
-                    </button>
-                    <button type="button" class="btn btn-primary" onclick="nextStep()">
-                        التالي →
-                    </button>
+                <!-- Wheat Project Data -->
+                <div id="wheatData" style="display: none;">
+                    <p style="background: #fff8e1; padding: 15px; border-radius: 8px; margin-bottom: 20px; color: #f57c00; font-size: 14px;">
+                        <i class="fas fa-info-circle"></i>
+                        أدخل معلومات الزراعة. سيتم إنشاء جدول زمني تلقائي للمراحل المختلفة.
+                    </p>
+                    <div class="form-group">
+                        <label><i class="fas fa-asterisk" style="color: #e74c3c; font-size: 8px;"></i> المساحة المزروعة (هكتار)</label>
+                        <input type="number" id="wheatArea" placeholder="مثال: 10" step="0.1" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>نوع البذور</label>
+                        <select id="wheatSeedType">
+                            <option value="">-- اختر النوع --</option>
+                            <option value="hard">قمح صلب</option>
+                            <option value="soft">قمح لين</option>
+                            <option value="durum">قمح الديرم</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>كمية البذور المستخدمة (كجم)</label>
+                        <input type="number" id="wheatSeedAmount" placeholder="مثال: 150" step="1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>الإنتاج المتوقع (قنطار/هكتار)</label>
+                        <input type="number" id="wheatExpectedYield" placeholder="مثال: 40" step="0.1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>تاريخ الحصاد المتوقع</label>
+                        <input type="date" id="wheatHarvestDate">
+                    </div>
+                    <div class="form-group">
+                        <label>طريقة الري</label>
+                        <select id="wheatIrrigationMethod">
+                            <option value="">-- اختر الطريقة --</option>
+                            <option value="rain">مطري</option>
+                            <option value="sprinkler">رش</option>
+                            <option value="drip">تنقيط</option>
+                            <option value="flood">غمر</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Other Projects (Coming Soon) -->
+                <div id="otherProjectData" style="display: none;">
+                    <div class="empty-state">
+                        <i class="fas fa-info-circle" style="font-size: 3rem; color: #4a7c2a; margin-bottom: 1rem;"></i>
+                        <p style="color: #666; font-weight: 600;">لا توجد بيانات إضافية مطلوبة لهذا النوع من المشاريع</p>
+                        <p style="color: #999; font-size: 14px; margin-top: 0.5rem;">يمكنك المتابعة للخطوة التالية</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Step 5: Add Employees (Optional) -->
-            <div class="wizard-step" id="step5">
-                <h2 class="step-title">إضافة موظفين للمشروع</h2>
-                <p class="step-subtitle">هل تريد إضافة موظفين لهذا المشروع؟ (اختياري)</p>
+            <!-- Step 5: Resources -->
+            <div class="step-content" data-content="5">
+                <h3 class="section-title">
+                    <i class="fas fa-link"></i>
+                    ربط الموارد
+                    <span style="font-size: 14px; color: #999; font-weight: 400;">(اختياري)</span>
+                </h3>
+                
+                <div class="form-group">
+                    <label><span class="optional-badge">اختياري</span> الأرض</label>
+                    <select id="landSelect">
+                        <option value="">-- اختر الأرض --</option>
+                    </select>
+                </div>
 
-                <div class="employee-choice">
-                    <div class="choice-card" onclick="selectEmployeeChoice('yes')">
-                        <div class="choice-icon">👥</div>
-                        <div class="choice-title">نعم، إضافة موظفين</div>
-                        <div class="choice-subtitle">سأقوم بإضافة موظفين الآن</div>
-                    </div>
-                    <div class="choice-card" onclick="selectEmployeeChoice('no')">
-                        <div class="choice-icon">⏭️</div>
-                        <div class="choice-title">لا، إضافتهم لاحقاً</div>
-                        <div class="choice-subtitle">سأتخطى هذه الخطوة</div>
+                <div class="form-group">
+                    <label><span class="optional-badge">اختياري</span> المعدات</label>
+                    <div id="equipmentList" class="multi-select">
+                        <div class="empty-state">لا توجد معدات متاحة</div>
                     </div>
                 </div>
 
-                <!-- Employee Form (Hidden by default) -->
-                <div class="employee-form-container" id="employeeFormContainer">
-                    <div class="employee-form-header">
-                        <div class="employee-form-title">
-                            👤 بيانات الموظف
-                        </div>
-                        <button type="button" class="add-another-btn" onclick="addEmployeeToList()">
-                            ➕ إضافة للقائمة
-                        </button>
+                <div class="form-group">
+                    <label><span class="optional-badge">اختياري</span> الموظفين</label>
+                    <div id="employeesList" class="multi-select">
+                        <div class="empty-state">لا يوجد موظفين متاحين</div>
                     </div>
-
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">
-                                الاسم <span class="required">*</span>
-                            </label>
-                            <input type="text" class="form-input" id="employeeName" 
-                                   placeholder="اسم الموظف">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">الوظيفة</label>
-                            <input type="text" class="form-input" id="employeeRole" 
-                                   placeholder="مثال: سائق جرار، عامل حقل، مشرف">
-                        </div>
-                    </div>
-
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label">نوع الأجر</label>
-                            <select class="form-select" id="paymentType">
-                                <option value="fixed">ثابت</option>
-                                <option value="hourly">بالساعة</option>
-                                <option value="daily">يومي</option>
-                                <option value="percentage">نسبة مئوية</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">المبلغ / النسبة</label>
-                            <input type="number" class="form-input" id="paymentAmount" 
-                                   placeholder="0" step="0.01" min="0">
-                            <div class="form-help">أدخل المبلغ بالدج أو النسبة المئوية</div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">رقم الهاتف (اختياري)</label>
-                        <input type="tel" class="form-input" id="employeePhone" 
-                               placeholder="مثال: 0555123456">
-                    </div>
-                </div>
-
-                <!-- Employees List -->
-                <div class="employees-list" id="employeesList" style="display: none;">
-                    <div class="employees-list-title">
-                        👥 الموظفين المضافين (<span id="employeesCount">0</span>)
-                    </div>
-                    <div id="employeesContainer">
-                        <!-- Employee cards will be added here -->
-                    </div>
-                </div>
-
-                <div class="wizard-actions">
-                    <button type="button" class="btn btn-secondary" onclick="prevStep()">
-                        ← السابق
-                    </button>
-                    <button type="button" class="btn btn-primary" onclick="submitProject()">
-                        ✓ حفظ المشروع
-                    </button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Footer -->
+    <div class="footer">
+        <button class="btn btn-secondary" id="prevBtn" onclick="prevStep()" style="display: none;">
+            <i class="fas fa-arrow-right"></i>
+            السابق
+        </button>
+        <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">
+            التالي
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <button class="btn btn-primary" id="saveBtn" onclick="saveProject()" style="display: none;">
+            <i class="fas fa-save"></i>
+            حفظ المشروع
+        </button>
+    </div>
+
     <script>
-        // Supabase Configuration
+        
+        // Supabase Config
         const SUPABASE_URL = 'https://sstvsknmmhbwubzajeix.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzdHZza25tbWhid3ViemFqZWl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNDM0NjIsImV4cCI6MjA3NDkxOTQ2Mn0.EeVUU9DxRYUi38nUHgWEsnG8li7KZjqAGPNW9IDokhg';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // State Variables
-        let currentStep = 1;
-        let selectedCategory = null;
-        let selectedType = null;
-        let currentUser = null;
-        let employeesToAdd = [];
-        let addEmployees = false;
-
-        // Project Types Configuration
-        const projectTypes = {
+        // Default project types
+        const DEFAULT_PROJECT_TYPES = {
             animal: [
-                { id: 'sheep', name: 'تربية الأغنام', description: 'مشروع لتربية الأغنام' },
-                { id: 'cattle', name: 'تربية الأبقار', description: 'مشروع لتربية الأبقار', badge: 'قريباً' },
-                { id: 'chicken', name: 'تربية الدجاج', description: 'مشروع لتربية الدجاج', badge: 'قريباً' },
-                { id: 'rabbit', name: 'تربية الأرانب', description: 'مشروع لتربية الأرانب', badge: 'قريباً' }
+                {
+                    id: 'sheep',
+                    name: 'تربية الأغنام',
+                    description: 'مشروع متكامل لتربية وإدارة قطيع الأغنام',
+                    icon: '🐑',
+                    page: 'projects/sheep.html',
+                    available: true
+                },
+                {
+                    id: 'poultry',
+                    name: 'تربية الدواجن',
+                    description: 'مشروع تربية الدجاج والطيور',
+                    icon: '🐔',
+                    available: false
+                },
+                {
+                    id: 'cattle',
+                    name: 'تربية الأبقار',
+                    description: 'مشروع إنتاج الحليب واللحوم',
+                    icon: '🐄',
+                    available: false
+                }
             ],
             plant: [
-                { id: 'wheat', name: 'زراعة القمح', description: 'مشروع لزراعة القمح' },
-                { id: 'barley', name: 'زراعة الشعير', description: 'مشروع لزراعة الشعير', badge: 'قريباً' },
-                { id: 'vegetables', name: 'زراعة الخضروات', description: 'مشروع لزراعة الخضروات', badge: 'قريباً' },
-                { id: 'fruits', name: 'زراعة الفواكه', description: 'مشروع لزراعة الفواكه', badge: 'قريباً' }
-            ],
-            equipment: [
-                { id: 'tractor', name: 'جرار زراعي', description: 'مشروع إدارة جرار زراعي' },
-                { id: 'harvester', name: 'حصادة', description: 'مشروع إدارة حصادة', badge: 'قريباً' },
-                { id: 'irrigation', name: 'نظام ري', description: 'مشروع إدارة نظام ري', badge: 'قريباً' }
+                {
+                    id: 'wheat',
+                    name: 'زراعة القمح',
+                    description: 'مشروع زراعة وإدارة محصول القمح',
+                    icon: '🌾',
+                    page: 'projects/wheat.html',
+                    available: true
+                },
+                {
+                    id: 'tomato',
+                    name: 'زراعة الطماطم',
+                    description: 'مشروع زراعة الطماطم في البيوت البلاستيكية',
+                    icon: '🍅',
+                    available: false
+                },
+                {
+                    id: 'olive',
+                    name: 'زراعة الزيتون',
+                    description: 'مشروع غراسة وإنتاج الزيتون',
+                    icon: '🫒',
+                    available: false
+                }
             ]
         };
 
-        // Check Authentication
+        let currentStep = 1;
+        let selectedCategory = null;
+        let selectedType = null;
+        let selectedEquipment = [];
+        let selectedEmployees = [];
+        let currentUser = null;
+        let dbProjectTypes = {};
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('%c🌾 نظام إدارة المشاريع - إضافة مشروع جديد', 'color: #4a7c2a; font-size: 16px; font-weight: bold;');
+            console.log('%c📋 ملاحظة هامة:', 'color: #f57c00; font-weight: bold;');
+            console.log('إذا ظهرت رسالة خطأ متعلقة بـ project_types و RLS، قم بتشغيل SQL التالي في Supabase:');
+            console.log('%c\n' +
+                '-- حذف السياسة القديمة\n' +
+                'DROP POLICY IF EXISTS "users_own_data_all_ops" ON project_types;\n\n' +
+                '-- إنشاء سياسة للقراءة للجميع\n' +
+                'CREATE POLICY "allow_read_project_types" ON project_types\n' +
+                'FOR SELECT USING (true);\n\n' +
+                '-- إنشاء سياسة للإدخال للمستخدمين المصادقين\n' +
+                'CREATE POLICY "allow_insert_project_types" ON project_types\n' +
+                'FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);\n',
+                'background: #f5f5f5; padding: 10px; font-family: monospace; font-size: 12px;'
+            );
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+            
+            await checkAuth();
+            setTodayDate();
+            await loadDBProjectTypes();
+        });
+
         async function checkAuth() {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
-                window.location.href = 'login.html';
-                return;
+                showAlert('error', 'يجب تسجيل الدخول أولاً');
+                setTimeout(() => {
+                    if (window.parent !== window) {
+                        window.parent.location.href = 'login.html';
+                    } else {
+                        window.location.href = '../login.html';
+                    }
+                }, 2000);
+                return false;
             }
             currentUser = session.user;
-            await loadLands();
+            return true;
         }
 
-        // Load Lands for Selection
+        function setTodayDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+        }
+
+        function selectCategory(category) {
+            selectedCategory = category;
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`[data-category="${category}"]`).classList.add('selected');
+        }
+
+        async function loadDBProjectTypes() {
+            try {
+                const { data, error } = await supabase
+                    .from('project_types')
+                    .select('*');
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    dbProjectTypes = { animal: [], plant: [] };
+                    
+                    data.forEach(type => {
+                        if (type.category && dbProjectTypes[type.category]) {
+                            dbProjectTypes[type.category].push({
+                                dbId: type.id,
+                                id: type.name.toLowerCase().replace(/\s+/g, '_'),
+                                name: type.name,
+                                description: type.meta?.description || '',
+                                icon: type.meta?.icon || (type.category === 'animal' ? '🐑' : '🌾'),
+                                page: type.meta?.page || null,
+                                available: true
+                            });
+                        }
+                    });
+                    
+                    console.log('✅ تم تحميل أنواع المشاريع من قاعدة البيانات:', dbProjectTypes);
+                }
+            } catch (error) {
+                console.log('⚠️ استخدام الأنواع الافتراضية:', error.message);
+            }
+        }
+
+        function loadProjectTypes() {
+            const typeList = document.getElementById('typeList');
+            typeList.innerHTML = '';
+
+            if (!selectedCategory) {
+                typeList.innerHTML = '<div class="empty-state">الرجاء اختيار فئة المشروع أولاً</div>';
+                return;
+            }
+
+            let types = (dbProjectTypes[selectedCategory] && dbProjectTypes[selectedCategory].length > 0) 
+                ? dbProjectTypes[selectedCategory] 
+                : (DEFAULT_PROJECT_TYPES[selectedCategory] || []);
+
+            if (types.length === 0) {
+                typeList.innerHTML = '<div class="empty-state">لا توجد أنواع متاحة لهذه الفئة</div>';
+                return;
+            }
+
+            types.forEach(type => {
+                const typeItem = document.createElement('div');
+                typeItem.className = `type-item ${!type.available ? 'coming-soon' : ''}`;
+                
+                if (type.available) {
+                    typeItem.onclick = () => selectType(type, typeItem);
+                }
+
+                typeItem.innerHTML = `
+                    <div class="type-icon">${type.icon}</div>
+                    <div class="type-info">
+                        <h3>${type.name}</h3>
+                        <p>${type.description}</p>
+                    </div>
+                `;
+                typeList.appendChild(typeItem);
+            });
+        }
+
+        function selectType(type, element) {
+            if (!type.available) return;
+            
+            selectedType = type;
+            document.querySelectorAll('.type-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            element.classList.add('selected');
+        }
+
+        async function loadResources() {
+            await Promise.all([
+                loadLands(),
+                loadEquipment(),
+                loadEmployees()
+            ]);
+        }
+
         async function loadLands() {
             try {
                 const { data, error } = await supabase
                     .from('lands')
                     .select('*')
-                    .eq('user_id', currentUser.id)
-                    .order('name');
+                    .eq('user_id', currentUser.id);
 
                 if (error) throw error;
 
-                const landSelect = document.getElementById('landId');
-                data.forEach(land => {
-                    const option = document.createElement('option');
-                    option.value = land.id;
-                    option.textContent = `${land.name} - ${land.area} هكتار`;
-                    landSelect.appendChild(option);
-                });
+                const select = document.getElementById('landSelect');
+                select.innerHTML = '<option value="">-- اختر الأرض --</option>';
+                
+                if (data && data.length > 0) {
+                    data.forEach(land => {
+                        const option = document.createElement('option');
+                        option.value = land.id;
+                        const statusText = land.status === 'available' ? '' : ` (${land.status})`;
+                        option.textContent = `${land.name} - ${land.area} هكتار${statusText}`;
+                        if (land.status !== 'available') {
+                            option.disabled = true;
+                            option.style.color = '#999';
+                        }
+                        select.appendChild(option);
+                    });
+                }
             } catch (error) {
-                console.error('Error loading lands:', error);
+                console.error('❌ خطأ في تحميل الأراضي:', error);
             }
         }
 
-        // Step Navigation
-        function nextStep() {
-            if (currentStep === 1 && !selectedCategory) return;
-            if (currentStep === 2 && !selectedType) return;
+        async function loadEquipment() {
+            try {
+                const { data, error } = await supabase
+                    .from('equipment')
+                    .select('*')
+                    .eq('user_id', currentUser.id);
 
-            currentStep++;
-            updateStepDisplay();
+                if (error) throw error;
+
+                const list = document.getElementById('equipmentList');
+                list.innerHTML = '';
+                
+                if (!data || data.length === 0) {
+                    list.innerHTML = '<div class="empty-state"><i class="fas fa-tractor"></i><p>لا توجد معدات متاحة</p></div>';
+                    return;
+                }
+
+                data.forEach(equipment => {
+                    const item = document.createElement('div');
+                    item.className = 'multi-select-item';
+                    const statusBadge = equipment.status !== 'active' ? ` <span style="color: #999;">(${equipment.status})</span>` : '';
+                    item.innerHTML = `<i class="fas fa-tractor"></i> ${equipment.name} - ${equipment.type || 'غير محدد'}${statusBadge}`;
+                    
+                    if (equipment.status === 'active') {
+                        item.onclick = () => toggleSelection(item, equipment.id, selectedEquipment);
+                    } else {
+                        item.style.opacity = '0.5';
+                        item.style.cursor = 'not-allowed';
+                    }
+                    
+                    list.appendChild(item);
+                });
+            } catch (error) {
+                console.error('❌ خطأ في تحميل المعدات:', error);
+            }
+        }
+
+        async function loadEmployees() {
+            try {
+                const { data, error } = await supabase
+                    .from('employees')
+                    .select('*')
+                    .eq('user_id', currentUser.id);
+
+                if (error) throw error;
+
+                const list = document.getElementById('employeesList');
+                list.innerHTML = '';
+                
+                if (!data || data.length === 0) {
+                    list.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><p>لا يوجد موظفين متاحين</p></div>';
+                    return;
+                }
+
+                data.forEach(employee => {
+                    const item = document.createElement('div');
+                    item.className = 'multi-select-item';
+                    const statusBadge = employee.status !== 'active' ? ` <span style="color: #999;">(${employee.status})</span>` : '';
+                    item.innerHTML = `<i class="fas fa-user"></i> ${employee.name} - ${employee.position || 'غير محدد'}${statusBadge}`;
+                    
+                    if (employee.status === 'active') {
+                        item.onclick = () => toggleSelection(item, employee.id, selectedEmployees);
+                    } else {
+                        item.style.opacity = '0.5';
+                        item.style.cursor = 'not-allowed';
+                    }
+                    
+                    list.appendChild(item);
+                });
+            } catch (error) {
+                console.error('❌ خطأ في تحميل الموظفين:', error);
+            }
+        }
+
+        function toggleSelection(element, id, array) {
+            element.classList.toggle('selected');
+            const index = array.indexOf(id);
+            if (index > -1) {
+                array.splice(index, 1);
+            } else {
+                array.push(id);
+            }
+        }
+
+        function nextStep() {
+            if (currentStep === 1 && !selectedCategory) {
+                showAlert('error', 'الرجاء اختيار فئة المشروع');
+                return;
+            }
+
+            if (currentStep === 2 && !selectedType) {
+                showAlert('error', 'الرجاء اختيار نوع المشروع');
+                return;
+            }
+
+            if (currentStep === 3) {
+                const name = document.getElementById('projectName').value.trim();
+                const startDate = document.getElementById('startDate').value;
+                
+                if (!name) {
+                    showAlert('error', 'الرجاء إدخال اسم المشروع');
+                    return;
+                }
+                if (!startDate) {
+                    showAlert('error', 'الرجاء اختيار تاريخ البدء');
+                    return;
+                }
+            }
+
+            if (currentStep === 4) {
+                if (selectedType.id === 'wheat' || selectedType.name?.includes('قمح')) {
+                    const area = document.getElementById('wheatArea').value;
+                    if (!area || parseFloat(area) <= 0) {
+                        showAlert('error', 'الرجاء إدخال المساحة المزروعة');
+                        return;
+                    }
+                }
+            }
+
+            if (currentStep < 5) {
+                currentStep++;
+                updateSteps();
+
+                if (currentStep === 2) {
+                    loadProjectTypes();
+                }
+
+                if (currentStep === 4) {
+                    loadProjectSpecificData();
+                }
+
+                if (currentStep === 5) {
+                    loadResources();
+                }
+            }
         }
 
         function prevStep() {
             if (currentStep > 1) {
                 currentStep--;
-                updateStepDisplay();
+                updateSteps();
             }
         }
 
-        function selectCategory(category) {
-            selectedCategory = category;
-            
-            // Update UI
-            document.querySelectorAll('.category-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            event.currentTarget.classList.add('selected');
+        function loadProjectSpecificData() {
+            document.getElementById('sheepData').style.display = 'none';
+            document.getElementById('wheatData').style.display = 'none';
+            document.getElementById('otherProjectData').style.display = 'none';
 
-            // Move to next step after short delay
-            setTimeout(() => {
-                nextStep();
-                populateTypes();
-            }, 300);
-        }
+            if (!selectedType) {
+                document.getElementById('otherProjectData').style.display = 'block';
+                return;
+            }
 
-        function populateTypes() {
-            const typeList = document.getElementById('typeList');
-            typeList.innerHTML = '';
+            const typeId = selectedType.id || '';
+            const typeName = selectedType.name || '';
 
-            const types = projectTypes[selectedCategory];
-            types.forEach(type => {
-                const typeItem = document.createElement('div');
-                typeItem.className = 'type-item';
-                typeItem.onclick = () => selectType(type.id);
-
-                typeItem.innerHTML = `
-                    <div class="type-info">
-                        <h3>${type.name}</h3>
-                        <p>${type.description}</p>
-                    </div>
-                    ${type.badge ? `<span class="type-badge">${type.badge}</span>` : ''}
-                `;
-
-                typeList.appendChild(typeItem);
-            });
-        }
-
-        function selectType(typeId) {
-            selectedType = typeId;
-
-            // Update UI
-            document.querySelectorAll('.type-item').forEach(item => {
-                item.classList.remove('selected');
-            });
-            event.currentTarget.classList.add('selected');
-
-            // Enable next button
-            document.getElementById('nextBtn').disabled = false;
-        }
-
-        function handleStep3Next() {
-            if (selectedCategory === 'equipment' && selectedType === 'tractor') {
-                nextStep();
+            if (typeId === 'sheep' || typeName.includes('أغنام') || typeName.includes('غنام')) {
+                document.getElementById('sheepData').style.display = 'block';
+            } else if (typeId === 'wheat' || typeName.includes('قمح')) {
+                document.getElementById('wheatData').style.display = 'block';
             } else {
-                // Skip step 4, go directly to step 5
-                currentStep = 5;
-                updateStepDisplay();
+                document.getElementById('otherProjectData').style.display = 'block';
             }
         }
 
-        function updateStepDisplay() {
-            // Hide all steps
-            document.querySelectorAll('.wizard-step').forEach(step => {
-                step.classList.remove('active');
-            });
-
-            // Show current step
-            document.getElementById(`step${currentStep}`).classList.add('active');
-
-            // Update progress bar
-            document.querySelectorAll('.progress-bar .step').forEach((step, index) => {
-                const stepNum = index + 1;
-                if (stepNum < currentStep) {
-                    step.classList.add('completed');
-                    step.classList.remove('active');
-                } else if (stepNum === currentStep) {
+        function updateSteps() {
+            document.querySelectorAll('.step').forEach(step => {
+                const stepNum = parseInt(step.dataset.step);
+                step.classList.remove('active', 'completed');
+                if (stepNum === currentStep) {
                     step.classList.add('active');
-                    step.classList.remove('completed');
-                } else {
-                    step.classList.remove('active', 'completed');
+                } else if (stepNum < currentStep) {
+                    step.classList.add('completed');
                 }
             });
 
-            // Show/hide step 4 indicator
-            if (selectedCategory === 'equipment' && selectedType === 'tractor') {
-                document.getElementById('step4Indicator').style.display = 'flex';
-            } else {
-                document.getElementById('step4Indicator').style.display = 'none';
-            }
-
-            // Always show step 5 indicator
-            document.getElementById('step5Indicator').style.display = 'flex';
-
-            // Update step 3 button text
-            if (currentStep === 3) {
-                const step3NextText = document.getElementById('step3NextText');
-                if (selectedCategory === 'equipment' && selectedType === 'tractor') {
-                    step3NextText.textContent = 'التالي →';
-                } else {
-                    step3NextText.textContent = 'التالي →';
-                }
-            }
-
-            // Update progress line
-            let totalSteps = 5;
-            if (selectedCategory !== 'equipment' || selectedType !== 'tractor') {
-                totalSteps = 4; // Skip step 4
-            }
-            let progressPercent = ((currentStep - 1) / (totalSteps - 1)) * 100;
-            document.getElementById('progressLine').style.width = `${progressPercent}%`;
-        }
-
-        // Employee Functions
-        function selectEmployeeChoice(choice) {
-            addEmployees = (choice === 'yes');
-
-            // Update UI
-            document.querySelectorAll('.choice-card').forEach(card => {
-                card.classList.remove('selected');
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.classList.remove('active');
             });
-            event.currentTarget.classList.add('selected');
+            document.querySelector(`[data-content="${currentStep}"]`).classList.add('active');
 
-            // Show/hide employee form
-            const formContainer = document.getElementById('employeeFormContainer');
-            if (addEmployees) {
-                formContainer.classList.add('active');
-            } else {
-                formContainer.classList.remove('active');
-                document.getElementById('employeesList').style.display = 'none';
-            }
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const saveBtn = document.getElementById('saveBtn');
+
+            prevBtn.style.display = currentStep === 1 ? 'none' : 'flex';
+            nextBtn.style.display = currentStep === 5 ? 'none' : 'flex';
+            saveBtn.style.display = currentStep === 5 ? 'flex' : 'none';
         }
 
-        function addEmployeeToList() {
-            const name = document.getElementById('employeeName').value.trim();
-            if (!name) {
-                showAlert('الرجاء إدخال اسم الموظف', 'error');
-                return;
-            }
-
-            const employee = {
-                name: name,
-                role: document.getElementById('employeeRole').value.trim(),
-                payment_type: document.getElementById('paymentType').value,
-                payment_amount: parseFloat(document.getElementById('paymentAmount').value) || 0,
-                phone: document.getElementById('employeePhone').value.trim()
-            };
-
-            employeesToAdd.push(employee);
-            updateEmployeesList();
-            clearEmployeeForm();
-            showSuccess('✓ تم إضافة الموظف للقائمة');
-        }
-
-        function updateEmployeesList() {
-            const container = document.getElementById('employeesContainer');
-            const listDiv = document.getElementById('employeesList');
-            const countSpan = document.getElementById('employeesCount');
-
-            if (employeesToAdd.length === 0) {
-                listDiv.style.display = 'none';
-                return;
-            }
-
-            listDiv.style.display = 'block';
-            countSpan.textContent = employeesToAdd.length;
-
-            container.innerHTML = employeesToAdd.map((emp, index) => {
-                const paymentText = emp.payment_type === 'percentage' 
-                    ? `${emp.payment_amount}%` 
-                    : `${emp.payment_amount} دج`;
-
-                const paymentTypeText = {
-                    'fixed': 'ثابت',
-                    'hourly': 'بالساعة',
-                    'daily': 'يومي',
-                    'percentage': 'نسبة مئوية'
-                }[emp.payment_type];
-
-                return `
-                    <div class="employee-card">
-                        <div class="employee-info">
-                            <h4>👤 ${emp.name}</h4>
-                            <div class="employee-details">
-                                ${emp.role ? `<div class="employee-detail"><strong>الوظيفة:</strong> ${emp.role}</div>` : ''}
-                                <div class="employee-detail"><strong>نوع الأجر:</strong> ${paymentTypeText}</div>
-                                <div class="employee-detail"><strong>المبلغ:</strong> ${paymentText}</div>
-                                ${emp.phone ? `<div class="employee-detail"><strong>الهاتف:</strong> ${emp.phone}</div>` : ''}
-                            </div>
-                        </div>
-                        <button class="delete-employee-btn" onclick="removeEmployee(${index})">
-                            🗑️ حذف
-                        </button>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function removeEmployee(index) {
-            employeesToAdd.splice(index, 1);
-            updateEmployeesList();
-            showSuccess('✓ تم حذف الموظف');
-        }
-
-        function clearEmployeeForm() {
-            document.getElementById('employeeName').value = '';
-            document.getElementById('employeeRole').value = '';
-            document.getElementById('paymentType').value = 'fixed';
-            document.getElementById('paymentAmount').value = '';
-            document.getElementById('employeePhone').value = '';
-        }
-
-        // Submit Project
-        async function submitProject() {
-            const projectName = document.getElementById('projectName').value.trim();
-            if (!projectName) {
-                showAlert('الرجاء إدخال اسم المشروع', 'error');
-                return;
-            }
-
-            showLoading(true);
+        async function saveProject() {
+            const loading = document.getElementById('loading');
+            const mainContent = document.getElementById('mainContent');
+            
+            loading.classList.add('show');
+            mainContent.style.display = 'none';
 
             try {
-                // Basic project data
+                console.clear(); // مسح Console للوضوح
+                console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #4a7c2a; font-weight: bold;');
+                console.log('%c🌾 بدء عملية حفظ المشروع', 'color: #4a7c2a; font-size: 16px; font-weight: bold;');
+                console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #4a7c2a; font-weight: bold;');
+                console.log('');
+                
+                // طباعة معلومات المستخدم
+                console.log('👤 المستخدم:', currentUser.email);
+                console.log('🆔 User ID:', currentUser.id);
+                console.log('');
+                
+                // طباعة البيانات المختارة
+                console.log('📋 البيانات المختارة:');
+                console.log('   الفئة:', selectedCategory);
+                console.log('   النوع:', selectedType.name);
+                console.log('   الأيقونة:', selectedType.icon);
+                console.log('   الصفحة:', selectedType.page);
+                console.log('');
+                
+                // ========== 1. معالجة نوع المشروع (project_types) ==========
+                console.log('%c━━━ المرحلة 1: نوع المشروع (project_types) ━━━', 'color: #2196F3; font-weight: bold;');
+                
+                let typeId = selectedType.dbId || null;
+                console.log('🔍 Type ID من الذاكرة:', typeId);
+                
+                if (!typeId) {
+                    console.log('⏩ لا يوجد Type ID، سنبحث في قاعدة البيانات...');
+                    console.log('');
+                    
+                    // البحث عن النوع
+                    console.log('🔎 البحث عن النوع في قاعدة البيانات...');
+                    console.log('   الاسم:', selectedType.name);
+                    console.log('   الفئة:', selectedCategory);
+                    
+                    const { data: existingTypes, error: searchError } = await supabase
+                        .from('project_types')
+                        .select('*')
+                        .eq('name', selectedType.name)
+                        .eq('category', selectedCategory);
+                    
+                    console.log('');
+                    console.log('📊 نتيجة البحث:');
+                    console.table(existingTypes);
+                    
+                    if (searchError) {
+                        console.error('❌ خطأ في البحث:', searchError);
+                    }
+                    
+                    if (existingTypes && existingTypes.length > 0) {
+                        // النوع موجود
+                        typeId = existingTypes[0].id;
+                        console.log('');
+                        console.log('%c✅ النوع موجود مسبقاً!', 'color: #4CAF50; font-weight: bold; font-size: 14px;');
+                        console.log('   ID:', typeId);
+                        console.log('   الاسم:', existingTypes[0].name);
+                        console.log('   تاريخ الإنشاء:', existingTypes[0].created_at);
+                        console.log('');
+                        console.log('✅ سيتم استخدام النوع الموجود');
+                    } else {
+                        // النوع غير موجود - يجب إنشاؤه
+                        console.log('');
+                        console.log('%c❌ النوع غير موجود في قاعدة البيانات', 'color: #FF9800; font-weight: bold;');
+                        console.log('');
+                        console.log('%c➕ محاولة إنشاء نوع جديد...', 'color: #2196F3; font-weight: bold;');
+                        
+                        const newTypeData = {
+                            name: selectedType.name,
+                            category: selectedCategory,
+                            meta: {
+                                description: selectedType.description || '',
+                                icon: selectedType.icon || '📋',
+                                page: selectedType.page || null
+                            }
+                        };
+                        
+                        console.log('');
+                        console.log('📤 البيانات المراد إدخالها:');
+                        console.log(JSON.stringify(newTypeData, null, 2));
+                        console.log('');
+                        
+                        const { data: insertedType, error: insertError } = await supabase
+                            .from('project_types')
+                            .insert([newTypeData])
+                            .select();
+                        
+                        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                        console.log('📥 نتيجة الإدخال:');
+                        
+                        if (insertError) {
+                            console.log('');
+                            console.log('%c❌❌❌ فشل إنشاء النوع! ❌❌❌', 'background: #f44336; color: white; padding: 5px; font-weight: bold; font-size: 14px;');
+                            console.log('');
+                            console.error('الخطأ:', insertError);
+                            console.error('الرسالة:', insertError.message);
+                            console.error('الكود:', insertError.code);
+                            console.error('التفاصيل:', insertError.details);
+                            console.error('التلميح:', insertError.hint);
+                            console.log('');
+                            
+                            if (insertError.message.includes('row-level security') || 
+                                insertError.message.includes('permission') ||
+                                insertError.code === '42501') {
+                                console.log('%c⚠️⚠️⚠️ المشكلة: صلاحيات RLS ⚠️⚠️⚠️', 'background: #ff9800; color: white; padding: 5px; font-weight: bold;');
+                                console.log('');
+                                console.log('🔧 الحل: افتح Supabase SQL Editor ونفذ:');
+                                console.log('');
+                                console.log('%c' +
+                                    'DROP POLICY IF EXISTS "authenticated_insert_project_types" ON project_types;\n\n' +
+                                    'CREATE POLICY "authenticated_insert_project_types" ON project_types\n' +
+                                    'FOR INSERT TO authenticated WITH CHECK (true);',
+                                    'background: #f5f5f5; color: #000; padding: 10px; font-family: monospace; font-size: 12px;'
+                                );
+                                console.log('');
+                            }
+                            
+                            throw new Error('فشل في إنشاء نوع المشروع: ' + insertError.message);
+                        }
+                        
+                        if (insertedType && insertedType.length > 0) {
+                            typeId = insertedType[0].id;
+                            console.log('');
+                            console.log('%c✅✅✅ تم إنشاء النوع بنجاح! ✅✅✅', 'background: #4CAF50; color: white; padding: 5px; font-weight: bold; font-size: 14px;');
+                            console.log('');
+                            console.table(insertedType);
+                            console.log('');
+                            console.log('🎉 ID الجديد:', typeId);
+                        } else {
+                            console.error('❌ لم يتم إرجاع بيانات!');
+                            throw new Error('فشل في الحصول على ID بعد الإنشاء');
+                        }
+                        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                    }
+                } else {
+                    console.log('✅ يوجد Type ID مسبقاً:', typeId);
+                }
+                
+                console.log('');
+                console.log('%c🎯 Type ID النهائي: ' + typeId, 'background: #4a7c2a; color: white; padding: 5px; font-weight: bold;');
+                console.log('');
+                
+                // ========== 2. حفظ المشروع (projects) ==========
+                console.log('%c━━━ المرحلة 2: حفظ المشروع (projects) ━━━', 'color: #2196F3; font-weight: bold;');
+                
                 const projectData = {
                     user_id: currentUser.id,
-                    name: projectName,
-                    project_category: selectedCategory,
-                    project_type: selectedType,
-                    status: 'active',
-                    start_date: document.getElementById('startDate').value || null,
+                    type_id: typeId,
+                    name: document.getElementById('projectName').value.trim(),
+                    start_date: document.getElementById('startDate').value,
                     budget: parseFloat(document.getElementById('budget').value) || null,
-                    land_id: document.getElementById('landId').value || null,
-                    description: document.getElementById('description').value || null
+                    description: document.getElementById('description').value.trim() || null,
+                    status: 'active'
                 };
+                
+                console.log('📤 بيانات المشروع:');
+                console.table(projectData);
 
-                // Add equipment-specific data if tractor
-                if (selectedCategory === 'equipment' && selectedType === 'tractor') {
-                    projectData.project_data = {
-                        equipment_type: document.getElementById('equipmentType').value,
-                        model: document.getElementById('model').value || null,
-                        manufacture_year: parseInt(document.getElementById('manufactureYear').value) || null,
-                        serial_number: document.getElementById('serialNumber').value || null,
-                        condition: document.getElementById('condition').value,
-                        working_hours: parseFloat(document.getElementById('workingHours').value) || 0,
-                        location: document.getElementById('location').value || null
-                    };
-                    projectData.notes = document.getElementById('equipmentNotes').value || null;
-                }
-
-                // Insert project
-                const { data, error } = await supabase
+                const { data: project, error: projectError } = await supabase
                     .from('projects')
                     .insert([projectData])
                     .select()
                     .single();
 
-                if (error) throw error;
+                if (projectError) {
+                    console.error('❌ خطأ في حفظ المشروع:', projectError);
+                    throw projectError;
+                }
+                
+                console.log('');
+                console.log('%c✅ تم حفظ المشروع بنجاح!', 'background: #4CAF50; color: white; padding: 5px; font-weight: bold;');
+                console.log('🆔 Project ID:', project.id);
+                console.log('📛 الاسم:', project.name);
+                console.log('');
 
-                // Add employees if any
-                if (employeesToAdd.length > 0) {
-                    const employeesData = employeesToAdd.map(emp => ({
+                // ========== 3. حفظ البيانات الخاصة بالمشروع ==========
+                await saveProjectSpecificData(project.id);
+
+                // ========== 4. ربط الأرض (project_lands) ==========
+                const landId = document.getElementById('landSelect').value;
+                if (landId) {
+                    console.log('🌍 ربط الأرض...');
+                    await supabase.from('project_lands').insert([{
                         user_id: currentUser.id,
-                        project_id: data.id,
-                        name: emp.name,
-                        role: emp.role || null,
-                        payment_type: emp.payment_type,
-                        payment_amount: emp.payment_amount,
-                        phone: emp.phone || null,
-                        is_active: true,
-                        hire_date: new Date().toISOString().split('T')[0]
-                    }));
+                        project_id: project.id,
+                        land_id: landId,
+                        start_date: projectData.start_date,
+                        usage_type: 'primary'
+                    }]);
 
-                    const { error: empError } = await supabase
-                        .from('project_employees')
-                        .insert(employeesData);
-
-                    if (empError) throw empError;
+                    await supabase.from('lands').update({ status: 'in_use' }).eq('id', landId);
+                    console.log('✅ تم ربط الأرض');
                 }
 
-                showSuccess('✅ تم إنشاء المشروع بنجاح!');
+                // ========== 5. ربط المعدات (project_equipment) ==========
+                if (selectedEquipment.length > 0) {
+                    console.log('🚜 ربط المعدات:', selectedEquipment.length);
+                    await supabase.from('project_equipment').insert(
+                        selectedEquipment.map(eqId => ({
+                            user_id: currentUser.id,
+                            project_id: project.id,
+                            equipment_id: eqId,
+                            start_date: projectData.start_date,
+                            status: 'active'
+                        }))
+                    );
+                    console.log('✅ تم ربط المعدات');
+                }
 
-                // Redirect based on project type
+                // ========== 6. ربط الموظفين (project_employees) ==========
+                if (selectedEmployees.length > 0) {
+                    console.log('👥 ربط الموظفين:', selectedEmployees.length);
+                    await supabase.from('project_employees').insert(
+                        selectedEmployees.map(empId => ({
+                            user_id: currentUser.id,
+                            project_id: project.id,
+                            employee_id: empId,
+                            start_date: projectData.start_date,
+                            status: 'active'
+                        }))
+                    );
+                    console.log('✅ تم ربط الموظفين');
+                }
+
+                console.log('🎉 تم حفظ المشروع وجميع بياناته بنجاح!');
+                showAlert('success', '✅ تم إضافة المشروع بنجاح!');
+                
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'projectAdded', projectId: project.id }, '*');
+                }
+
                 setTimeout(() => {
-                    if (selectedCategory === 'animal' && selectedType === 'sheep') {
-                        window.location.href = `projects/sheep.html?id=${data.id}`;
-                    } else if (selectedCategory === 'plant' && selectedType === 'wheat') {
-                        window.location.href = `projects/wheat.html?id=${data.id}`;
-                    } else if (selectedCategory === 'equipment' && selectedType === 'tractor') {
-                        window.location.href = `projects/tractor.html?id=${data.id}`;
-                    } else {
-                        window.location.href = '../index.html';
-                    }
-                }, 1500);
+    let redirectUrl = '';
+    
+    if (selectedType.page) {
+        redirectUrl = selectedType.page; // ✅ بدون ../
+    } else {
+        redirectUrl = '../index.html';
+    }
+
+    const finalUrl = redirectUrl.includes('index.html') 
+        ? redirectUrl 
+        : `${redirectUrl}?id=${project.id}`;
+
+    console.log('📍 المسار النهائي:', finalUrl);
+    alert('✅ تم حفظ المشروع بنجاح!\n\n🚀 جاري تحويلك إلى صفحة المشروع...');
+    
+    if (window.parent !== window) {
+        window.parent.location.href = finalUrl;
+    } else {
+        window.location.href = finalUrl; // ✅ صحيح الآن
+    }
+}, 1500);
 
             } catch (error) {
-                console.error('Error creating project:', error);
-                showAlert('حدث خطأ أثناء إنشاء المشروع: ' + error.message, 'error');
-                showLoading(false);
+                console.error('❌ خطأ عام في حفظ المشروع:', error);
+                console.error('📊 تفاصيل الخطأ:', {
+                    message: error.message,
+                    code: error.code,
+                    details: error.details,
+                    hint: error.hint
+                });
+                
+                let errorMessage = 'حدث خطأ غير متوقع';
+                
+                if (error.message.includes('project_types') && error.message.includes('row-level security')) {
+                    errorMessage = `
+                        <strong>خطأ في صلاحيات جدول project_types</strong><br>
+                        <small>يجب تشغيل SQL التالي في Supabase:</small><br>
+                        <code style="display:block;background:#f5f5f5;padding:10px;margin-top:5px;border-radius:4px;font-size:12px;direction:ltr;text-align:left;">
+                        -- حذف السياسة القديمة<br>
+                        DROP POLICY IF EXISTS "users_own_data_all_ops" ON project_types;<br><br>
+                        -- إنشاء سياسة للقراءة للجميع<br>
+                        CREATE POLICY "allow_read_project_types" ON project_types<br>
+                        FOR SELECT USING (true);<br><br>
+                        -- إنشاء سياسة للإدخال للمستخدمين المصادقين<br>
+                        CREATE POLICY "allow_insert_project_types" ON project_types<br>
+                        FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+                        </code>
+                    `;
+                } else if (error.message.includes('violates row-level security')) {
+                    errorMessage = 'خطأ في الصلاحيات. يرجى تسجيل الدخول مرة أخرى أو التحقق من إعدادات قاعدة البيانات.';
+                } else if (error.message.includes('projects')) {
+                    errorMessage = 'خطأ في حفظ بيانات المشروع: ' + error.message;
+                } else {
+                    errorMessage = error.message;
+                }
+                
+                showAlert('error', errorMessage);
+                loading.classList.remove('show');
+                mainContent.style.display = 'block';
             }
         }
 
-        // UI Helper Functions
-        function showLoading(show) {
-            const overlay = document.getElementById('loadingOverlay');
-            if (show) {
-                overlay.classList.add('active');
-            } else {
-                overlay.classList.remove('active');
-            }
-        }
+        async function saveProjectSpecificData(projectId) {
+            const typeId = selectedType.id || '';
+            const typeName = selectedType.name || '';
 
-        function showAlert(message, type) {
-            const alertBox = document.getElementById('alertBox');
-            const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
+            // ========== مشروع الأغنام ==========
+            if (typeId === 'sheep' || typeName.includes('أغنام') || typeName.includes('غنام')) {
+                console.log('🐑 حفظ بيانات الأغنام...');
+                
+                const ewesCount = parseInt(document.getElementById('sheepEwesCount').value) || 0;
+                const ramsCount = parseInt(document.getElementById('sheepRamsCount').value) || 0;
+                const lambsCount = parseInt(document.getElementById('sheepLambsCount').value) || 0;
+                const breed = document.getElementById('sheepBreed').value.trim();
+                const purpose = document.getElementById('sheepPurpose').value;
+
+                const animals = [];
+                const timestamp = Date.now();
+
+                for (let i = 1; i <= ewesCount; i++) {
+                    animals.push({
+                        user_id: currentUser.id,
+                        project_id: projectId,
+                        tag_number: `EWE-${timestamp}-${String(i).padStart(3, '0')}`,
+                        type: 'ewe',
+                        sex: 'F',
+                        status: 'active',
+                        health_json: { breed: breed || 'غير محدد', purpose: purpose || 'غير محدد', initial_animal: true }
+                    });
+                }
+
+                for (let i = 1; i <= ramsCount; i++) {
+                    animals.push({
+                        user_id: currentUser.id,
+                        project_id: projectId,
+                        tag_number: `RAM-${timestamp}-${String(i).padStart(3, '0')}`,
+                        type: 'ram',
+                        sex: 'M',
+                        status: 'active',
+                        health_json: { breed: breed || 'غير محدد', purpose: purpose || 'غير محدد', initial_animal: true }
+                    });
+                }
+
+                for (let i = 1; i <= lambsCount; i++) {
+                    animals.push({
+                        user_id: currentUser.id,
+                        project_id: projectId,
+                        tag_number: `LAMB-${timestamp}-${String(i).padStart(3, '0')}`,
+                        type: 'lamb',
+                        sex: i % 2 === 0 ? 'M' : 'F',
+                        birth_date: new Date().toISOString().split('T')[0],
+                        status: 'active',
+                        health_json: { breed: breed || 'غير محدد', purpose: purpose || 'غير محدد', initial_animal: true }
+                    });
+                }
+
+                if (animals.length > 0) {
+                    await supabase.from('sheep_animals').insert(animals);
+                    console.log('✅ تم حفظ', animals.length, 'حيوان');
+                }
+            }
             
-            alertBox.innerHTML = `
-                <div class="alert ${alertClass} show">
-                    ${message}
-                </div>
-            `;
+            // ========== مشروع القمح ==========
+            else if (typeId === 'wheat' || typeName.includes('قمح')) {
+                console.log('🌾 حفظ بيانات القمح...');
+                
+                const area = parseFloat(document.getElementById('wheatArea').value) || 0;
+                const seedType = document.getElementById('wheatSeedType').value;
+                const expectedYield = parseFloat(document.getElementById('wheatExpectedYield').value) || 0;
+                const harvestDate = document.getElementById('wheatHarvestDate').value;
+                const irrigationMethod = document.getElementById('wheatIrrigationMethod').value;
 
+                const stages = [
+                    { stage_name: 'الحرث والتجهيز', status: 'pending' },
+                    { stage_name: 'البذر', status: 'pending' },
+                    { stage_name: 'التسميد الأول', status: 'pending' },
+                    { stage_name: 'الري الأول', status: 'pending' },
+                    { stage_name: 'التسميد الثاني', status: 'pending' },
+                    { stage_name: 'الري الثاني', status: 'pending' },
+                    { stage_name: 'المكافحة', status: 'pending' },
+                    { stage_name: 'الحصاد', status: 'pending' }
+                ];
+
+                await supabase.from('wheat_project_stages').insert(
+                    stages.map(stage => ({
+                        user_id: currentUser.id,
+                        project_id: projectId,
+                        stage_name: stage.stage_name,
+                        status: stage.status,
+                        notes: `المساحة: ${area} هكتار | البذور: ${seedType || 'غير محدد'} | الري: ${irrigationMethod || 'غير محدد'}`
+                    }))
+                );
+
+                if (harvestDate && expectedYield > 0) {
+                    await supabase.from('wheat_harvest').insert([{
+                        user_id: currentUser.id,
+                        project_id: projectId,
+                        harvest_date: harvestDate,
+                        total_yield: expectedYield * area,
+                        yield_unit: 'quintal',
+                        notes: `الإنتاج المتوقع: ${expectedYield} قنطار/هكتار`
+                    }]);
+                }
+                
+                console.log('✅ تم حفظ مراحل القمح');
+            }
+        }
+
+        function showAlert(type, message) {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${type} show`;
+            
+            if (message.includes('<br>')) {
+                alert.innerHTML = `
+                    <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i>
+                    <div style="flex: 1;">${message}</div>
+                `;
+            } else {
+                alert.innerHTML = `
+                    <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i>
+                    ${message}
+                `;
+            }
+            
             setTimeout(() => {
-                alertBox.innerHTML = '';
+                alert.classList.remove('show');
             }, 5000);
         }
 
-        function showSuccess(message) {
-            showAlert(message, 'success');
-        }
-
-        // Initialize
-        checkAuth();
+        // ========== دالة اختبار (يمكن تشغيلها من Console) ==========
+        window.testProjectTypeInsert = async function() {
+            console.log('🧪 اختبار إدخال نوع مشروع جديد...');
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            
+            if (!currentUser) {
+                console.error('❌ يجب تسجيل الدخول أولاً!');
+                return;
+            }
+            
+            console.log('✅ المستخدم:', currentUser.email);
+            
+            const testData = {
+                name: 'اختبار - ' + Date.now(),
+                category: 'animal',
+                meta: {
+                    description: 'مشروع اختبار',
+                    icon: '🧪',
+                    page: null
+                }
+            };
+            
+            console.log('📤 بيانات الاختبار:', testData);
+            
+            try {
+                const { data, error } = await supabase
+                    .from('project_types')
+                    .insert([testData])
+                    .select();
+                
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                if (error) {
+                    console.error('❌ فشل الإدخال!');
+                    console.error('الخطأ:', error);
+                    console.error('الرسالة:', error.message);
+                    console.error('الكود:', error.code);
+                } else {
+                    console.log('✅✅✅ نجح الإدخال! ✅✅✅');
+                    console.log('البيانات:', data);
+                    
+                    // حذف البيانات التجريبية
+                    if (data && data[0]) {
+                        await supabase.from('project_types').delete().eq('id', data[0].id);
+                        console.log('🗑️ تم حذف البيانات التجريبية');
+                    }
+                }
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            } catch (e) {
+                console.error('❌ خطأ:', e);
+            }
+        };
+        
+        console.log('%c💡 نصيحة: لاختبار إدخال البيانات مباشرة، اكتب في Console:', 'color: #4a7c2a; font-weight: bold;');
+        console.log('%ctestProjectTypeInsert()', 'background: #f5f5f5; padding: 5px; font-family: monospace;');
     </script>
 </body>
 </html>
