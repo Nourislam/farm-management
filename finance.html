@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💰 المالية - نظام إدارة المزرعة</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>💰 الإدارة المالية - إدارة المزرعة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <style>
         * {
             margin: 0;
@@ -16,219 +16,177 @@
 
         body {
             font-family: 'Cairo', sans-serif;
-            background: #f5f7fa;
-            color: #2c3e50;
-            line-height: 1.6;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            direction: rtl;
         }
 
-        #authLoading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-
-        #authLoading.hidden {
-            display: none;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #4a7c2a;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .header {
+        /* Navbar */
+        .navbar {
             background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
-            color: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .header h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-
-        .header-right {
+        .navbar h1 {
+            color: white;
+            font-size: 2rem;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 15px;
+        }
+
+        .navbar-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
         }
 
         .back-btn {
-            background: rgba(255,255,255,0.2);
+            padding: 12px 24px;
             border: none;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
+            border-radius: 10px;
             cursor: pointer;
             font-family: 'Cairo', sans-serif;
-            transition: background 0.3s;
-            font-size: 1rem;
+            font-size: 15px;
             font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.2);
+            color: white;
         }
 
         .back-btn:hover {
             background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
-        .main-content {
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
+        /* Container */
+        .container {
+            max-width: 1600px;
+            margin: 2.5rem auto;
+            padding: 0 2rem;
         }
 
-        .period-selector {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            margin-bottom: 2rem;
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .period-selector label {
-            font-weight: 600;
-            color: #2d5016;
-        }
-
-        .period-selector select,
-        .period-selector input {
-            padding: 0.6rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-family: 'Cairo', sans-serif;
-            font-size: 0.95rem;
-        }
-
-        .stats-grid {
+        /* Stats Cards */
+        .stats-overview {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
         }
 
         .stat-card {
             background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            border-right: 4px solid;
-            transition: transform 0.3s, box-shadow 0.3s;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
-
-        .stat-card.expense {
-            border-right-color: #e74c3c;
-        }
-
-        .stat-card.income {
-            border-right-color: #27ae60;
-        }
-
-        .stat-card.profit {
-            border-right-color: #3498db;
-        }
-
-        .stat-card.warning {
-            border-right-color: #f39c12;
-        }
-
-        .stat-card.salary {
-            border-right-color: #9b59b6;
-        }
-
-        .stat-card.equipment {
-            border-right-color: #16a085;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
         }
 
         .stat-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 2rem;
-            margin-bottom: 0.5rem;
+            flex-shrink: 0;
         }
 
-        .stat-label {
-            font-size: 0.9rem;
-            color: #7f8c8d;
-            margin-bottom: 0.5rem;
+        .stat-icon.expenses {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
         }
 
-        .stat-value {
+        .stat-icon.sales {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .stat-icon.profit {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .stat-icon.loans {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .stat-content h3 {
+            color: #666;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .stat-content .value {
             font-size: 1.8rem;
             font-weight: 700;
-            color: #2c3e50;
+            color: #2d5016;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
         }
 
         .tabs {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            margin-bottom: 2rem;
-        }
-
-        .tab-header {
             display: flex;
-            border-bottom: 2px solid #ecf0f1;
-            overflow-x: auto;
+            gap: 10px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
         }
 
-        .tab-button {
-            flex: 1;
-            min-width: 140px;
-            padding: 1rem;
-            background: transparent;
+        .tab {
+            padding: 12px 24px;
             border: none;
-            color: #7f8c8d;
+            background: transparent;
+            color: #666;
             font-family: 'Cairo', sans-serif;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
+            border-radius: 8px 8px 0 0;
             transition: all 0.3s;
-            white-space: nowrap;
-            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .tab-button:hover {
-            background: #f8f9fa;
+        .tab:hover {
+            background: #f5f5f5;
+            color: #2d5016;
         }
 
-        .tab-button.active {
-            color: #4a7c2a;
-            background: #f0f8f0;
-            border-bottom: 3px solid #4a7c2a;
+        .tab.active {
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
+            color: white;
         }
 
+        /* Tab Content */
         .tab-content {
-            padding: 2rem;
             display: none;
         }
 
@@ -236,111 +194,233 @@
             display: block;
         }
 
-        .action-bar {
+        /* Section */
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 25px;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 15px;
         }
 
-        .btn {
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 5px;
+        .section-header h2 {
+            color: #2d5016;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
+
+        .section-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .search-box-small {
+            position: relative;
+            min-width: 250px;
+        }
+
+        .search-box-small input {
+            width: 100%;
+            padding: 10px 14px 10px 45px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
             font-family: 'Cairo', sans-serif;
-            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .search-box-small input:focus {
+            outline: none;
+            border-color: #4a7c2a;
+        }
+
+        .search-icon-small {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 16px;
+        }
+
+        .filter-select-small {
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            min-width: 180px;
+            transition: all 0.3s;
+        }
+
+        .filter-select-small:focus {
+            outline: none;
+            border-color: #4a7c2a;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
             cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
             transition: all 0.3s;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 0.95rem;
+            gap: 8px;
         }
 
-        .btn-primary {
+        .btn-primary, .btn-success {
             background: #4a7c2a;
             color: white;
         }
 
-        .btn-primary:hover {
-            background: #2d5016;
+        .btn-primary:hover, .btn-success:hover {
+            background: #3d6622;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(74, 124, 42, 0.3);
+            box-shadow: 0 4px 12px rgba(45, 80, 22, 0.3);
         }
 
         .btn-secondary {
-            background: #95a5a6;
+            background: #6c757d;
             color: white;
         }
 
         .btn-secondary:hover {
-            background: #7f8c8d;
+            background: #5a6268;
         }
 
         .btn-danger {
-            background: #e74c3c;
+            background: #dc3545;
             color: white;
+            padding: 8px 15px;
+            font-size: 0.9rem;
         }
 
         .btn-danger:hover {
-            background: #c0392b;
+            background: #c82333;
         }
 
-        .btn-warning {
-            background: #f39c12;
-            color: white;
+        .btn-edit {
+            background: #ffc107;
+            color: #000;
+            padding: 8px 15px;
+            font-size: 0.9rem;
         }
 
-        .btn-info {
-            background: #3498db;
-            color: white;
+        .btn-edit:hover {
+            background: #e0a800;
         }
 
+        /* Table */
         .table-container {
             overflow-x: auto;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            background: white;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
         }
 
         thead {
-            background: #f8f9fa;
-        }
-
-        th, td {
-            padding: 1rem;
-            text-align: right;
-            border-bottom: 1px solid #ecf0f1;
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
+            color: white;
         }
 
         th {
+            padding: 18px;
+            text-align: right;
             font-weight: 600;
-            color: #2d5016;
-            font-size: 0.95rem;
         }
 
-        tr:hover {
+        td {
+            padding: 15px 18px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
             background: #f8f9fa;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: #95a5a6;
+        /* Badge */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
         }
 
-        .empty-state-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+        .badge.paid {
+            background: #d1fae5;
+            color: #065f46;
         }
 
+        .badge.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge.active {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge.completed {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .badge.expense {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge.sale {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge.inventory {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge.employee {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge.equipment {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -348,89 +428,87 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 2000;
+            background: rgba(0,0,0,0.6);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
             overflow-y: auto;
-            padding: 2rem;
+            padding: 20px;
         }
 
         .modal.active {
             display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .modal-content {
             background: white;
-            border-radius: 10px;
-            padding: 2rem;
-            max-width: 600px;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 700px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
-            animation: slideDown 0.3s ease-out;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #ecf0f1;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
         }
 
-        .modal-header h3 {
+        .modal-header h2 {
             color: #2d5016;
             font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .close-btn {
-            background: none;
+        .close-modal {
+            background: #f5f5f5;
             border: none;
-            font-size: 1.8rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             cursor: pointer;
-            color: #7f8c8d;
-            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #666;
+            transition: all 0.3s;
         }
 
-        .close-btn:hover {
-            color: #e74c3c;
+        .close-modal:hover {
+            background: #e0e0e0;
+            transform: rotate(90deg);
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: 8px;
+            color: #2d5016;
             font-weight: 600;
-            color: #2c3e50;
-            font-size: 0.95rem;
         }
 
         .form-group input,
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
             font-family: 'Cairo', sans-serif;
             font-size: 1rem;
-            transition: border-color 0.3s;
+            transition: border 0.3s;
         }
 
         .form-group input:focus,
@@ -438,631 +516,506 @@
         .form-group textarea:focus {
             outline: none;
             border-color: #4a7c2a;
-            box-shadow: 0 0 0 3px rgba(74, 124, 42, 0.1);
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
         }
 
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1rem;
+            gap: 20px;
         }
 
-        .form-actions {
+        .modal-footer {
             display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid #ecf0f1;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
         }
 
-        .chart-container {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        /* Loading & Empty States */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
         }
 
-        canvas {
-            max-width: 100%;
+        .loading i {
+            font-size: 3rem;
+            color: #4a7c2a;
+            animation: spin 1s linear infinite;
         }
 
-        .report-container {
-            display: grid;
-            gap: 2rem;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
-        .report-section {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        .loading p {
+            margin-top: 15px;
+            font-size: 1.1rem;
         }
 
-        .report-section h3 {
-            color: #2d5016;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #ecf0f1;
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            color: #d1d5db;
+            margin-bottom: 20px;
+        }
+
+        .empty-state p {
             font-size: 1.2rem;
+            margin-bottom: 20px;
         }
 
-        .report-item {
+        /* Actions */
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .alert.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        .alert.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+
+        /* Project Stats Cards */
+        .project-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .project-stat-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .project-stat-card h4 {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .project-stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d5016;
+        }
+
+        .project-stat-card.negative .value {
+            color: #ef4444;
+        }
+
+        .project-stat-card.positive .value {
+            color: #10b981;
+        }
+
+        /* Category Summary */
+        .category-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .category-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
             display: flex;
             justify-content: space-between;
-            padding: 0.8rem 0;
-            border-bottom: 1px solid #ecf0f1;
             align-items: center;
         }
 
-        .report-item:last-child {
-            border-bottom: none;
-        }
-
-        .report-label {
-            color: #7f8c8d;
-            font-size: 0.95rem;
-        }
-
-        .report-value {
+        .category-item .category-name {
             font-weight: 600;
-            color: #2c3e50;
-            font-size: 1rem;
+            color: #333;
         }
 
-        .report-value.expense {
-            color: #e74c3c;
+        .category-item .category-amount {
+            font-weight: 700;
+            color: #2d5016;
         }
 
-        .report-value.income {
-            color: #27ae60;
-        }
-
-        .report-value.profit {
-            color: #3498db;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 0.3rem 0.8rem;
-            border-radius: 15px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .badge.paid {
-            background: #d5f4e6;
-            color: #27ae60;
-        }
-
-        .badge.unpaid {
-            background: #fadbd8;
-            color: #e74c3c;
-        }
-
-        .badge.partial {
-            background: #fef5e7;
-            color: #f39c12;
-        }
-
-        .alert {
-            padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-        }
-
-        .salary-alert {
-            background: #f4ecf7;
-            border-right: 4px solid #9b59b6;
-            color: #6c3483;
-            padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        #employeeSelectGroup {
-            display: none;
-        }
-
-        .filter-bar {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .filter-bar select {
-            padding: 0.6rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-family: 'Cairo', sans-serif;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-        }
-
+        /* Responsive */
         @media (max-width: 768px) {
-            .main-content {
-                padding: 1rem;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 1rem;
-                padding: 1rem;
-            }
-
-            .header h1 {
+            .navbar h1 {
                 font-size: 1.3rem;
             }
 
-            .stats-grid {
+            .stats-overview {
                 grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                width: 100%;
             }
 
             .form-row {
                 grid-template-columns: 1fr;
             }
 
-            .tab-button {
-                font-size: 0.8rem;
-                padding: 0.8rem 0.5rem;
-                min-width: 110px;
-            }
-
-            .period-selector {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .table-container {
-                font-size: 0.85rem;
+            table {
+                font-size: 0.9rem;
             }
 
             th, td {
-                padding: 0.6rem;
-            }
-
-            .modal {
-                padding: 1rem;
-            }
-
-            .modal-content {
-                padding: 1.5rem;
-            }
-
-            .report-container {
-                grid-template-columns: 1fr;
+                padding: 12px;
             }
         }
     </style>
 </head>
 <body>
-    <div id="authLoading">
-        <div class="spinner"></div>
-        <p style="margin-top: 1rem; color: #7f8c8d; font-weight: 600;">جاري التحميل...</p>
-    </div>
-
-    <div class="header">
-        <h1>💰 إدارة المالية</h1>
-        <div class="header-right">
+    <!-- Navbar -->
+    <nav class="navbar">
+        <h1>
+            <i class="fas fa-money-bill-wave"></i>
+            الإدارة المالية
+        </h1>
+        <div class="navbar-actions">
             <button class="back-btn" onclick="window.location.href='index.html'">
-                ← العودة للرئيسية
+                <i class="fas fa-arrow-right"></i>
+                العودة للرئيسية
             </button>
         </div>
-    </div>
+    </nav>
 
-    <div class="main-content">
-        <div class="period-selector">
-            <label>⏱️ الفترة الزمنية:</label>
-            <select id="periodType" onchange="handlePeriodChange()">
-                <option value="month">الشهر الحالي</option>
-                <option value="year">السنة الحالية</option>
-                <option value="custom">فترة مخصصة</option>
-            </select>
-            <div id="customDateRange" style="display: none;">
-                <input type="date" id="startDate">
-                <span>إلى</span>
-                <input type="date" id="endDate">
+    <div class="container">
+        <!-- Stats Overview -->
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-icon expenses">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>إجمالي المصاريف (الشهر الحالي)</h3>
+                    <div class="value" id="totalExpenses">0 د</div>
+                </div>
             </div>
-            <button class="btn btn-primary" onclick="loadAllData()">🔍 تطبيق</button>
-        </div>
-
-        <div id="salaryAlertContainer"></div>
-
-        <div class="stats-grid">
-            <div class="stat-card expense">
-                <div class="stat-icon">📉</div>
-                <div class="stat-label">إجمالي المصروفات</div>
-                <div class="stat-value" id="totalExpenses">0 دج</div>
+            <div class="stat-card">
+                <div class="stat-icon sales">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>إجمالي المبيعات (الشهر الحالي)</h3>
+                    <div class="value" id="totalSales">0 د</div>
+                </div>
             </div>
-
-            <div class="stat-card income">
-                <div class="stat-icon">📈</div>
-                <div class="stat-label">إجمالي المبيعات</div>
-                <div class="stat-value" id="totalSales">0 دج</div>
+            <div class="stat-card" id="profitCard">
+                <div class="stat-icon profit">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>صافي الربح/الخسارة</h3>
+                    <div class="value" id="netProfit">0 د</div>
+                </div>
             </div>
-
-            <div class="stat-card profit">
-                <div class="stat-icon">💎</div>
-                <div class="stat-label">صافي الربح</div>
-                <div class="stat-value" id="netProfit">0 دج</div>
-            </div>
-
-            <div class="stat-card salary">
-                <div class="stat-icon">💼</div>
-                <div class="stat-label">إجمالي الرواتب الشهرية</div>
-                <div class="stat-value" id="totalSalaries">0 دج</div>
-            </div>
-
-            <div class="stat-card equipment">
-                <div class="stat-icon">🚜</div>
-                <div class="stat-label">مصاريف المعدات</div>
-                <div class="stat-value" id="equipmentExpenses">0 دج</div>
-            </div>
-
-            <div class="stat-card equipment">
-                <div class="stat-icon">💵</div>
-                <div class="stat-label">إيرادات المعدات</div>
-                <div class="stat-value" id="equipmentIncome">0 دج</div>
-            </div>
-
-            <div class="stat-card warning">
-                <div class="stat-icon">💳</div>
-                <div class="stat-label">القروض المتبقية</div>
-                <div class="stat-value" id="loansRemaining">0 دج</div>
-            </div>
-
-            <div class="stat-card warning">
-                <div class="stat-icon">📋</div>
-                <div class="stat-label">ديون الخدمات</div>
-                <div class="stat-value" id="servicesDebt">0 دج</div>
+            <div class="stat-card">
+                <div class="stat-icon loans">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>إجمالي القروض المتبقية</h3>
+                    <div class="value" id="totalLoans">0 د</div>
+                </div>
             </div>
         </div>
 
-        <div class="tabs">
-            <div class="tab-header">
-                <button class="tab-button active" onclick="switchTab('overview')">📊 نظرة عامة</button>
-                <button class="tab-button" onclick="switchTab('expenses')">📉 المصروفات</button>
-                <button class="tab-button" onclick="switchTab('salaries')">💼 الرواتب</button>
-                <button class="tab-button" onclick="switchTab('sales')">📈 المبيعات</button>
-                <button class="tab-button" onclick="switchTab('equipment')">🚜 المعدات</button>
-                <button class="tab-button" onclick="switchTab('debts')">📋 المديونيات</button>
-                <button class="tab-button" onclick="switchTab('loans')">💳 القروض</button>
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <div class="tabs" id="mainTabs">
+                <button class="tab active" onclick="switchMainTab('all')" data-tab="all">
+                    <i class="fas fa-globe"></i>
+                    جميع العمليات
+                </button>
+                <button class="tab" onclick="switchMainTab('expenses')" data-tab="expenses">
+                    <i class="fas fa-receipt"></i>
+                    المصاريف
+                </button>
+                <button class="tab" onclick="switchMainTab('sales')" data-tab="sales">
+                    <i class="fas fa-shopping-cart"></i>
+                    المبيعات
+                </button>
+                <button class="tab" onclick="switchMainTab('loans')" data-tab="loans">
+                    <i class="fas fa-university"></i>
+                    القروض
+                </button>
+                <!-- Project tabs will be added dynamically here -->
             </div>
 
-            <!-- Tab 1: Overview -->
-            <div class="tab-content active" id="overview">
-                <h3 style="color: #2d5016; margin-bottom: 1.5rem;">📊 التقرير المالي الشامل</h3>
-                
-                <div class="chart-container">
-                    <h4 style="color: #2d5016; margin-bottom: 1rem;">المصروفات مقابل الإيرادات</h4>
-                    <canvas id="overviewChart" width="800" height="300"></canvas>
-                </div>
-
-                <div class="report-container">
-                    <div class="report-section">
-                        <h3>💰 ملخص المصروفات</h3>
-                        <div id="expensesSummary">
-                            <p style="color: #7f8c8d; text-align: center; padding: 2rem;">جاري التحميل...</p>
+            <!-- All Tab -->
+            <div class="tab-content active" id="all-content">
+                <div class="section">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-list"></i>
+                            جميع العمليات المالية
+                        </h2>
+                        <div class="section-filters">
+                            <div class="search-box-small">
+                                <i class="fas fa-search search-icon-small"></i>
+                                <input type="text" id="searchAll" placeholder="ابحث..." onkeyup="filterAll()">
+                            </div>
+                            <select class="filter-select-small" id="filterTypeAll" onchange="filterAll()">
+                                <option value="">جميع الأنواع</option>
+                                <option value="expense">مصروف</option>
+                                <option value="sale">مبيعات</option>
+                                <option value="loan">قرض</option>
+                            </select>
                         </div>
                     </div>
 
-                    <div class="report-section">
-                        <h3>📈 ملخص الإيرادات</h3>
-                        <div id="salesSummary">
-                            <p style="color: #7f8c8d; text-align: center; padding: 2rem;">جاري التحميل...</p>
-                        </div>
+                    <div class="loading" id="loadingAll">
+                        <i class="fas fa-spinner"></i>
+                        <p>جاري التحميل...</p>
                     </div>
 
-                    <div class="report-section">
-                        <h3>🚜 ملخص المعدات</h3>
-                        <div id="equipmentSummary">
-                            <p style="color: #7f8c8d; text-align: center; padding: 2rem;">جاري التحميل...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tab 2: Expenses -->
-            <div class="tab-content" id="expenses">
-                <div class="action-bar">
-                    <h3 style="color: #2d5016;">📉 إدارة المصاريف</h3>
-                    <button class="btn btn-primary" onclick="openExpenseModal()">
-                        ➕ إضافة مصروف جديد
-                    </button>
-                </div>
-
-                <div class="filter-bar">
-                    <select id="expenseFilter" onchange="loadExpenses()">
-                        <option value="">جميع الفئات</option>
-                        <option value="رواتب">💼 رواتب الموظفين</option>
-                        <option value="وقود">⛽ وقود</option>
-                        <option value="أسمدة">🌱 أسمدة</option>
-                        <option value="صيانة">🔧 صيانة</option>
-                        <option value="نقل">🚚 نقل</option>
-                    </select>
-                </div>
-
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>التاريخ</th>
-                                <th>الفئة</th>
-                                <th>المبلغ</th>
-                                <th>المشروع</th>
-                                <th>الموظف</th>
-                                <th>الوصف</th>
-                                <th>المستفيد</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="expensesTableBody">
-                            <tr>
-                                <td colspan="8" class="empty-state">
-                                    <div class="empty-state-icon">💵</div>
-                                    <p>جاري تحميل المصروفات...</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Tab 3: Salaries -->
-            <div class="tab-content" id="salaries">
-                <div class="action-bar">
-                    <h3 style="color: #2d5016;">💼 تقارير الرواتب والأجور</h3>
-                    <button class="btn btn-primary" onclick="openExpenseModal('salary')">
-                        ➕ تسجيل دفع راتب
-                    </button>
-                </div>
-
-                <div class="report-container">
-                    <div class="report-section">
-                        <h3>📊 ملخص الرواتب الشهرية</h3>
-                        <div id="salariesSummary">
-                            <p style="color: #7f8c8d; text-align: center; padding: 2rem;">جاري التحميل...</p>
-                        </div>
+                    <div class="empty-state" id="emptyAll" style="display: none;">
+                        <i class="fas fa-inbox"></i>
+                        <p>لا توجد عمليات مالية حالياً</p>
                     </div>
 
-                    <div class="report-section">
-                        <h3>👥 تفاصيل رواتب الموظفين</h3>
-                        <div id="employeeSalariesDetail">
-                            <p style="color: #7f8c8d; text-align: center; padding: 2rem;">جاري التحميل...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="margin-top: 2rem;">
-                    <h4 style="color: #2d5016; margin-bottom: 1rem;">📅 سجل دفع الرواتب</h4>
-                    <div class="table-container">
+                    <div class="table-container" id="tableAll" style="display: none;">
                         <table>
                             <thead>
                                 <tr>
+                                    <th>النوع</th>
                                     <th>التاريخ</th>
-                                    <th>الموظف</th>
-                                    <th>نوع الأجر</th>
-                                    <th>المبلغ المدفوع</th>
+                                    <th>الفئة/الوصف</th>
+                                    <th>المبلغ</th>
                                     <th>المشروع</th>
-                                    <th>ملاحظات</th>
-                                    <th>الإجراءات</th>
+                                    <th>الحالة</th>
                                 </tr>
                             </thead>
-                            <tbody id="salaryHistoryTableBody">
-                                <tr>
-                                    <td colspan="7" class="empty-state">
-                                        <div class="empty-state-icon">💼</div>
-                                        <p>جاري تحميل السجل...</p>
-                                    </td>
-                                </tr>
-                            </tbody>
+                            <tbody id="allTableBody"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab 4: Sales -->
-            <div class="tab-content" id="sales">
-                <div class="action-bar">
-                    <h3 style="color: #2d5016;">📈 إدارة المبيعات</h3>
-                    <button class="btn btn-primary" onclick="openSaleModal()">
-                        ➕ إضافة عملية بيع
-                    </button>
-                </div>
+            <!-- Expenses Tab -->
+            <div class="tab-content" id="expenses-content">
+                <div class="section">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-receipt"></i>
+                            سجل المصاريف
+                        </h2>
+                        <button class="btn btn-primary" onclick="openExpenseModal()">
+                            <i class="fas fa-plus"></i>
+                            إضافة مصروف
+                        </button>
+                    </div>
 
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>التاريخ</th>
-                                <th>العميل</th>
-                                <th>المنتج</th>
-                                <th>الكمية</th>
-                                <th>السعر</th>
-                                <th>المبلغ الإجمالي</th>
-                                <th>الحالة</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="salesTableBody">
-                            <tr>
-                                <td colspan="8" class="empty-state">
-                                    <div class="empty-state-icon">💵</div>
-                                    <p>جاري تحميل المبيعات...</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="section-filters" style="margin-bottom: 20px;">
+                        <div class="search-box-small">
+                            <i class="fas fa-search search-icon-small"></i>
+                            <input type="text" id="searchExpenses" placeholder="ابحث عن مصروف..." onkeyup="filterExpenses()">
+                        </div>
+                        <select class="filter-select-small" id="categoryFilterExpenses" onchange="filterExpenses()">
+                            <option value="">جميع الفئات</option>
+                            <option value="أعلاف">أعلاف</option>
+                            <option value="رواتب">رواتب</option>
+                            <option value="صيانة">صيانة</option>
+                            <option value="وقود">وقود</option>
+                            <option value="أدوية">أدوية</option>
+                            <option value="بذور وأسمدة">بذور وأسمدة</option>
+                            <option value="أخرى">أخرى</option>
+                        </select>
+                        <select class="filter-select-small" id="projectFilterExpenses" onchange="filterExpenses()">
+                            <option value="">جميع المشاريع</option>
+                        </select>
+                    </div>
+
+                    <div class="loading" id="loadingExpenses">
+                        <i class="fas fa-spinner"></i>
+                        <p>جاري التحميل...</p>
+                    </div>
+
+                    <div class="empty-state" id="emptyExpenses" style="display: none;">
+                        <i class="fas fa-receipt"></i>
+                        <p>لا توجد مصاريف مسجلة حالياً</p>
+                        <button class="btn btn-primary" onclick="openExpenseModal()" style="margin-top: 15px;">
+                            <i class="fas fa-plus"></i>
+                            إضافة مصروف جديد
+                        </button>
+                    </div>
+
+                    <div class="table-container" id="tableExpenses" style="display: none;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>التاريخ</th>
+                                    <th>الفئة</th>
+                                    <th>المبلغ</th>
+                                    <th>المشروع</th>
+                                    <th>الوصف</th>
+                                    <th>طريقة الدفع</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expensesTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <!-- Tab 5: Equipment -->
-            <div class="tab-content" id="equipment">
-                <h3 style="color: #2d5016; margin-bottom: 1.5rem;">🚜 التقارير المالية للمعدات</h3>
-
-                <div class="report-container">
-                    <div class="report-section">
-                        <h3>📊 ملخص مالي شامل</h3>
-                        <div class="report-item">
-                            <span class="report-label">إجمالي مصاريف المعدات</span>
-                            <span class="report-value expense" id="equipExpTotal">0 دج</span>
-                        </div>
-                        <div class="report-item">
-                            <span class="report-label">إجمالي إيرادات الخدمات</span>
-                            <span class="report-value income" id="equipIncTotal">0 دج</span>
-                        </div>
-                        <div class="report-item">
-                            <span class="report-label">صافي الربح/الخسارة</span>
-                            <span class="report-value profit" id="equipNetProfit">0 دج</span>
-                        </div>
+            <!-- Sales Tab -->
+            <div class="tab-content" id="sales-content">
+                <div class="section">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-shopping-cart"></i>
+                            سجل المبيعات
+                        </h2>
+                        <button class="btn btn-primary" onclick="openSaleModal()">
+                            <i class="fas fa-plus"></i>
+                            تسجيل مبيعات
+                        </button>
                     </div>
 
-                    <div class="report-section">
-                        <h3>⚙️ تفاصيل المصاريف</h3>
-                        <div class="report-item">
-                            <span class="report-label">تكاليف الصيانة</span>
-                            <span class="report-value expense" id="equipMaintenanceTotal">0 دج</span>
+                    <div class="section-filters" style="margin-bottom: 20px;">
+                        <div class="search-box-small">
+                            <i class="fas fa-search search-icon-small"></i>
+                            <input type="text" id="searchSales" placeholder="ابحث عن مبيعات..." onkeyup="filterSales()">
                         </div>
-                        <div class="report-item">
-                            <span class="report-label">تكاليف التشغيل</span>
-                            <span class="report-value expense" id="equipOperationTotal">0 دج</span>
-                        </div>
-                        <div class="report-item">
-                            <span class="report-label">تكاليف الوقود</span>
-                            <span class="report-value expense" id="equipFuelTotal">0 دج</span>
-                        </div>
-                        <div class="report-item">
-                            <span class="report-label">أجور المشغلين</span>
-                            <span class="report-value expense" id="equipOperatorTotal">0 دج</span>
-                        </div>
+                        <select class="filter-select-small" id="typeFilterSales" onchange="filterSales()">
+                            <option value="">جميع الأنواع</option>
+                            <option value="بيع حيوانات">بيع حيوانات</option>
+                            <option value="بيع محاصيل">بيع محاصيل</option>
+                            <option value="خدمات">خدمات (الجرار)</option>
+                            <option value="منتجات ثانوية">منتجات ثانوية</option>
+                        </select>
+                        <select class="filter-select-small" id="projectFilterSales" onchange="filterSales()">
+                            <option value="">جميع المشاريع</option>
+                        </select>
                     </div>
 
-                    <div class="report-section">
-                        <h3>💰 تفاصيل الإيرادات</h3>
-                        <div class="report-item">
-                            <span class="report-label">إجمالي الخدمات المقدمة</span>
-                            <span class="report-value" id="equipServicesCount">0</span>
-                        </div>
-                        <div class="report-item">
-                            <span class="report-label">المبالغ المدفوعة</span>
-                            <span class="report-value income" id="equipPaidTotal">0 دج</span>
-                        </div>
-                        <div class="report-item">
-                            <span class="report-label">المبالغ المتبقية</span>
-                            <span class="report-value" style="color: #e67e22;" id="equipRemainingTotal">0 دج</span>
-                        </div>
+                    <div class="loading" id="loadingSales">
+                        <i class="fas fa-spinner"></i>
+                        <p>جاري التحميل...</p>
                     </div>
-                </div>
 
-                <div style="margin-top: 2rem;">
-                    <h4 style="color: #2d5016; margin-bottom: 1rem;">📋 تفاصيل المصاريف حسب النوع</h4>
-                    <div class="table-container">
+                    <div class="empty-state" id="emptySales" style="display: none;">
+                        <i class="fas fa-shopping-cart"></i>
+                        <p>لا توجد مبيعات مسجلة حالياً</p>
+                        <button class="btn btn-primary" onclick="openSaleModal()" style="margin-top: 15px;">
+                            <i class="fas fa-plus"></i>
+                            تسجيل مبيعات جديدة
+                        </button>
+                    </div>
+
+                    <div class="table-container" id="tableSales" style="display: none;">
                         <table>
                             <thead>
                                 <tr>
                                     <th>التاريخ</th>
                                     <th>النوع</th>
-                                    <th>المعدة</th>
+                                    <th>الكمية</th>
+                                    <th>السعر</th>
+                                    <th>الإجمالي</th>
+                                    <th>المشتري</th>
                                     <th>المشروع</th>
-                                    <th>الوصف</th>
-                                    <th>المبلغ</th>
+                                    <th>حالة الدفع</th>
+                                    <th>الإجراءات</th>
                                 </tr>
                             </thead>
-                            <tbody id="equipmentExpensesTableBody">
-                                <tr>
-                                    <td colspan="6" class="empty-state">
-                                        <div class="empty-state-icon">🚜</div>
-                                        <p>جاري تحميل مصاريف المعدات...</p>
-                                    </td>
-                                </tr>
-                            </tbody>
+                            <tbody id="salesTableBody"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab 6: Debts -->
-            <div class="tab-content" id="debts">
-                <h3 style="color: #2d5016; margin-bottom: 1.5rem;">📋 المديونيات - الخدمات غير المدفوعة</h3>
+            <!-- Loans Tab -->
+            <div class="tab-content" id="loans-content">
+                <div class="section">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-university"></i>
+                            القروض
+                        </h2>
+                        <button class="btn btn-primary" onclick="openLoanModal()">
+                            <i class="fas fa-plus"></i>
+                            إضافة قرض
+                        </button>
+                    </div>
 
-                <div style="background: #fef5e7; padding: 1rem; border-radius: 5px; margin-bottom: 1.5rem; border-right: 4px solid #f39c12;">
-                    <strong style="color: #e67e22;">💡 ملاحظة:</strong>
-                    <p style="color: #7f8c8d; margin-top: 0.5rem;">هذه المديونيات مستمدة من خدمات المعدات غير المدفوعة بالكامل</p>
-                </div>
+                    <div class="loading" id="loadingLoans">
+                        <i class="fas fa-spinner"></i>
+                        <p>جاري التحميل...</p>
+                    </div>
 
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>التاريخ</th>
-                                <th>العميل</th>
-                                <th>نوع الخدمة</th>
-                                <th>المبلغ الإجمالي</th>
-                                <th>المدفوع</th>
-                                <th>المتبقي</th>
-                                <th>الحالة</th>
-                                <th>رقم الهاتف</th>
-                            </tr>
-                        </thead>
-                        <tbody id="debtsTableBody">
-                            <tr>
-                                <td colspan="8" class="empty-state">
-                                    <div class="empty-state-icon">📋</div>
-                                    <p>جاري تحميل المديونيات...</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                    <div class="empty-state" id="emptyLoans" style="display: none;">
+                        <i class="fas fa-university"></i>
+                        <p>لا توجد قروض مسجلة حالياً</p>
+                        <button class="btn btn-primary" onclick="openLoanModal()" style="margin-top: 15px;">
+                            <i class="fas fa-plus"></i>
+                            إضافة قرض جديد
+                        </button>
+                    </div>
 
-            <!-- Tab 7: Loans -->
-            <div class="tab-content" id="loans">
-                <div class="action-bar">
-                    <h3 style="color: #2d5016;">💳 إدارة القروض</h3>
-                    <button class="btn btn-primary" onclick="openLoanModal()">
-                        ➕ إضافة قرض جديد
-                    </button>
-                </div>
-
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>التاريخ</th>
-                                <th>المصدر</th>
-                                <th>المبلغ الأصلي</th>
-                                <th>المدفوع</th>
-                                <th>المتبقي</th>
-                                <th>الفائدة</th>
-                                <th>الحالة</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="loansTableBody">
-                            <tr>
-                                <td colspan="8" class="empty-state">
-                                    <div class="empty-state-icon">💳</div>
-                                    <p>جاري تحميل القروض...</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-container" id="tableLoans" style="display: none;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>المقرض</th>
+                                    <th>المبلغ الإجمالي</th>
+                                    <th>المدفوع</th>
+                                    <th>المتبقي</th>
+                                    <th>تاريخ البدء</th>
+                                    <th>تاريخ الاستحقاق</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="loansTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+
+            <!-- Project tabs content will be added dynamically -->
         </div>
     </div>
 
@@ -1070,87 +1023,68 @@
     <div class="modal" id="expenseModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="expenseModalTitle">➕ إضافة مصروف جديد</h3>
-                <button class="close-btn" onclick="closeExpenseModal()">×</button>
+                <h2 id="expenseModalTitle">
+                    <i class="fas fa-receipt"></i>
+                    إضافة مصروف جديد
+                </h2>
+                <button class="close-modal" onclick="closeExpenseModal()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <form id="expenseForm" onsubmit="saveExpense(event)">
                 <input type="hidden" id="expenseId">
-                
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="expenseDate">التاريخ *</label>
+                        <label>الفئة *</label>
+                        <select id="expenseCategory" required>
+                            <option value="">اختر الفئة</option>
+                            <option value="أعلاف">أعلاف</option>
+                            <option value="رواتب">رواتب</option>
+                            <option value="صيانة">صيانة</option>
+                            <option value="وقود">وقود</option>
+                            <option value="أدوية">أدوية</option>
+                            <option value="بذور وأسمدة">بذور وأسمدة</option>
+                            <option value="أخرى">أخرى</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>المبلغ (د) *</label>
+                        <input type="number" id="expenseAmount" step="0.01" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>التاريخ *</label>
                         <input type="date" id="expenseDate" required>
                     </div>
                     <div class="form-group">
-                        <label for="expenseAmount">المبلغ (دج) *</label>
-                        <input type="number" id="expenseAmount" step="0.01" min="0" required>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="expenseCategory">الفئة *</label>
-                        <select id="expenseCategory" required onchange="handleCategoryChange()">
-                            <option value="">اختر الفئة</option>
-                            <option value="رواتب">💼 رواتب الموظفين</option>
-                            <option value="وقود">⛽ وقود</option>
-                            <option value="زيوت">🛢️ زيوت</option>
-                            <option value="صيانة">🔧 صيانة</option>
-                            <option value="أسمدة">💊 أسمدة</option>
-                            <option value="بذور وأسمدة">🌱 بذور وأسمدة</option>
-                            <option value="كهرباء وماء">💡 كهرباء وماء</option>
-                            <option value="نقل">🚚 نقل</option>
-                            <option value="أجور عمال">👷 أجور عمال</option>
-                            <option value="أخرى">📦 أخرى</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="expenseProject">المشروع</label>
-                        <select id="expenseProject">
-                            <option value="">عام</option>
+                        <label>طريقة الدفع</label>
+                        <select id="expensePaymentMethod">
+                            <option value="نقدي">نقدي</option>
+                            <option value="بطاقة">بطاقة</option>
+                            <option value="تحويل">تحويل بنكي</option>
+                            <option value="شيك">شيك</option>
                         </select>
                     </div>
                 </div>
-
-                <div class="form-group" id="employeeSelectGroup">
-                    <label for="expenseEmployee">الموظف *</label>
-                    <select id="expenseEmployee">
-                        <option value="">اختر الموظف</option>
+                <div class="form-group">
+                    <label>المشروع (اختياري)</label>
+                    <select id="expenseProject">
+                        <option value="">بدون مشروع</option>
                     </select>
                 </div>
-
                 <div class="form-group">
-                    <label for="expenseDescription">الوصف</label>
-                    <input type="text" id="expenseDescription" placeholder="تفاصيل المصروف (اختياري)">
+                    <label>الوصف</label>
+                    <textarea id="expenseDescription" rows="3"></textarea>
                 </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="expensePaymentMethod">طريقة الدفع</label>
-                        <select id="expensePaymentMethod">
-                            <option value="نقدي">💵 نقدي</option>
-                            <option value="تحويل بنكي">🏦 تحويل بنكي</option>
-                            <option value="شيك">📝 شيك</option>
-                            <option value="بطاقة">💳 بطاقة</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="expenseReceiptNumber">رقم الإيصال</label>
-                        <input type="text" id="expenseReceiptNumber" placeholder="رقم الإيصال (اختياري)">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="expensePaidTo">المستفيد</label>
-                    <input type="text" id="expensePaidTo" placeholder="اسم الشخص أو المؤسسة (اختياري)">
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        💾 حفظ المصروف
-                    </button>
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeExpenseModal()">
+                        <i class="fas fa-times"></i>
                         إلغاء
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        حفظ
                     </button>
                 </div>
             </form>
@@ -1161,94 +1095,79 @@
     <div class="modal" id="saleModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>➕ إضافة عملية بيع</h3>
-                <button class="close-btn" onclick="closeSaleModal()">×</button>
+                <h2 id="saleModalTitle">
+                    <i class="fas fa-shopping-cart"></i>
+                    تسجيل مبيعات جديدة
+                </h2>
+                <button class="close-modal" onclick="closeSaleModal()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <form id="saleForm" onsubmit="saveSale(event)">
                 <input type="hidden" id="saleId">
-                
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="saleDate">التاريخ *</label>
+                        <label>النوع *</label>
+                        <select id="saleType" required>
+                            <option value="">اختر النوع</option>
+                            <option value="بيع حيوانات">بيع حيوانات</option>
+                            <option value="بيع محاصيل">بيع محاصيل</option>
+                            <option value="خدمات">خدمات (الجرار)</option>
+                            <option value="منتجات ثانوية">منتجات ثانوية</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>الكمية</label>
+                        <input type="number" id="saleQuantity" step="0.01">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>السعر (د) *</label>
+                        <input type="number" id="salePrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>الإجمالي (د) *</label>
+                        <input type="number" id="saleTotal" step="0.01" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>التاريخ *</label>
                         <input type="date" id="saleDate" required>
                     </div>
                     <div class="form-group">
-                        <label for="saleProject">المشروع</label>
+                        <label>اسم المشتري</label>
+                        <input type="text" id="saleCustomer">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>المشروع (اختياري)</label>
                         <select id="saleProject">
-                            <option value="">عام</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="customerName">اسم العميل</label>
-                        <input type="text" id="customerName" placeholder="اسم العميل (اختياري)">
-                    </div>
-                    <div class="form-group">
-                        <label for="customerPhone">رقم الهاتف</label>
-                        <input type="tel" id="customerPhone" placeholder="0555123456">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="itemDescription">وصف المنتج *</label>
-                    <input type="text" id="itemDescription" required placeholder="مثال: قمح، شعير، حليب...">
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="quantity">الكمية</label>
-                        <input type="number" id="quantity" step="0.01" min="0" placeholder="مثال: 100">
-                    </div>
-                    <div class="form-group">
-                        <label for="unitPrice">سعر الوحدة (دج)</label>
-                        <input type="number" id="unitPrice" step="0.01" min="0" placeholder="مثال: 5000">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="totalAmount">المبلغ الإجمالي (دج) *</label>
-                    <input type="number" id="totalAmount" step="0.01" min="0" required>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="paymentStatus">حالة الدفع</label>
-                        <select id="paymentStatus">
-                            <option value="paid">✓ مدفوع بالكامل</option>
-                            <option value="partial">⚠ دفع جزئي</option>
-                            <option value="unpaid">✗ غير مدفوع</option>
+                            <option value="">بدون مشروع</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="paidAmount">المبلغ المدفوع (دج)</label>
-                        <input type="number" id="paidAmount" step="0.01" min="0" value="0">
+                        <label>حالة الدفع</label>
+                        <select id="salePaymentStatus">
+                            <option value="paid">مدفوع</option>
+                            <option value="pending">معلق</option>
+                        </select>
                     </div>
                 </div>
-
                 <div class="form-group">
-                    <label for="salePaymentMethod">طريقة الدفع</label>
-                    <select id="salePaymentMethod">
-                        <option value="نقدي">💵 نقدي</option>
-                        <option value="تحويل بنكي">🏦 تحويل بنكي</option>
-                        <option value="شيك">📝 شيك</option>
-                        <option value="بطاقة">💳 بطاقة</option>
-                        <option value="آجل">⏳ آجل</option>
-                    </select>
+                    <label>ملاحظات</label>
+                    <textarea id="saleNotes" rows="3"></textarea>
                 </div>
-
-                <div class="form-group">
-                    <label for="saleNotes">ملاحظات</label>
-                    <textarea id="saleNotes" placeholder="أي ملاحظات إضافية..."></textarea>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        💾 حفظ البيع
-                    </button>
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeSaleModal()">
+                        <i class="fas fa-times"></i>
                         إلغاء
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        حفظ
                     </button>
                 </div>
             </form>
@@ -1259,65 +1178,98 @@
     <div class="modal" id="loanModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>➕ إضافة قرض جديد</h3>
-                <button class="close-btn" onclick="closeLoanModal()">×</button>
+                <h2 id="loanModalTitle">
+                    <i class="fas fa-university"></i>
+                    إضافة قرض جديد
+                </h2>
+                <button class="close-modal" onclick="closeLoanModal()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <form id="loanForm" onsubmit="saveLoan(event)">
                 <input type="hidden" id="loanId">
-                
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="loanDate">تاريخ القرض *</label>
-                        <input type="date" id="loanDate" required>
+                        <label>اسم المقرض *</label>
+                        <input type="text" id="loanLender" required>
                     </div>
                     <div class="form-group">
-                        <label for="loanSource">مصدر القرض *</label>
-                        <input type="text" id="loanSource" required placeholder="مثال: بنك، شخص، مؤسسة">
+                        <label>المبلغ الإجمالي (د) *</label>
+                        <input type="number" id="loanAmount" step="0.01" required>
                     </div>
                 </div>
-
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="loanAmount">المبلغ الأصلي (دج) *</label>
-                        <input type="number" id="loanAmount" step="0.01" min="0" required>
+                        <label>المبلغ المدفوع (د)</label>
+                        <input type="number" id="loanPaid" step="0.01" value="0">
                     </div>
                     <div class="form-group">
-                        <label for="interestRate">معدل الفائدة (%)</label>
-                        <input type="number" id="interestRate" step="0.01" min="0" value="0">
+                        <label>نسبة الفائدة (%)</label>
+                        <input type="number" id="loanInterest" step="0.01" value="0">
                     </div>
                 </div>
-
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="loanPaidAmount">المبلغ المدفوع (دج)</label>
-                        <input type="number" id="loanPaidAmount" step="0.01" min="0" value="0">
+                        <label>تاريخ البدء</label>
+                        <input type="date" id="loanStartDate">
                     </div>
                     <div class="form-group">
-                        <label for="loanStatus">الحالة</label>
-                        <select id="loanStatus">
-                            <option value="active">✗ نشط - غير مسدد</option>
-                            <option value="partial">⚠ مسدد جزئياً</option>
-                            <option value="paid">✓ مسدد بالكامل</option>
-                        </select>
+                        <label>تاريخ الاستحقاق</label>
+                        <input type="date" id="loanDueDate">
                     </div>
                 </div>
-
                 <div class="form-group">
-                    <label for="dueDate">تاريخ الاستحقاق</label>
-                    <input type="date" id="dueDate">
+                    <label>ملاحظات</label>
+                    <textarea id="loanNotes" rows="3"></textarea>
                 </div>
-
-                <div class="form-group">
-                    <label for="loanNotes">ملاحظات</label>
-                    <textarea id="loanNotes" placeholder="شروط القرض وأي ملاحظات..."></textarea>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        💾 حفظ القرض
-                    </button>
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeLoanModal()">
+                        <i class="fas fa-times"></i>
                         إلغاء
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        حفظ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-money-bill"></i>
+                    تسجيل دفعة
+                </h2>
+                <button class="close-modal" onclick="closePaymentModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="paymentForm" onsubmit="savePayment(event)">
+                <input type="hidden" id="paymentLoanId">
+                <div class="form-group">
+                    <label>المبلغ (د) *</label>
+                    <input type="number" id="paymentAmount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>التاريخ *</label>
+                    <input type="date" id="paymentDate" required>
+                </div>
+                <div class="form-group">
+                    <label>ملاحظات</label>
+                    <textarea id="paymentNotes" rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closePaymentModal()">
+                        <i class="fas fa-times"></i>
+                        إلغاء
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        حفظ
                     </button>
                 </div>
             </form>
@@ -1325,1090 +1277,833 @@
     </div>
 
     <script>
+        // Supabase Config
         const SUPABASE_URL = 'https://sstvsknmmhbwubzajeix.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzdHZza25tbWhid3ViemFqZWl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNDM0NjIsImV4cCI6MjA3NDkxOTQ2Mn0.EeVUU9DxRYUi38nUHgWEsnG8li7KZjqAGPNW9IDokhg';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentUser = null;
-        let startDate = new Date();
-        let endDate = new Date();
-        let allEmployees = [];
-        let allProjects = [];
+        let expenses = [];
+        let sales = [];
+        let loans = [];
+        let projects = [];
+        let projectFinancialData = {};
 
+        // Auth Check
         async function checkAuth() {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                window.location.href = 'login.html';
-                return;
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = '../login.html';
+                return null;
             }
-            currentUser = user;
-            document.getElementById('authLoading').classList.add('hidden');
+            return session.user;
+        }
+
+        // Initialize
+        async function init() {
+            currentUser = await checkAuth();
+            if (!currentUser) return;
+
             await loadProjects();
-            await loadEmployees();
-            await loadAllData();
-            checkSalaryPaymentDue();
+            await loadExpenses();
+            await loadSales();
+            await loadLoans();
+            updateStats();
+            
+            // Set today's date as default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('expenseDate').value = today;
+            document.getElementById('saleDate').value = today;
+            document.getElementById('paymentDate').value = today;
         }
 
-        function handlePeriodChange() {
-            const periodType = document.getElementById('periodType').value;
-            const customDateRange = document.getElementById('customDateRange');
-
-            if (periodType === 'custom') {
-                customDateRange.style.display = 'flex';
-                customDateRange.style.gap = '0.5rem';
-                customDateRange.style.alignItems = 'center';
-            } else {
-                customDateRange.style.display = 'none';
-            }
-        }
-
-        function calculatePeriodDates() {
-            const periodType = document.getElementById('periodType').value;
-            const today = new Date();
-
-            if (periodType === 'month') {
-                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            } else if (periodType === 'year') {
-                startDate = new Date(today.getFullYear(), 0, 1);
-                endDate = new Date(today.getFullYear(), 11, 31);
-            } else {
-                const startInput = document.getElementById('startDate').value;
-                const endInput = document.getElementById('endDate').value;
-                if (startInput && endInput) {
-                    startDate = new Date(startInput);
-                    endDate = new Date(endInput);
-                }
-            }
-        }
-
+        // Load Projects and create tabs
         async function loadProjects() {
             try {
-                const { data: projects, error } = await supabase
+                const { data, error } = await supabase
                     .from('projects')
                     .select('*')
                     .eq('user_id', currentUser.id)
-                    .order('name');
+                    .eq('status', 'active')
+                    .order('created_at', { ascending: false });
 
                 if (error) throw error;
 
-                allProjects = projects || [];
+                projects = data || [];
                 
-                const selects = ['expenseProject', 'saleProject'];
-                selects.forEach(selectId => {
+                // Update project dropdowns
+                const projectSelects = ['expenseProject', 'saleProject', 'projectFilterExpenses', 'projectFilterSales'];
+                projectSelects.forEach(selectId => {
                     const select = document.getElementById(selectId);
-                    if (select) {
-                        select.innerHTML = '<option value="">عام</option>';
-                        projects?.forEach(project => {
-                            const option = document.createElement('option');
-                            option.value = project.id;
-                            option.textContent = project.name;
-                            select.appendChild(option);
-                        });
+                    if (!selectId.includes('Filter')) {
+                        select.innerHTML = '<option value="">بدون مشروع</option>';
+                    } else {
+                        select.innerHTML = '<option value="">جميع المشاريع</option>';
                     }
+                    projects.forEach(project => {
+                        const option = document.createElement('option');
+                        option.value = project.id;
+                        option.textContent = project.name;
+                        select.appendChild(option);
+                    });
                 });
+
+                // Create project tabs and load their data
+                const tabsContainer = document.getElementById('mainTabs');
+                const existingProjectTabs = tabsContainer.querySelectorAll('.tab[data-project]');
+                existingProjectTabs.forEach(tab => tab.remove());
+
+                // Remove existing project tab contents
+                const existingContents = document.querySelectorAll('.tab-content[id^="project-"]');
+                existingContents.forEach(content => content.remove());
+
+                for (const project of projects) {
+                    // Create tab button
+                    const tab = document.createElement('button');
+                    tab.className = 'tab';
+                    tab.setAttribute('data-tab', 'project-' + project.id);
+                    tab.setAttribute('data-project', project.id);
+                    tab.innerHTML = `<i class="fas fa-folder"></i> ${project.name}`;
+                    tab.onclick = () => switchMainTab('project-' + project.id);
+                    tabsContainer.appendChild(tab);
+
+                    // Load project financial data
+                    await loadProjectFinancialData(project.id);
+
+                    // Create tab content
+                    const content = document.createElement('div');
+                    content.className = 'tab-content';
+                    content.id = 'project-' + project.id + '-content';
+                    content.innerHTML = createProjectFinancialView(project);
+                    document.querySelector('.tabs-container').appendChild(content);
+                }
             } catch (error) {
                 console.error('Error loading projects:', error);
             }
         }
 
-        async function loadEmployees() {
+        // Load Project Financial Data
+        async function loadProjectFinancialData(projectId) {
             try {
-                const { data: employees, error } = await supabase
-                    .from('project_employees')
-                    .select(`
-                        *,
-                        projects:project_id (name)
-                    `)
-                    .eq('user_id', currentUser.id)
-                    .eq('is_active', true)
-                    .order('name');
-
-                if (error) throw error;
-
-                allEmployees = employees || [];
-                const employeeSelect = document.getElementById('expenseEmployee');
-                if (employeeSelect) {
-                    employeeSelect.innerHTML = '<option value="">اختر الموظف</option>';
-                    
-                    employees?.forEach(emp => {
-                        const option = document.createElement('option');
-                        option.value = emp.id;
-                        option.textContent = `${emp.name} - ${emp.projects?.name || 'عام'}`;
-                        option.dataset.paymentType = emp.payment_type;
-                        option.dataset.paymentAmount = emp.payment_amount || 0;
-                        employeeSelect.appendChild(option);
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading employees:', error);
-            }
-        }
-
-        function handleCategoryChange() {
-            const category = document.getElementById('expenseCategory').value;
-            const employeeGroup = document.getElementById('employeeSelectGroup');
-            const employeeSelect = document.getElementById('expenseEmployee');
-            
-            if (category === 'رواتب') {
-                employeeGroup.style.display = 'block';
-                employeeSelect.required = true;
-                
-                const selectedOption = employeeSelect.options[employeeSelect.selectedIndex];
-                if (selectedOption && selectedOption.value) {
-                    const amount = selectedOption.dataset.paymentAmount;
-                    if (amount && amount > 0) {
-                        document.getElementById('expenseAmount').value = amount;
-                    }
-                }
-            } else {
-                employeeGroup.style.display = 'none';
-                employeeSelect.required = false;
-                employeeSelect.value = '';
-            }
-        }
-
-        async function calculateTotalSalaries() {
-            try {
-                const { data, error } = await supabase
-                    .from('project_employees')
-                    .select('payment_amount, payment_type')
-                    .eq('user_id', currentUser.id)
-                    .eq('is_active', true);
-
-                if (error) throw error;
-
-                let total = 0;
-                data?.forEach(emp => {
-                    if (emp.payment_type === 'fixed') {
-                        total += parseFloat(emp.payment_amount || 0);
-                    }
-                });
-
-                document.getElementById('totalSalaries').textContent = formatCurrency(total);
-                return total;
-            } catch (error) {
-                console.error('Error calculating salaries:', error);
-                return 0;
-            }
-        }
-
-        async function checkSalaryPaymentDue() {
-            const today = new Date();
-            const dayOfMonth = today.getDate();
-            const alertContainer = document.getElementById('salaryAlertContainer');
-
-            if (dayOfMonth >= 25 && dayOfMonth <= 31) {
-                const totalSalaries = await calculateTotalSalaries();
-                
-                if (totalSalaries > 0) {
-                    alertContainer.innerHTML = `
-                        <div class="salary-alert">
-                            <span style="font-size: 2rem;">⏰</span>
-                            <div>
-                                <strong>تنبيه: اقترب موعد دفع الرواتب!</strong>
-                                <p>إجمالي الرواتب الشهرية المستحقة: <strong>${formatCurrency(totalSalaries)}</strong></p>
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-        }
-
-        async function loadAllData() {
-            calculatePeriodDates();
-            await Promise.all([
-                loadStats(),
-                loadExpenses(),
-                loadSales(),
-                loadEquipmentFinancials(),
-                loadDebts(),
-                loadLoans(),
-                loadSalariesReport()
-            ]);
-        }
-
-        async function loadStats() {
-            try {
-                calculatePeriodDates();
-                
-                const startDateStr = startDate.toISOString().split('T')[0];
-                const endDateStr = endDate.toISOString().split('T')[0];
-
-                // Traditional expenses
-                const { data: expensesData } = await supabase
+                // Load expenses for project
+                const { data: projectExpenses } = await supabase
                     .from('expenses')
-                    .select('amount, category')
+                    .select('*')
                     .eq('user_id', currentUser.id)
-                    .gte('expense_date', startDateStr)
-                    .lte('expense_date', endDateStr);
-
-                const totalExpenses = expensesData?.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0) || 0;
-
-                // Equipment expenses
-                const { data: maintenanceData } = await supabase
-                    .from('equipment_maintenance')
-                    .select('total_cost')
-                    .eq('user_id', currentUser.id)
-                    .gte('maintenance_date', startDateStr)
-                    .lte('maintenance_date', endDateStr);
-
-                const maintenanceCosts = maintenanceData?.reduce((sum, item) => sum + parseFloat(item.total_cost || 0), 0) || 0;
-
-                const { data: operationsData } = await supabase
-                    .from('equipment_operations')
-                    .select('total_cost')
-                    .eq('user_id', currentUser.id)
-                    .gte('operation_date', startDateStr)
-                    .lte('operation_date', endDateStr);
-
-                const operationCosts = operationsData?.reduce((sum, item) => sum + parseFloat(item.total_cost || 0), 0) || 0;
-
-                const equipmentExpenses = maintenanceCosts + operationCosts;
-                const allExpenses = totalExpenses + equipmentExpenses;
-
-                // Sales & Services
-                const { data: salesData } = await supabase
-                    .from('sales')
-                    .select('total_amount')
-                    .eq('user_id', currentUser.id)
-                    .gte('sale_date', startDateStr)
-                    .lte('sale_date', endDateStr);
-
-                const { data: servicesData } = await supabase
-                    .from('equipment_services')
-                    .select('amount, paid_amount')
-                    .eq('user_id', currentUser.id)
-                    .gte('service_date', startDateStr)
-                    .lte('service_date', endDateStr);
-
-                const totalSales = salesData?.reduce((sum, item) => sum + parseFloat(item.total_amount || 0), 0) || 0;
-                const totalServices = servicesData?.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0) || 0;
-                const allSales = totalSales + totalServices;
-
-                const netProfit = allSales - allExpenses;
-
-                // Loans
-                const { data: loansData } = await supabase
-                    .from('loans')
-                    .select('amount, amount_paid')
-                    .eq('user_id', currentUser.id)
-                    .neq('status', 'paid');
-
-                const loansRemaining = loansData?.reduce((sum, loan) => {
-                    return sum + (parseFloat(loan.amount || 0) - parseFloat(loan.amount_paid || 0));
-                }, 0) || 0;
-
-                const servicesDebt = servicesData?.reduce((sum, srv) => {
-                    return sum + (parseFloat(srv.amount || 0) - parseFloat(srv.paid_amount || 0));
-                }, 0) || 0;
-
-                // Update UI
-                document.getElementById('totalExpenses').textContent = formatCurrency(allExpenses);
-                document.getElementById('totalSales').textContent = formatCurrency(allSales);
-                document.getElementById('netProfit').textContent = (netProfit >= 0 ? '+' : '') + formatCurrency(netProfit);
-                document.getElementById('equipmentExpenses').textContent = formatCurrency(equipmentExpenses);
-                document.getElementById('equipmentIncome').textContent = formatCurrency(totalServices);
-                document.getElementById('loansRemaining').textContent = formatCurrency(loansRemaining);
-                document.getElementById('servicesDebt').textContent = formatCurrency(servicesDebt);
-
-                await calculateTotalSalaries();
-
-                drawOverviewChart(allExpenses, allSales);
-
-                // Expenses summary
-                const expensesByCategory = {};
-                expensesData?.forEach(exp => {
-                    const cat = exp.category || 'أخرى';
-                    expensesByCategory[cat] = (expensesByCategory[cat] || 0) + parseFloat(exp.amount || 0);
-                });
-
-                let expensesSummaryHTML = '';
-                const sortedCategories = Object.entries(expensesByCategory).sort((a, b) => b[1] - a[1]);
-                
-                for (const [category, amount] of sortedCategories) {
-                    expensesSummaryHTML += `
-                        <div class="report-item">
-                            <span class="report-label">${category}</span>
-                            <span class="report-value expense">${formatCurrency(amount)}</span>
-                        </div>
-                    `;
-                }
-                document.getElementById('expensesSummary').innerHTML = expensesSummaryHTML || '<p style="color: #7f8c8d; text-align: center; padding: 1rem;">لا توجد مصروفات</p>';
-
-                // Sales summary
-                const salesSummaryHTML = `
-                    <div class="report-item">
-                        <span class="report-label">مبيعات المنتجات</span>
-                        <span class="report-value income">${formatCurrency(totalSales)}</span>
-                    </div>
-                    <div class="report-item">
-                        <span class="report-label">خدمات المعدات</span>
-                        <span class="report-value income">${formatCurrency(totalServices)}</span>
-                    </div>
-                    <div class="report-item">
-                        <span class="report-label"><strong>الإجمالي</strong></span>
-                        <span class="report-value income"><strong>${formatCurrency(allSales)}</strong></span>
-                    </div>
-                `;
-                document.getElementById('salesSummary').innerHTML = salesSummaryHTML;
-
-                // Equipment summary
-                const equipmentSummaryHTML = `
-                    <div class="report-item">
-                        <span class="report-label">تكاليف الصيانة</span>
-                        <span class="report-value expense">${formatCurrency(maintenanceCosts)}</span>
-                    </div>
-                    <div class="report-item">
-                        <span class="report-label">تكاليف التشغيل</span>
-                        <span class="report-value expense">${formatCurrency(operationCosts)}</span>
-                    </div>
-                    <div class="report-item">
-                        <span class="report-label">إيرادات الخدمات</span>
-                        <span class="report-value income">${formatCurrency(totalServices)}</span>
-                    </div>
-                    <div class="report-item">
-                        <span class="report-label"><strong>صافي الربح</strong></span>
-                        <span class="report-value profit"><strong>${formatCurrency(totalServices - equipmentExpenses)}</strong></span>
-                    </div>
-                `;
-                document.getElementById('equipmentSummary').innerHTML = equipmentSummaryHTML;
-
-            } catch (error) {
-                console.error('Error loading stats:', error);
-            }
-        }
-
-        function drawOverviewChart(expenses, sales) {
-            const canvas = document.getElementById('overviewChart');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            
-            canvas.width = canvas.offsetWidth;
-            canvas.height = 300;
-            
-            const maxValue = Math.max(expenses, sales) * 1.2 || 100;
-            const barWidth = 100;
-            const spacing = 150;
-            const startX = canvas.width / 2 - spacing;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            const expensesHeight = (expenses / maxValue) * (canvas.height - 80);
-            ctx.fillStyle = '#e74c3c';
-            ctx.fillRect(startX - barWidth/2, canvas.height - expensesHeight - 50, barWidth, expensesHeight);
-            
-            const salesHeight = (sales / maxValue) * (canvas.height - 80);
-            ctx.fillStyle = '#27ae60';
-            ctx.fillRect(startX + spacing - barWidth/2, canvas.height - salesHeight - 50, barWidth, salesHeight);
-            
-            ctx.fillStyle = '#2c3e50';
-            ctx.font = 'bold 14px Cairo';
-            ctx.textAlign = 'center';
-            ctx.fillText('المصروفات', startX, canvas.height - 20);
-            ctx.fillText('الإيرادات', startX + spacing, canvas.height - 20);
-            
-            ctx.font = 'bold 16px Cairo';
-            ctx.fillStyle = '#e74c3c';
-            ctx.fillText(formatCurrency(expenses), startX, canvas.height - expensesHeight - 60);
-            ctx.fillStyle = '#27ae60';
-            ctx.fillText(formatCurrency(sales), startX + spacing, canvas.height - salesHeight - 60);
-        }
-
-        async function loadExpenses() {
-            try {
-                calculatePeriodDates();
-                
-                const startDateStr = startDate.toISOString().split('T')[0];
-                const endDateStr = endDate.toISOString().split('T')[0];
-
-                const categoryFilter = document.getElementById('expenseFilter')?.value;
-
-                let query = supabase
-                    .from('expenses')
-                    .select(`
-                        *,
-                        projects:project_id (name),
-                        project_employees:employee_id (name, role)
-                    `)
-                    .eq('user_id', currentUser.id)
-                    .gte('expense_date', startDateStr)
-                    .lte('expense_date', endDateStr)
+                    .eq('project_id', projectId)
                     .order('expense_date', { ascending: false });
 
-                if (categoryFilter) {
-                    query = query.eq('category', categoryFilter);
-                }
-
-                const { data: expenses, error } = await query;
-
-                if (error) throw error;
-
-                const tbody = document.getElementById('expensesTableBody');
-                
-                if (!expenses || expenses.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="8" class="empty-state">
-                                <div class="empty-state-icon">📭</div>
-                                <p>لا توجد مصروفات في هذه الفترة</p>
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-
-                tbody.innerHTML = expenses.map(exp => `
-                    <tr>
-                        <td>${formatDate(exp.expense_date)}</td>
-                        <td><span class="badge" style="background: #e8f5e9; color: #27ae60;">${exp.category}</span></td>
-                        <td><strong style="color: #e74c3c;">${formatCurrency(exp.amount)}</strong></td>
-                        <td>${exp.projects?.name || 'عام'}</td>
-                        <td>${exp.project_employees?.name || '-'}</td>
-                        <td>${exp.description || '-'}</td>
-                        <td>${exp.paid_to || '-'}</td>
-                        <td>
-                            <button class="btn btn-danger" onclick="deleteExpense('${exp.id}')" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" title="حذف">
-                                🗑️
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
-            } catch (error) {
-                console.error('Error loading expenses:', error);
-            }
-        }
-
-        async function loadSalariesReport() {
-            try {
-                const summaryHTML = `
-                    <div class="report-item">
-                        <span class="report-label">الرواتب الثابتة الشهرية</span>
-                        <span class="report-value" id="fixedSalariesTotal">0 دج</span>
-                    </div>
-                    <div class="report-item">
-                        <span class="report-label">عدد الموظفين بأجر ثابت</span>
-                        <span class="report-value" id="fixedEmployeesCount">0</span>
-                    </div>
-                    <div class="report-item">
-                        <span class="report-label">الأجور المتغيرة (ساعة/يوم)</span>
-                        <span class="report-value">حسب ساعات العمل</span>
-                    </div>
-                    <div class="report-item">
-                        <span class="report-label">النسب المئوية</span>
-                        <span class="report-value">حسب الإيرادات</span>
-                    </div>
-                `;
-                document.getElementById('salariesSummary').innerHTML = summaryHTML;
-
-                let fixedTotal = 0;
-                let fixedCount = 0;
-                let detailHTML = '';
-
-                allEmployees.forEach(emp => {
-                    if (emp.is_active) {
-                        let salaryInfo = '';
-                        let badgeColor = '#e8f5e9';
-                        
-                        if (emp.payment_type === 'fixed') {
-                            fixedTotal += parseFloat(emp.payment_amount || 0);
-                            fixedCount++;
-                            salaryInfo = formatCurrency(emp.payment_amount);
-                            badgeColor = '#e8f5e9';
-                        } else if (emp.payment_type === 'hourly') {
-                            salaryInfo = `${formatCurrency(emp.payment_amount)}/ساعة`;
-                            badgeColor = '#fff3e0';
-                        } else if (emp.payment_type === 'daily') {
-                            salaryInfo = `${formatCurrency(emp.payment_amount)}/يوم`;
-                            badgeColor = '#fff3e0';
-                        } else if (emp.payment_type === 'percentage') {
-                            salaryInfo = `${emp.payment_percentage}٪ من الإيرادات`;
-                            badgeColor = '#f3e5f5';
-                        }
-
-                        detailHTML += `
-                            <div class="report-item">
-                                <span class="report-label">
-                                    <strong>${emp.name}</strong><br>
-                                    <small style="color: #95a5a6;">${emp.projects?.name || 'عام'} - ${emp.role || 'موظف'}</small>
-                                </span>
-                                <span class="report-value">
-                                    <span class="badge" style="background: ${badgeColor}; color: #2d5016;">${salaryInfo}</span>
-                                </span>
-                            </div>
-                        `;
-                    }
-                });
-
-                document.getElementById('fixedSalariesTotal').textContent = formatCurrency(fixedTotal);
-                document.getElementById('fixedEmployeesCount').textContent = fixedCount;
-                document.getElementById('employeeSalariesDetail').innerHTML = detailHTML || '<p style="color: #7f8c8d; text-align: center; padding: 1rem;">لا يوجد موظفون نشطون</p>';
-
-                // Load salary history
-                calculatePeriodDates();
-                const startDateStr = startDate.toISOString().split('T')[0];
-                const endDateStr = endDate.toISOString().split('T')[0];
-
-                const { data: salaryHistory } = await supabase
-                    .from('expenses')
-                    .select(`
-                        *,
-                        projects:project_id (name),
-                        project_employees:employee_id (name, role, payment_type)
-                    `)
-                    .eq('user_id', currentUser.id)
-                    .eq('category', 'رواتب')
-                    .gte('expense_date', startDateStr)
-                    .lte('expense_date', endDateStr)
-                    .order('expense_date', { ascending: false });
-
-                const tbody = document.getElementById('salaryHistoryTableBody');
-                
-                if (!salaryHistory || salaryHistory.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="7" class="empty-state">
-                                <div class="empty-state-icon">💼</div>
-                                <p>لا توجد سجلات لدفع الرواتب في هذه الفترة</p>
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-
-                const paymentTypeLabels = {
-                    'fixed': 'ثابت شهري',
-                    'hourly': 'بالساعة',
-                    'daily': 'يومي',
-                    'percentage': 'نسبة مئوية'
-                };
-
-                tbody.innerHTML = salaryHistory.map(sal => `
-                    <tr>
-                        <td>${formatDate(sal.expense_date)}</td>
-                        <td><strong>${sal.project_employees?.name || '-'}</strong></td>
-                        <td><span class="badge" style="background: #e8f5e9; color: #27ae60;">${paymentTypeLabels[sal.project_employees?.payment_type] || '-'}</span></td>
-                        <td><strong style="color: #e74c3c;">${formatCurrency(sal.amount)}</strong></td>
-                        <td>${sal.projects?.name || 'عام'}</td>
-                        <td>${sal.description || '-'}</td>
-                        <td>
-                            <button class="btn btn-danger" onclick="deleteExpense('${sal.id}')" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
-                                🗑️
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
-
-            } catch (error) {
-                console.error('Error loading salaries report:', error);
-            }
-        }
-
-        async function loadSales() {
-            try {
-                calculatePeriodDates();
-                
-                const startDateStr = startDate.toISOString().split('T')[0];
-                const endDateStr = endDate.toISOString().split('T')[0];
-
-                const { data: sales, error } = await supabase
+                // Load sales for project
+                const { data: projectSales } = await supabase
                     .from('sales')
                     .select('*')
                     .eq('user_id', currentUser.id)
-                    .gte('sale_date', startDateStr)
-                    .lte('sale_date', endDateStr)
+                    .eq('project_id', projectId)
+                    .order('sale_date', { ascending: false });
+
+                // Load inventory usage for project
+                const { data: inventoryUsage } = await supabase
+                    .from('project_inventory_usage')
+                    .select(`
+                        *,
+                        item:inventory_items(name, unit)
+                    `)
+                    .eq('user_id', currentUser.id)
+                    .eq('project_id', projectId)
+                    .order('usage_date', { ascending: false });
+
+                // Load employees for project
+                const { data: projectEmployees } = await supabase
+                    .from('project_employees')
+                    .select(`
+                        *,
+                        employee:employees(name, position)
+                    `)
+                    .eq('user_id', currentUser.id)
+                    .eq('project_id', projectId)
+                    .eq('status', 'active');
+
+                // Load equipment for project
+                const { data: projectEquipment } = await supabase
+                    .from('project_equipment')
+                    .select(`
+                        *,
+                        equipment:equipment(name, type)
+                    `)
+                    .eq('user_id', currentUser.id)
+                    .eq('project_id', projectId)
+                    .eq('status', 'active');
+
+                // Store project financial data
+                projectFinancialData[projectId] = {
+                    expenses: projectExpenses || [],
+                    sales: projectSales || [],
+                    inventoryUsage: inventoryUsage || [],
+                    employees: projectEmployees || [],
+                    equipment: projectEquipment || []
+                };
+
+            } catch (error) {
+                console.error('Error loading project financial data:', error);
+                projectFinancialData[projectId] = {
+                    expenses: [],
+                    sales: [],
+                    inventoryUsage: [],
+                    employees: [],
+                    equipment: []
+                };
+            }
+        }
+
+        // Create Project Financial View
+        function createProjectFinancialView(project) {
+            const data = projectFinancialData[project.id];
+            
+            // Calculate totals
+            const totalExpenses = data.expenses.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
+            const totalSales = data.sales.reduce((sum, s) => sum + parseFloat(s.total_amount || 0), 0);
+            const inventoryCost = data.inventoryUsage.reduce((sum, i) => sum + parseFloat(i.total_cost || 0), 0);
+            const employeeCost = data.employees.reduce((sum, e) => sum + parseFloat(e.salary_amount || 0), 0);
+            const netProfit = totalSales - (totalExpenses + inventoryCost + employeeCost);
+
+            // Calculate expense categories
+            const expensesByCategory = {};
+            data.expenses.forEach(exp => {
+                expensesByCategory[exp.category] = (expensesByCategory[exp.category] || 0) + parseFloat(exp.amount || 0);
+            });
+
+            return `
+                <div class="section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-chart-pie"></i> التفاصيل المالية - ${project.name}</h2>
+                    </div>
+
+                    <!-- Project Stats -->
+                    <div class="project-stats">
+                        <div class="project-stat-card">
+                            <h4>إجمالي المصاريف</h4>
+                            <div class="value">${formatNumber(totalExpenses)} د</div>
+                        </div>
+                        <div class="project-stat-card">
+                            <h4>إجمالي المبيعات</h4>
+                            <div class="value">${formatNumber(totalSales)} د</div>
+                        </div>
+                        <div class="project-stat-card">
+                            <h4>تكلفة المخزون</h4>
+                            <div class="value">${formatNumber(inventoryCost)} د</div>
+                        </div>
+                        <div class="project-stat-card">
+                            <h4>تكلفة الموظفين</h4>
+                            <div class="value">${formatNumber(employeeCost)} د</div>
+                        </div>
+                        <div class="project-stat-card ${netProfit >= 0 ? 'positive' : 'negative'}">
+                            <h4>صافي الربح/الخسارة</h4>
+                            <div class="value">${formatNumber(netProfit)} د</div>
+                        </div>
+                    </div>
+
+                    <!-- Expenses by Category -->
+                    ${Object.keys(expensesByCategory).length > 0 ? `
+                        <h3 style="color: #2d5016; margin-bottom: 15px;">
+                            <i class="fas fa-chart-bar"></i> المصاريف حسب الفئة
+                        </h3>
+                        <div class="category-summary">
+                            ${Object.entries(expensesByCategory).map(([category, amount]) => `
+                                <div class="category-item">
+                                    <span class="category-name">${category}</span>
+                                    <span class="category-amount">${formatNumber(amount)} د</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+
+                    <!-- All Transactions Table -->
+                    <h3 style="color: #2d5016; margin: 25px 0 15px;">
+                        <i class="fas fa-list"></i> جميع العمليات المالية
+                    </h3>
+                    
+                    ${(data.expenses.length + data.sales.length + data.inventoryUsage.length) > 0 ? `
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>النوع</th>
+                                        <th>التاريخ</th>
+                                        <th>التفاصيل</th>
+                                        <th>المبلغ</th>
+                                        <th>الحالة</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${createProjectTransactionsRows(data)}
+                                </tbody>
+                            </table>
+                        </div>
+                    ` : `
+                        <div class="alert info">
+                            <i class="fas fa-info-circle"></i>
+                            لا توجد عمليات مالية مسجلة لهذا المشروع حتى الآن
+                        </div>
+                    `}
+
+                    <!-- Employees Section -->
+                    ${data.employees.length > 0 ? `
+                        <h3 style="color: #2d5016; margin: 25px 0 15px;">
+                            <i class="fas fa-users"></i> الموظفين المرتبطين (${data.employees.length})
+                        </h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>الاسم</th>
+                                        <th>الوظيفة</th>
+                                        <th>نوع الأجر</th>
+                                        <th>قيمة الأجر</th>
+                                        <th>تاريخ البدء</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.employees.map(emp => `
+                                        <tr>
+                                            <td>${emp.employee?.name || '-'}</td>
+                                            <td>${emp.employee?.position || '-'}</td>
+                                            <td>${getSalaryTypeLabel(emp.salary_type)}</td>
+                                            <td>${formatNumber(emp.salary_amount || 0)} د</td>
+                                            <td>${emp.start_date ? new Date(emp.start_date).toLocaleDateString('ar-DZ') : '-'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    ` : ''}
+
+                    <!-- Equipment Section -->
+                    ${data.equipment.length > 0 ? `
+                        <h3 style="color: #2d5016; margin: 25px 0 15px;">
+                            <i class="fas fa-tools"></i> المعدات المرتبطة (${data.equipment.length})
+                        </h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>اسم المعدة</th>
+                                        <th>النوع</th>
+                                        <th>تاريخ البدء</th>
+                                        <th>الساعات المقدرة</th>
+                                        <th>الساعات الفعلية</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.equipment.map(eq => `
+                                        <tr>
+                                            <td>${eq.equipment?.name || '-'}</td>
+                                            <td>${eq.equipment?.type || '-'}</td>
+                                            <td>${eq.start_date ? new Date(eq.start_date).toLocaleDateString('ar-DZ') : '-'}</td>
+                                            <td>${eq.estimated_hours || 0} ساعة</td>
+                                            <td>${eq.actual_hours || 0} ساعة</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Create Project Transactions Rows
+        function createProjectTransactionsRows(data) {
+            const transactions = [];
+
+            // Add expenses
+            data.expenses.forEach(exp => {
+                transactions.push({
+                    type: 'expense',
+                    date: exp.expense_date,
+                    details: `${exp.category} - ${exp.description || ''}`,
+                    amount: parseFloat(exp.amount || 0),
+                    status: exp.payment_method || 'نقدي',
+                    sortDate: new Date(exp.expense_date)
+                });
+            });
+
+            // Add sales
+            data.sales.forEach(sale => {
+                transactions.push({
+                    type: 'sale',
+                    date: sale.sale_date,
+                    details: `${sale.type} - ${sale.customer_name || ''}`,
+                    amount: parseFloat(sale.total_amount || 0),
+                    status: sale.payment_status === 'paid' ? 'مدفوع' : 'معلق',
+                    sortDate: new Date(sale.sale_date)
+                });
+            });
+
+            // Add inventory usage
+            data.inventoryUsage.forEach(inv => {
+                transactions.push({
+                    type: 'inventory',
+                    date: inv.usage_date,
+                    details: `استخدام مخزون - ${inv.item?.name || ''} (${inv.quantity} ${inv.item?.unit || ''})`,
+                    amount: parseFloat(inv.total_cost || 0),
+                    status: inv.usage_type || 'استهلاك',
+                    sortDate: new Date(inv.usage_date)
+                });
+            });
+
+            // Sort by date (newest first)
+            transactions.sort((a, b) => b.sortDate - a.sortDate);
+
+            return transactions.map(trans => `
+                <tr>
+                    <td>
+                        <span class="badge ${trans.type}">
+                            ${trans.type === 'expense' ? 'مصروف' : trans.type === 'sale' ? 'مبيعات' : 'مخزون'}
+                        </span>
+                    </td>
+                    <td>${new Date(trans.date).toLocaleDateString('ar-DZ')}</td>
+                    <td>${trans.details}</td>
+                    <td style="color: ${trans.type === 'sale' ? '#10b981' : '#ef4444'}; font-weight: 700;">
+                        ${trans.type === 'sale' ? '+' : '-'}${formatNumber(trans.amount)} د
+                    </td>
+                    <td>${trans.status}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Helper Functions
+        function getSalaryTypeLabel(type) {
+            const types = {
+                'fixed': 'ثابت',
+                'percentage': 'نسبة',
+                'daily': 'يومي',
+                'hourly': 'ساعي'
+            };
+            return types[type] || type;
+        }
+
+        // Load Expenses
+        async function loadExpenses() {
+            try {
+                document.getElementById('loadingExpenses').style.display = 'block';
+                document.getElementById('emptyExpenses').style.display = 'none';
+                document.getElementById('tableExpenses').style.display = 'none';
+
+                const { data, error } = await supabase
+                    .from('expenses')
+                    .select(`
+                        *,
+                        project:projects(name)
+                    `)
+                    .eq('user_id', currentUser.id)
+                    .order('expense_date', { ascending: false });
+
+                if (error) throw error;
+
+                expenses = data || [];
+                document.getElementById('loadingExpenses').style.display = 'none';
+
+                if (expenses.length === 0) {
+                    document.getElementById('emptyExpenses').style.display = 'block';
+                    return;
+                }
+
+                document.getElementById('tableExpenses').style.display = 'block';
+                renderExpenses(expenses);
+            } catch (error) {
+                console.error('Error loading expenses:', error);
+                document.getElementById('loadingExpenses').style.display = 'none';
+                document.getElementById('emptyExpenses').style.display = 'block';
+            }
+        }
+
+        // Render Expenses
+        function renderExpenses(data) {
+            const tbody = document.getElementById('expensesTableBody');
+            tbody.innerHTML = '';
+
+            data.forEach(expense => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${new Date(expense.expense_date).toLocaleDateString('ar-DZ')}</td>
+                    <td>${expense.category}</td>
+                    <td>${formatNumber(expense.amount)} د</td>
+                    <td>${expense.project?.name || 'عام'}</td>
+                    <td>${expense.description || '-'}</td>
+                    <td>${expense.payment_method || '-'}</td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn btn-edit" onclick="editExpense('${expense.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteExpense('${expense.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Load Sales
+        async function loadSales() {
+            try {
+                document.getElementById('loadingSales').style.display = 'block';
+                document.getElementById('emptySales').style.display = 'none';
+                document.getElementById('tableSales').style.display = 'none';
+
+                const { data, error } = await supabase
+                    .from('sales')
+                    .select(`
+                        *,
+                        project:projects(name)
+                    `)
+                    .eq('user_id', currentUser.id)
                     .order('sale_date', { ascending: false });
 
                 if (error) throw error;
 
-                const tbody = document.getElementById('salesTableBody');
-                
-                if (!sales || sales.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="8" class="empty-state">
-                                <div class="empty-state-icon">📭</div>
-                                <p>لا توجد مبيعات في هذه الفترة</p>
-                            </td>
-                        </tr>
-                    `;
+                sales = data || [];
+                document.getElementById('loadingSales').style.display = 'none';
+
+                if (sales.length === 0) {
+                    document.getElementById('emptySales').style.display = 'block';
                     return;
                 }
 
-                tbody.innerHTML = sales.map(sale => `
-                    <tr>
-                        <td>${formatDate(sale.sale_date)}</td>
-                        <td>${sale.customer_name || '-'}</td>
-                        <td><strong>${sale.item_description}</strong></td>
-                        <td>${sale.quantity || '-'}</td>
-                        <td>${sale.unit_price ? formatCurrency(sale.unit_price) : '-'}</td>
-                        <td><strong style="color: #27ae60;">${formatCurrency(sale.total_amount)}</strong></td>
-                        <td>
-                            <span class="badge ${sale.payment_status === 'paid' ? 'paid' : sale.payment_status === 'partial' ? 'partial' : 'unpaid'}">
-                                ${sale.payment_status === 'paid' ? '✓ مدفوع' : sale.payment_status === 'partial' ? '⚠ جزئي' : '✗ غير مدفوع'}
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn btn-danger" onclick="deleteSale('${sale.id}')" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
-                                🗑️
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
+                document.getElementById('tableSales').style.display = 'block';
+                renderSales(sales);
             } catch (error) {
                 console.error('Error loading sales:', error);
+                document.getElementById('loadingSales').style.display = 'none';
+                document.getElementById('emptySales').style.display = 'block';
             }
         }
 
-        async function loadEquipmentFinancials() {
-            try {
-                calculatePeriodDates();
-                
-                const startDateStr = startDate.toISOString().split('T')[0];
-                const endDateStr = endDate.toISOString().split('T')[0];
+        // Render Sales
+        function renderSales(data) {
+            const tbody = document.getElementById('salesTableBody');
+            tbody.innerHTML = '';
 
-                // Maintenance costs
-                const { data: maintenance } = await supabase
-                    .from('equipment_maintenance')
-                    .select(`
-                        *,
-                        projects:project_id (name)
-                    `)
-                    .eq('user_id', currentUser.id)
-                    .gte('maintenance_date', startDateStr)
-                    .lte('maintenance_date', endDateStr)
-                    .order('maintenance_date', { ascending: false });
-
-                const maintenanceTotal = maintenance?.reduce((sum, m) => sum + parseFloat(m.total_cost || 0), 0) || 0;
-
-                // Operation costs
-                const { data: operations } = await supabase
-                    .from('equipment_operations')
-                    .select(`
-                        *,
-                        projects:project_id (name)
-                    `)
-                    .eq('user_id', currentUser.id)
-                    .gte('operation_date', startDateStr)
-                    .lte('operation_date', endDateStr)
-                    .order('operation_date', { ascending: false});
-
-                const operationTotal = operations?.reduce((sum, o) => sum + parseFloat(o.total_cost || 0), 0) || 0;
-                const fuelTotal = operations?.reduce((sum, o) => sum + parseFloat(o.fuel_cost || 0), 0) || 0;
-                const operatorTotal = operations?.reduce((sum, o) => sum + parseFloat(o.operator_payment || 0), 0) || 0;
-
-                // Services income
-                const { data: services } = await supabase
-                    .from('equipment_services')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .gte('service_date', startDateStr)
-                    .lte('service_date', endDateStr);
-
-                const servicesTotal = services?.reduce((sum, s) => sum + parseFloat(s.amount || 0), 0) || 0;
-                const paidTotal = services?.reduce((sum, s) => sum + parseFloat(s.paid_amount || 0), 0) || 0;
-                const remainingTotal = servicesTotal - paidTotal;
-
-                const totalExpenses = maintenanceTotal + operationTotal;
-                const netProfit = servicesTotal - totalExpenses;
-
-                // Update UI
-                document.getElementById('equipExpTotal').textContent = formatCurrency(totalExpenses);
-                document.getElementById('equipIncTotal').textContent = formatCurrency(servicesTotal);
-                document.getElementById('equipNetProfit').textContent = (netProfit >= 0 ? '+' : '') + formatCurrency(netProfit);
-                document.getElementById('equipMaintenanceTotal').textContent = formatCurrency(maintenanceTotal);
-                document.getElementById('equipOperationTotal').textContent = formatCurrency(operationTotal);
-                document.getElementById('equipFuelTotal').textContent = formatCurrency(fuelTotal);
-                document.getElementById('equipOperatorTotal').textContent = formatCurrency(operatorTotal);
-                document.getElementById('equipServicesCount').textContent = services?.length || 0;
-                document.getElementById('equipPaidTotal').textContent = formatCurrency(paidTotal);
-                document.getElementById('equipRemainingTotal').textContent = formatCurrency(remainingTotal);
-
-                // Build expenses table
-                const tbody = document.getElementById('equipmentExpensesTableBody');
-                const allExpenses = [];
-
-                maintenance?.forEach(m => {
-                    allExpenses.push({
-                        date: m.maintenance_date,
-                        type: 'صيانة',
-                        equipment: 'معدة',
-                        project: m.projects?.name || 'عام',
-                        description: m.description || '-',
-                        amount: m.total_cost
-                    });
-                });
-
-                operations?.forEach(o => {
-                    allExpenses.push({
-                        date: o.operation_date,
-                        type: 'تشغيل',
-                        equipment: 'معدة',
-                        project: o.projects?.name || 'عام',
-                        description: `ساعات العمل: ${o.working_hours || 0}`,
-                        amount: o.total_cost
-                    });
-                });
-
-                allExpenses.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-                if (allExpenses.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="6" class="empty-state">
-                                <div class="empty-state-icon">🚜</div>
-                                <p>لا توجد مصاريف للمعدات في هذه الفترة</p>
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-
-                tbody.innerHTML = allExpenses.map(exp => `
-                    <tr>
-                        <td>${formatDate(exp.date)}</td>
-                        <td><span class="badge" style="background: #fff3e0; color: #e67e22;">${exp.type}</span></td>
-                        <td>${exp.equipment}</td>
-                        <td>${exp.project}</td>
-                        <td>${exp.description}</td>
-                        <td><strong style="color: #e74c3c;">${formatCurrency(exp.amount)}</strong></td>
-                    </tr>
-                `).join('');
-
-            } catch (error) {
-                console.error('Error loading equipment financials:', error);
-            }
+            data.forEach(sale => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${new Date(sale.sale_date).toLocaleDateString('ar-DZ')}</td>
+                    <td>${sale.type}</td>
+                    <td>${sale.quantity || '-'}</td>
+                    <td>${formatNumber(sale.unit_price)} د</td>
+                    <td>${formatNumber(sale.total_amount)} د</td>
+                    <td>${sale.customer_name || '-'}</td>
+                    <td>${sale.project?.name || 'عام'}</td>
+                    <td>
+                        <span class="badge ${sale.payment_status === 'paid' ? 'paid' : 'pending'}">
+                            ${sale.payment_status === 'paid' ? 'مدفوع' : 'معلق'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn btn-edit" onclick="editSale('${sale.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteSale('${sale.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
-        async function loadDebts() {
-            try {
-                calculatePeriodDates();
-                
-                const startDateStr = startDate.toISOString().split('T')[0];
-                const endDateStr = endDate.toISOString().split('T')[0];
-
-                const { data: services, error } = await supabase
-                    .from('equipment_services')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .neq('payment_status', 'paid')
-                    .gte('service_date', startDateStr)
-                    .lte('service_date', endDateStr)
-                    .order('service_date', { ascending: false });
-
-                if (error) throw error;
-
-                const tbody = document.getElementById('debtsTableBody');
-                
-                if (!services || services.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="8" class="empty-state">
-                                <div class="empty-state-icon">✓</div>
-                                <p style="color: #27ae60;">لا توجد مديونيات - جميع الخدمات مدفوعة!</p>
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-
-                tbody.innerHTML = services.map(srv => {
-                    const remaining = parseFloat(srv.amount || 0) - parseFloat(srv.paid_amount || 0);
-                    return `
-                        <tr>
-                            <td>${formatDate(srv.service_date)}</td>
-                            <td><strong>${srv.customer_name}</strong></td>
-                            <td>${srv.service_type}</td>
-                            <td>${formatCurrency(srv.amount)}</td>
-                            <td style="color: #27ae60;">${formatCurrency(srv.paid_amount)}</td>
-                            <td><strong style="color: #e74c3c;">${formatCurrency(remaining)}</strong></td>
-                            <td>
-                                <span class="badge ${srv.payment_status === 'partial' ? 'partial' : 'unpaid'}">
-                                    ${srv.payment_status === 'partial' ? '⚠ جزئي' : '✗ غير مدفوع'}
-                                </span>
-                            </td>
-                            <td>${srv.customer_phone || '-'}</td>
-                        </tr>
-                    `;
-                }).join('');
-            } catch (error) {
-                console.error('Error loading debts:', error);
-            }
-        }
-
+        // Load Loans
         async function loadLoans() {
             try {
-                const { data: loans, error } = await supabase
+                document.getElementById('loadingLoans').style.display = 'block';
+                document.getElementById('emptyLoans').style.display = 'none';
+                document.getElementById('tableLoans').style.display = 'none';
+
+                const { data, error } = await supabase
                     .from('loans')
                     .select('*')
                     .eq('user_id', currentUser.id)
-                    .order('loan_date', { ascending: false });
+                    .order('created_at', { ascending: false });
 
                 if (error) throw error;
 
-                const tbody = document.getElementById('loansTableBody');
-                
-                if (!loans || loans.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="8" class="empty-state">
-                                <div class="empty-state-icon">💳</div>
-                                <p>لا توجد قروض مسجلة</p>
-                            </td>
-                        </tr>
-                    `;
+                loans = data || [];
+                document.getElementById('loadingLoans').style.display = 'none';
+
+                if (loans.length === 0) {
+                    document.getElementById('emptyLoans').style.display = 'block';
                     return;
                 }
 
-                tbody.innerHTML = loans.map(loan => {
-                    const remaining = parseFloat(loan.amount || 0) - parseFloat(loan.amount_paid || 0);
-                    const isOverdue = loan.due_date && new Date(loan.due_date) < new Date() && loan.status === 'active';
-                    
-                    let statusText = '✗ نشط';
-                    let statusClass = 'unpaid';
-                    
-                    if (loan.status === 'paid') {
-                        statusText = '✓ مسدد';
-                        statusClass = 'paid';
-                    } else if (isOverdue) {
-                        statusText = '⚠ متأخر';
-                        statusClass = 'partial';
-                    } else if (parseFloat(loan.amount_paid || 0) > 0) {
-                        statusText = '⚠ جزئي';
-                        statusClass = 'partial';
-                    }
-                    
-                    return `
-                        <tr>
-                            <td>${formatDate(loan.loan_date)}</td>
-                            <td><strong>${loan.creditor_name}</strong></td>
-                            <td>${formatCurrency(loan.amount)}</td>
-                            <td style="color: #27ae60;">${formatCurrency(loan.amount_paid || 0)}</td>
-                            <td><strong style="color: ${remaining > 0 ? '#e74c3c' : '#27ae60'};">${formatCurrency(remaining)}</strong></td>
-                            <td>${loan.interest_rate || 0}%</td>
-                            <td>
-                                <span class="badge ${statusClass}">
-                                    ${statusText}
-                                </span>
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn btn-info" onclick="editLoan('${loan.id}')" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" title="تعديل">
-                                        ✏️
-                                    </button>
-                                    <button class="btn btn-danger" onclick="deleteLoan('${loan.id}')" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" title="حذف">
-                                        🗑️
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
+                document.getElementById('tableLoans').style.display = 'block';
+                renderLoans(loans);
             } catch (error) {
                 console.error('Error loading loans:', error);
-                const tbody = document.getElementById('loansTableBody');
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="empty-state">
-                            <div class="empty-state-icon">⚠️</div>
-                            <p style="color: #e74c3c;">حدث خطأ في تحميل القروض</p>
-                            <p style="font-size: 0.85rem; color: #7f8c8d;">${error.message}</p>
-                        </td>
-                    </tr>
-                `;
+                document.getElementById('loadingLoans').style.display = 'none';
+                document.getElementById('emptyLoans').style.display = 'block';
             }
         }
 
-        // Modal functions
-        function openExpenseModal(mode = null) {
+        // Render Loans
+        function renderLoans(data) {
+            const tbody = document.getElementById('loansTableBody');
+            tbody.innerHTML = '';
+
+            data.forEach(loan => {
+                const remaining = loan.total_amount - (loan.paid_amount || 0);
+                const status = remaining <= 0 ? 'completed' : 'active';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${loan.lender_name}</td>
+                    <td>${formatNumber(loan.total_amount)} د</td>
+                    <td>${formatNumber(loan.paid_amount || 0)} د</td>
+                    <td>${formatNumber(remaining)} د</td>
+                    <td>${loan.start_date ? new Date(loan.start_date).toLocaleDateString('ar-DZ') : '-'}</td>
+                    <td>${loan.due_date ? new Date(loan.due_date).toLocaleDateString('ar-DZ') : '-'}</td>
+                    <td>
+                        <span class="badge ${status}">
+                            ${status === 'active' ? 'نشط' : 'مكتمل'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            ${remaining > 0 ? `
+                                <button class="btn btn-success" onclick="openPaymentModal('${loan.id}')">
+                                    <i class="fas fa-money-bill"></i>
+                                </button>
+                            ` : ''}
+                            <button class="btn btn-edit" onclick="editLoan('${loan.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteLoan('${loan.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Update Stats
+        function updateStats() {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+
+            // Calculate monthly expenses
+            const monthlyExpenses = expenses
+                .filter(e => {
+                    const date = new Date(e.expense_date);
+                    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+                })
+                .reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
+
+            // Calculate monthly sales
+            const monthlySales = sales
+                .filter(s => {
+                    const date = new Date(s.sale_date);
+                    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+                })
+                .reduce((sum, s) => sum + parseFloat(s.total_amount || 0), 0);
+
+            // Calculate profit
+            const profit = monthlySales - monthlyExpenses;
+
+            // Calculate remaining loans
+            const remainingLoans = loans.reduce((sum, l) => {
+                return sum + (parseFloat(l.total_amount || 0) - parseFloat(l.paid_amount || 0));
+            }, 0);
+
+            // Update UI
+            document.getElementById('totalExpenses').textContent = formatNumber(monthlyExpenses) + ' د';
+            document.getElementById('totalSales').textContent = formatNumber(monthlySales) + ' د';
+            document.getElementById('netProfit').textContent = formatNumber(profit) + ' د';
+            document.getElementById('totalLoans').textContent = formatNumber(remainingLoans) + ' د';
+
+            // Update profit card color
+            const profitCard = document.getElementById('profitCard');
+            const profitIcon = profitCard.querySelector('.stat-icon');
+            if (profit >= 0) {
+                profitIcon.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            } else {
+                profitIcon.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+            }
+        }
+
+        // Tab Switching
+        function switchMainTab(tabName) {
+            // Hide all tabs and contents
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Show selected tab
+            const selectedTab = document.querySelector(`.tab[data-tab="${tabName}"]`);
+            if (selectedTab) selectedTab.classList.add('active');
+
+            const selectedContent = document.getElementById(tabName + '-content');
+            if (selectedContent) selectedContent.classList.add('active');
+        }
+
+        // Modal Functions
+        function openExpenseModal() {
+            document.getElementById('expenseModal').classList.add('active');
             document.getElementById('expenseForm').reset();
             document.getElementById('expenseId').value = '';
-            document.getElementById('expenseDate').valueAsDate = new Date();
-            document.getElementById('employeeSelectGroup').style.display = 'none';
-            
-            if (mode === 'salary') {
-                document.getElementById('expenseCategory').value = 'رواتب';
-                handleCategoryChange();
-                document.getElementById('expenseModalTitle').textContent = '💼 تسجيل دفع راتب';
-            } else {
-                document.getElementById('expenseModalTitle').textContent = '➕ إضافة مصروف جديد';
-            }
-            
-            document.getElementById('expenseModal').classList.add('active');
+            document.getElementById('expenseModalTitle').innerHTML = '<i class="fas fa-receipt"></i> إضافة مصروف جديد';
+            document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
         }
 
         function closeExpenseModal() {
             document.getElementById('expenseModal').classList.remove('active');
         }
 
-        async function saveExpense(event) {
-            event.preventDefault();
-
-            try {
-                const category = document.getElementById('expenseCategory').value;
-                const employeeId = category === 'رواتب' ? document.getElementById('expenseEmployee').value : null;
-
-                if (category === 'رواتب' && !employeeId) {
-                    alert('⚠️ الرجاء اختيار الموظف عند تسجيل راتب');
-                    return;
-                }
-
-                const expenseData = {
-                    user_id: currentUser.id,
-                    project_id: document.getElementById('expenseProject').value || null,
-                    expense_date: document.getElementById('expenseDate').value,
-                    category: category,
-                    amount: parseFloat(document.getElementById('expenseAmount').value),
-                    description: document.getElementById('expenseDescription').value || null,
-                    payment_method: document.getElementById('expensePaymentMethod').value,
-                    receipt_number: document.getElementById('expenseReceiptNumber').value || null,
-                    paid_to: document.getElementById('expensePaidTo').value || null,
-                    employee_id: employeeId
-                };
-
-                const { error } = await supabase
-                    .from('expenses')
-                    .insert([expenseData]);
-
-                if (error) throw error;
-
-                closeExpenseModal();
-                await loadAllData();
-                
-                if (category === 'رواتب') {
-                    switchTab('salaries');
-                    alert('✓ تم تسجيل دفع الراتب بنجاح');
-                } else {
-                    alert('✓ تم حفظ المصروف بنجاح');
-                }
-            } catch (error) {
-                console.error('Error saving expense:', error);
-                alert('❌ حدث خطأ أثناء الحفظ: ' + error.message);
-            }
-        }
-
-        async function deleteExpense(id) {
-            if (!confirm('⚠️ هل أنت متأكد من حذف هذا المصروف؟\nلا يمكن التراجع عن هذا الإجراء.')) return;
-
-            try {
-                const { error } = await supabase
-                    .from('expenses')
-                    .delete()
-                    .eq('id', id)
-                    .eq('user_id', currentUser.id);
-
-                if (error) throw error;
-
-                await loadAllData();
-                alert('✓ تم حذف المصروف بنجاح');
-            } catch (error) {
-                console.error('Error deleting expense:', error);
-                alert('❌ حدث خطأ أثناء الحذف: ' + error.message);
-            }
-        }
-
         function openSaleModal() {
+            document.getElementById('saleModal').classList.add('active');
             document.getElementById('saleForm').reset();
             document.getElementById('saleId').value = '';
-            document.getElementById('saleDate').valueAsDate = new Date();
-            document.getElementById('saleModal').classList.add('active');
+            document.getElementById('saleModalTitle').innerHTML = '<i class="fas fa-shopping-cart"></i> تسجيل مبيعات جديدة';
+            document.getElementById('saleDate').value = new Date().toISOString().split('T')[0];
         }
 
         function closeSaleModal() {
             document.getElementById('saleModal').classList.remove('active');
         }
 
-        async function saveSale(event) {
-            event.preventDefault();
-
-            try {
-                const saleData = {
-                    user_id: currentUser.id,
-                    project_id: document.getElementById('saleProject').value || null,
-                    sale_date: document.getElementById('saleDate').value,
-                    customer_name: document.getElementById('customerName').value || null,
-                    customer_phone: document.getElementById('customerPhone').value || null,
-                    item_description: document.getElementById('itemDescription').value,
-                    quantity: parseFloat(document.getElementById('quantity').value) || null,
-                    unit_price: parseFloat(document.getElementById('unitPrice').value) || null,
-                    total_amount: parseFloat(document.getElementById('totalAmount').value),
-                    payment_status: document.getElementById('paymentStatus').value,
-                    paid_amount: parseFloat(document.getElementById('paidAmount').value) || 0,
-                    payment_method: document.getElementById('salePaymentMethod').value,
-                    notes: document.getElementById('saleNotes').value || null
-                };
-
-                const { error } = await supabase
-                    .from('sales')
-                    .insert([saleData]);
-
-                if (error) throw error;
-
-                closeSaleModal();
-                await loadAllData();
-                alert('✓ تم حفظ عملية البيع بنجاح');
-            } catch (error) {
-                console.error('Error saving sale:', error);
-                alert('❌ حدث خطأ أثناء الحفظ: ' + error.message);
-            }
-        }
-
-        async function deleteSale(id) {
-            if (!confirm('⚠️ هل أنت متأكد من حذف هذه العملية؟\nلا يمكن التراجع عن هذا الإجراء.')) return;
-
-            try {
-                const { error } = await supabase
-                    .from('sales')
-                    .delete()
-                    .eq('id', id)
-                    .eq('user_id', currentUser.id);
-
-                if (error) throw error;
-
-                await loadAllData();
-                alert('✓ تم حذف عملية البيع بنجاح');
-            } catch (error) {
-                console.error('Error deleting sale:', error);
-                alert('❌ حدث خطأ أثناء الحذف: ' + error.message);
-            }
-        }
-
         function openLoanModal() {
+            document.getElementById('loanModal').classList.add('active');
             document.getElementById('loanForm').reset();
             document.getElementById('loanId').value = '';
-            document.getElementById('loanDate').valueAsDate = new Date();
-            document.getElementById('loanModal').classList.add('active');
+            document.getElementById('loanModalTitle').innerHTML = '<i class="fas fa-university"></i> إضافة قرض جديد';
         }
 
         function closeLoanModal() {
             document.getElementById('loanModal').classList.remove('active');
         }
 
-        async function saveLoan(event) {
-            event.preventDefault();
+        function openPaymentModal(loanId) {
+            document.getElementById('paymentModal').classList.add('active');
+            document.getElementById('paymentForm').reset();
+            document.getElementById('paymentLoanId').value = loanId;
+            document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
+        }
 
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.remove('active');
+        }
+
+        // Save Expense
+        async function saveExpense(e) {
+            e.preventDefault();
             try {
-                const loanId = document.getElementById('loanId').value;
-                const loanData = {
+                const expenseData = {
                     user_id: currentUser.id,
-                    loan_date: document.getElementById('loanDate').value,
-                    source: document.getElementById('loanSource').value,
-                    amount: parseFloat(document.getElementById('loanAmount').value),
-                    interest_rate: parseFloat(document.getElementById('interestRate').value) || 0,
-                    paid_amount: parseFloat(document.getElementById('loanPaidAmount').value) || 0,
-                    status: document.getElementById('loanStatus').value,
-                    due_date: document.getElementById('dueDate').value || null,
-                    notes: document.getElementById('loanNotes').value || null
+                    category: document.getElementById('expenseCategory').value,
+                    amount: parseFloat(document.getElementById('expenseAmount').value),
+                    expense_date: document.getElementById('expenseDate').value,
+                    payment_method: document.getElementById('expensePaymentMethod').value,
+                    project_id: document.getElementById('expenseProject').value || null,
+                    description: document.getElementById('expenseDescription').value
                 };
 
+                const expenseId = document.getElementById('expenseId').value;
                 let error;
+
+                if (expenseId) {
+                    ({ error } = await supabase
+                        .from('expenses')
+                        .update(expenseData)
+                        .eq('id', expenseId));
+                } else {
+                    ({ error } = await supabase
+                        .from('expenses')
+                        .insert([expenseData]));
+                }
+
+                if (error) throw error;
+
+                closeExpenseModal();
+                await loadExpenses();
+                await loadProjects(); // Reload to update project tabs
+                updateStats();
+            } catch (error) {
+                console.error('Error saving expense:', error);
+                alert('حدث خطأ أثناء حفظ المصروف');
+            }
+        }
+
+        // Save Sale
+        async function saveSale(e) {
+            e.preventDefault();
+            try {
+                const saleData = {
+                    user_id: currentUser.id,
+                    type: document.getElementById('saleType').value,
+                    quantity: parseFloat(document.getElementById('saleQuantity').value) || null,
+                    unit_price: parseFloat(document.getElementById('salePrice').value),
+                    total_amount: parseFloat(document.getElementById('saleTotal').value),
+                    customer_name: document.getElementById('saleCustomer').value,
+                    project_id: document.getElementById('saleProject').value || null,
+                    payment_status: document.getElementById('salePaymentStatus').value,
+                    sale_date: document.getElementById('saleDate').value,
+                    notes: document.getElementById('saleNotes').value
+                };
+
+                const saleId = document.getElementById('saleId').value;
+                let error;
+
+                if (saleId) {
+                    ({ error } = await supabase
+                        .from('sales')
+                        .update(saleData)
+                        .eq('id', saleId));
+                } else {
+                    ({ error } = await supabase
+                        .from('sales')
+                        .insert([saleData]));
+                }
+
+                if (error) throw error;
+
+                closeSaleModal();
+                await loadSales();
+                await loadProjects(); // Reload to update project tabs
+                updateStats();
+            } catch (error) {
+                console.error('Error saving sale:', error);
+                alert('حدث خطأ أثناء حفظ المبيعات');
+            }
+        }
+
+        // Save Loan
+        async function saveLoan(e) {
+            e.preventDefault();
+            try {
+                const loanData = {
+                    user_id: currentUser.id,
+                    lender_name: document.getElementById('loanLender').value,
+                    total_amount: parseFloat(document.getElementById('loanAmount').value),
+                    paid_amount: parseFloat(document.getElementById('loanPaid').value) || 0,
+                    interest_rate: parseFloat(document.getElementById('loanInterest').value) || 0,
+                    start_date: document.getElementById('loanStartDate').value || null,
+                    due_date: document.getElementById('loanDueDate').value || null,
+                    notes: document.getElementById('loanNotes').value,
+                    status: 'active'
+                };
+
+                const loanId = document.getElementById('loanId').value;
+                let error;
+
                 if (loanId) {
                     ({ error } = await supabase
                         .from('loans')
                         .update(loanData)
-                        .eq('id', loanId)
-                        .eq('user_id', currentUser.id));
+                        .eq('id', loanId));
                 } else {
                     ({ error } = await supabase
                         .from('loans')
@@ -2418,196 +2113,246 @@
                 if (error) throw error;
 
                 closeLoanModal();
-                await loadAllData();
-                alert(loanId ? '✓ تم تحديث القرض بنجاح' : '✓ تم حفظ القرض بنجاح');
+                await loadLoans();
+                updateStats();
             } catch (error) {
                 console.error('Error saving loan:', error);
-                alert('❌ حدث خطأ أثناء الحفظ: ' + error.message);
+                alert('حدث خطأ أثناء حفظ القرض');
             }
         }
 
-        async function editLoan(id) {
+        // Save Payment
+        async function savePayment(e) {
+            e.preventDefault();
             try {
-                const { data: loan, error } = await supabase
+                const loanId = document.getElementById('paymentLoanId').value;
+                const amount = parseFloat(document.getElementById('paymentAmount').value);
+
+                // Get current loan data
+                const { data: loan, error: loanError } = await supabase
                     .from('loans')
                     .select('*')
-                    .eq('id', id)
-                    .eq('user_id', currentUser.id)
+                    .eq('id', loanId)
                     .single();
+
+                if (loanError) throw loanError;
+
+                // Calculate new paid amount
+                const newPaidAmount = (loan.paid_amount || 0) + amount;
+                const remaining = loan.total_amount - newPaidAmount;
+
+                // Update loan
+                const { error: updateError } = await supabase
+                    .from('loans')
+                    .update({
+                        paid_amount: newPaidAmount,
+                        status: remaining <= 0 ? 'completed' : 'active'
+                    })
+                    .eq('id', loanId);
+
+                if (updateError) throw updateError;
+
+                // Record payment
+                const { error: paymentError } = await supabase
+                    .from('loan_payments')
+                    .insert([{
+                        user_id: currentUser.id,
+                        loan_id: loanId,
+                        amount: amount,
+                        payment_date: document.getElementById('paymentDate').value,
+                        notes: document.getElementById('paymentNotes').value
+                    }]);
+
+                if (paymentError) throw paymentError;
+
+                closePaymentModal();
+                await loadLoans();
+                updateStats();
+            } catch (error) {
+                console.error('Error saving payment:', error);
+                alert('حدث خطأ أثناء تسجيل الدفعة');
+            }
+        }
+
+        // Edit Functions
+        async function editExpense(id) {
+            const expense = expenses.find(e => e.id === id);
+            if (!expense) return;
+
+            document.getElementById('expenseId').value = expense.id;
+            document.getElementById('expenseCategory').value = expense.category;
+            document.getElementById('expenseAmount').value = expense.amount;
+            document.getElementById('expenseDate').value = expense.expense_date;
+            document.getElementById('expensePaymentMethod').value = expense.payment_method || 'نقدي';
+            document.getElementById('expenseProject').value = expense.project_id || '';
+            document.getElementById('expenseDescription').value = expense.description || '';
+            document.getElementById('expenseModalTitle').innerHTML = '<i class="fas fa-edit"></i> تعديل مصروف';
+            
+            document.getElementById('expenseModal').classList.add('active');
+        }
+
+        async function editSale(id) {
+            const sale = sales.find(s => s.id === id);
+            if (!sale) return;
+
+            document.getElementById('saleId').value = sale.id;
+            document.getElementById('saleType').value = sale.type;
+            document.getElementById('saleQuantity').value = sale.quantity || '';
+            document.getElementById('salePrice').value = sale.unit_price;
+            document.getElementById('saleTotal').value = sale.total_amount;
+            document.getElementById('saleDate').value = sale.sale_date;
+            document.getElementById('saleCustomer').value = sale.customer_name || '';
+            document.getElementById('saleProject').value = sale.project_id || '';
+            document.getElementById('salePaymentStatus').value = sale.payment_status;
+            document.getElementById('saleNotes').value = sale.notes || '';
+            document.getElementById('saleModalTitle').innerHTML = '<i class="fas fa-edit"></i> تعديل مبيعات';
+            
+            document.getElementById('saleModal').classList.add('active');
+        }
+
+        async function editLoan(id) {
+            const loan = loans.find(l => l.id === id);
+            if (!loan) return;
+
+            document.getElementById('loanId').value = loan.id;
+            document.getElementById('loanLender').value = loan.lender_name;
+            document.getElementById('loanAmount').value = loan.total_amount;
+            document.getElementById('loanPaid').value = loan.paid_amount || 0;
+            document.getElementById('loanInterest').value = loan.interest_rate || 0;
+            document.getElementById('loanStartDate').value = loan.start_date || '';
+            document.getElementById('loanDueDate').value = loan.due_date || '';
+            document.getElementById('loanNotes').value = loan.notes || '';
+            document.getElementById('loanModalTitle').innerHTML = '<i class="fas fa-edit"></i> تعديل قرض';
+            
+            document.getElementById('loanModal').classList.add('active');
+        }
+
+        // Delete Functions
+        async function deleteExpense(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا المصروف؟')) return;
+
+            try {
+                const { error } = await supabase
+                    .from('expenses')
+                    .delete()
+                    .eq('id', id);
 
                 if (error) throw error;
 
-                document.getElementById('loanId').value = loan.id;
-                document.getElementById('loanDate').value = loan.loan_date;
-                document.getElementById('loanSource').value = loan.source;
-                document.getElementById('loanAmount').value = loan.amount;
-                document.getElementById('interestRate').value = loan.interest_rate || 0;
-                document.getElementById('loanPaidAmount').value = loan.paid_amount || 0;
-                document.getElementById('loanStatus').value = loan.status;
-                document.getElementById('dueDate').value = loan.due_date || '';
-                document.getElementById('loanNotes').value = loan.notes || '';
-
-                document.getElementById('loanModal').classList.add('active');
+                await loadExpenses();
+                await loadProjects();
+                updateStats();
             } catch (error) {
-                console.error('Error loading loan:', error);
-                alert('❌ حدث خطأ أثناء تحميل بيانات القرض');
+                console.error('Error deleting expense:', error);
+                alert('حدث خطأ أثناء حذف المصروف');
+            }
+        }
+
+        async function deleteSale(id) {
+            if (!confirm('هل أنت متأكد من حذف هذه المبيعات؟')) return;
+
+            try {
+                const { error } = await supabase
+                    .from('sales')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                await loadSales();
+                await loadProjects();
+                updateStats();
+            } catch (error) {
+                console.error('Error deleting sale:', error);
+                alert('حدث خطأ أثناء حذف المبيعات');
             }
         }
 
         async function deleteLoan(id) {
-            if (!confirm('⚠️ هل أنت متأكد من حذف هذا القرض؟\nلا يمكن التراجع عن هذا الإجراء.')) return;
+            if (!confirm('هل أنت متأكد من حذف هذا القرض؟')) return;
 
             try {
                 const { error } = await supabase
                     .from('loans')
                     .delete()
-                    .eq('id', id)
-                    .eq('user_id', currentUser.id);
+                    .eq('id', id);
 
                 if (error) throw error;
 
-                await loadAllData();
-                alert('✓ تم حذف القرض بنجاح');
+                await loadLoans();
+                updateStats();
             } catch (error) {
                 console.error('Error deleting loan:', error);
-                alert('❌ حدث خطأ أثناء الحذف: ' + error.message);
+                alert('حدث خطأ أثناء حذف القرض');
             }
         }
 
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            const buttons = document.querySelectorAll('.tab-button');
-            buttons.forEach((btn, index) => {
-                const tabs = ['overview', 'expenses', 'salaries', 'sales', 'equipment', 'debts', 'loans'];
-                if (tabs[index] === tabName) {
-                    btn.classList.add('active');
-                }
+        // Filter Functions
+        function filterExpenses() {
+            const search = document.getElementById('searchExpenses').value.toLowerCase();
+            const category = document.getElementById('categoryFilterExpenses').value;
+            const project = document.getElementById('projectFilterExpenses').value;
+
+            const filtered = expenses.filter(expense => {
+                const matchSearch = !search || 
+                    expense.description?.toLowerCase().includes(search) ||
+                    expense.category.toLowerCase().includes(search);
+                const matchCategory = !category || expense.category === category;
+                const matchProject = !project || expense.project_id === project;
+
+                return matchSearch && matchCategory && matchProject;
             });
-            
-            document.getElementById(tabName).classList.add('active');
 
-            if (tabName === 'salaries') {
-                loadSalariesReport();
-            } else if (tabName === 'expenses') {
-                loadExpenses();
-            } else if (tabName === 'sales') {
-                loadSales();
-            } else if (tabName === 'equipment') {
-                loadEquipmentFinancials();
-            } else if (tabName === 'debts') {
-                loadDebts();
-            } else if (tabName === 'loans') {
-                loadLoans();
-            }
+            renderExpenses(filtered);
         }
 
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('ar-DZ', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2
-            }).format(amount || 0) + ' دج';
+        function filterSales() {
+            const search = document.getElementById('searchSales').value.toLowerCase();
+            const type = document.getElementById('typeFilterSales').value;
+            const project = document.getElementById('projectFilterSales').value;
+
+            const filtered = sales.filter(sale => {
+                const matchSearch = !search || 
+                    sale.customer_name?.toLowerCase().includes(search) ||
+                    sale.type.toLowerCase().includes(search);
+                const matchType = !type || sale.type === type;
+                const matchProject = !project || sale.project_id === project;
+
+                return matchSearch && matchType && matchProject;
+            });
+
+            renderSales(filtered);
         }
 
-        function formatDate(dateStr) {
-            if (!dateStr) return '-';
-            const date = new Date(dateStr);
-            return new Intl.DateTimeFormat('ar-DZ', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-            }).format(date);
+        function filterAll() {
+            // Implementation for all tab filtering
+            // Combines expenses, sales, and loans
         }
 
-        // Auto-calculate total amount when quantity or unit price changes
-        const quantityInput = document.getElementById('quantity');
-        const unitPriceInput = document.getElementById('unitPrice');
-        
-        if (quantityInput) {
-            quantityInput.addEventListener('input', calculateSaleTotal);
+        // Utility Functions
+        function formatNumber(num) {
+            return new Intl.NumberFormat('ar-DZ').format(num || 0);
         }
-        if (unitPriceInput) {
-            unitPriceInput.addEventListener('input', calculateSaleTotal);
-        }
+
+        // Auto-calculate total in sale form
+        document.getElementById('saleQuantity')?.addEventListener('input', calculateSaleTotal);
+        document.getElementById('salePrice')?.addEventListener('input', calculateSaleTotal);
 
         function calculateSaleTotal() {
-            const quantity = parseFloat(document.getElementById('quantity').value) || 0;
-            const unitPrice = parseFloat(document.getElementById('unitPrice').value) || 0;
-            const total = quantity * unitPrice;
-            if (total > 0) {
-                document.getElementById('totalAmount').value = total.toFixed(2);
-            }
+            const quantity = parseFloat(document.getElementById('saleQuantity').value) || 0;
+            const price = parseFloat(document.getElementById('salePrice').value) || 0;
+            document.getElementById('saleTotal').value = (quantity * price).toFixed(2);
         }
 
-        // Auto-set paid amount based on payment status
-        const paymentStatusSelect = document.getElementById('paymentStatus');
-        if (paymentStatusSelect) {
-            paymentStatusSelect.addEventListener('change', function() {
-                const status = this.value;
-                const totalAmount = parseFloat(document.getElementById('totalAmount').value) || 0;
-                
-                if (status === 'paid') {
-                    document.getElementById('paidAmount').value = totalAmount;
-                } else if (status === 'unpaid') {
-                    document.getElementById('paidAmount').value = 0;
-                }
-            });
-        }
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', init);
 
-        // Auto-fill expense amount when selecting employee for salary
-        const expenseEmployeeSelect = document.getElementById('expenseEmployee');
-        if (expenseEmployeeSelect) {
-            expenseEmployeeSelect.addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
-                if (selectedOption && selectedOption.value) {
-                    const paymentType = selectedOption.dataset.paymentType;
-                    const paymentAmount = selectedOption.dataset.paymentAmount;
-                    
-                    if (paymentType === 'fixed' && paymentAmount && paymentAmount > 0) {
-                        document.getElementById('expenseAmount').value = paymentAmount;
-                        document.getElementById('expenseDescription').value = 'راتب شهري - ' + selectedOption.textContent;
-                    }
-                }
-            });
-        }
-
-        // Auto-update loan status based on paid amount
-        const loanPaidAmountInput = document.getElementById('loanPaidAmount');
-        if (loanPaidAmountInput) {
-            loanPaidAmountInput.addEventListener('input', function() {
-                const totalAmount = parseFloat(document.getElementById('loanAmount').value) || 0;
-                const paidAmount = parseFloat(this.value) || 0;
-                
-                if (paidAmount >= totalAmount) {
-                    document.getElementById('loanStatus').value = 'paid';
-                } else if (paidAmount > 0) {
-                    document.getElementById('loanStatus').value = 'partial';
-                } else {
-                    document.getElementById('loanStatus').value = 'active';
-                }
-            });
-        }
-
-        // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.classList.remove('active');
+        // Close modals on outside click
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
             }
         });
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(event) {
-            // ESC to close modals
-            if (event.key === 'Escape') {
-                document.querySelectorAll('.modal.active').forEach(modal => {
-                    modal.classList.remove('active');
-                });
-            }
-        });
-
-        // Initialize
-        checkAuth();
     </script>
 </body>
 </html>
