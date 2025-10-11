@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - نظام إدارة المزرعة</title>
+    <title>لوحة التحكم - إدارة المزرعة</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -16,110 +17,72 @@
         body {
             font-family: 'Cairo', sans-serif;
             background: #f5f7fa;
-            color: #2c3e50;
-            line-height: 1.6;
+            color: #333;
         }
 
-        /* Loading Screen */
-        #authLoading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-
-        #authLoading.hidden {
-            display: none;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #4a7c2a;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Header */
-        .header {
+        /* Navbar */
+        .navbar {
             background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
-            color: white;
             padding: 1rem 2rem;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+        }
+
+        .navbar-container {
+            max-width: 1400px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .header h1 {
-            font-size: 1.8rem;
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            font-size: 1.5rem;
             font-weight: 700;
         }
 
-        .user-info {
+        .navbar-menu {
             display: flex;
-            gap: 0.8rem;
+            gap: 1rem;
             align-items: center;
-            flex-wrap: wrap;
         }
 
-        .user-name {
-            font-weight: 600;
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
             font-size: 1rem;
         }
 
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
         .logout-btn {
-            background: #c0392b;
-            border: none;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Cairo', sans-serif;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-            white-space: nowrap;
+            background: rgba(255,255,255,0.2);
         }
 
         .logout-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            background: rgba(255,255,255,0.3);
         }
 
-        /* Main Content */
-        .main-content {
-            padding: 2rem;
+        /* Container */
+        .container {
             max-width: 1400px;
             margin: 0 auto;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #2d5016;
+            padding: 2rem;
         }
 
         /* Stats Cards */
@@ -133,47 +96,106 @@
         .stat-card {
             background: white;
             padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
             transition: transform 0.3s;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
 
-        .stat-card-title {
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-icon.projects {
+            background: linear-gradient(135deg, #4a7c2a, #2d5016);
+        }
+
+        .stat-icon.expenses {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .stat-icon.sales {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .stat-icon.profit {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+
+        .stat-content h3 {
+            color: #666;
             font-size: 0.9rem;
-            color: #7f8c8d;
+            font-weight: 500;
             margin-bottom: 0.5rem;
         }
 
-        .stat-card-value {
-            font-size: 2rem;
-            font-weight: 700;
+        .stat-content .value {
             color: #2d5016;
+            font-size: 1.8rem;
+            font-weight: 700;
         }
 
-        .stat-card-subtitle {
-            font-size: 0.85rem;
-            color: #95a5a6;
-            margin-top: 0.5rem;
-        }
-
-        .stat-card.positive .stat-card-value {
-            color: #27ae60;
-        }
-
-        .stat-card.negative .stat-card-value {
+        .stat-content .value.negative {
             color: #e74c3c;
         }
 
-        /* Projects Section */
-        .projects-section {
+        /* Section */
+        .section {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             margin-bottom: 2rem;
         }
 
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .section-header h2 {
+            color: #2d5016;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4a7c2a 0%, #2d5016 100%);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(74, 124, 42, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 124, 42, 0.4);
+        }
+
+        /* Projects Grid */
         .projects-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -182,239 +204,364 @@
 
         .project-card {
             background: white;
-            border-radius: 10px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            padding: 0;
+            border-radius: 15px;
+            border: 2px solid #e0e0e0;
+            overflow: hidden;
             transition: all 0.3s;
-            cursor: pointer;
-            border-right: 4px solid #4a7c2a;
+            position: relative;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .project-card:hover {
+            border-color: #4a7c2a;
             transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
         }
 
         .project-card-header {
+            background: linear-gradient(135deg, #4a7c2a 0%, #2d5016 100%);
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .project-icon-wrapper {
             display: flex;
             align-items: center;
             gap: 1rem;
-            margin-bottom: 1rem;
         }
 
         .project-icon {
-            font-size: 2.5rem;
+            font-size: 3rem;
         }
 
-        .project-info h3 {
+        .project-name {
             font-size: 1.2rem;
-            color: #2c3e50;
-            margin-bottom: 0.3rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
         }
 
-        .project-type {
-            font-size: 0.85rem;
-            color: #7f8c8d;
+        .project-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .project-action-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .project-action-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .project-action-btn.delete {
+            transition: all 0.3s;
+        }
+
+        .project-action-btn.delete:hover {
+            background: #e74c3c;
+            transform: scale(1.15);
+        }
+
+        .project-action-btn.toggle {
+            transition: all 0.3s;
+        }
+
+        .project-action-btn.toggle:hover {
+            background: #f39c12;
+            transform: scale(1.15);
+        }
+
+        .project-card-body {
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .project-card-body:hover {
+            background: #f8f9fa;
+        }
+
+        .project-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .project-info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .project-info-item i {
+            color: #4a7c2a;
+            width: 20px;
         }
 
         .project-status {
             display: inline-block;
-            padding: 0.3rem 0.8rem;
-            border-radius: 15px;
-            font-size: 0.8rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
             font-weight: 600;
         }
 
-        .status-active {
+        .project-status.active {
             background: #d4edda;
             color: #155724;
         }
 
-        .status-planning {
+        .project-status.paused {
             background: #fff3cd;
             color: #856404;
         }
 
-        .status-paused {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-completed {
+        .project-status.completed {
             background: #d1ecf1;
             color: #0c5460;
         }
 
-        .status-cancelled {
+        .project-status.cancelled {
             background: #f8d7da;
             color: #721c24;
         }
 
-        .project-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.8rem;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid #ecf0f1;
-        }
-
-        .project-stat {
-            text-align: center;
-        }
-
-        .project-stat-label {
-            font-size: 0.75rem;
-            color: #7f8c8d;
-        }
-
-        .project-stat-value {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .project-stat-value.expense {
-            color: #e74c3c;
-        }
-
-        .project-stat-value.income {
-            color: #27ae60;
-        }
-
-        .project-stat-value.profit {
-            color: #3498db;
-        }
-
-        /* Alerts Section */
-        .alerts-section {
-            background: white;
-            border-radius: 10px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            margin-bottom: 2rem;
-        }
-
-        .alert-item {
-            padding: 1rem;
-            border-right: 4px solid #ffc107;
+        /* Notifications */
+        .notification-item {
             background: #fff3cd;
+            border-right: 4px solid #ffc107;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
             border-radius: 5px;
-            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .notification-item.error {
+            background: #f8d7da;
+            border-right-color: #dc3545;
+        }
+
+        .notification-item.success {
+            background: #d4edda;
+            border-right-color: #28a745;
+        }
+
+        .notification-item.hidden {
+            animation: slideOut 0.3s ease forwards;
+        }
+
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .notification-text {
+            flex: 1;
+        }
+
+        .notification-close {
+            background: rgba(0,0,0,0.1);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .notification-close:hover {
+            background: rgba(0,0,0,0.2);
+            transform: scale(1.1);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 95%;
+            max-width: 1200px;
+            height: 92vh;
+            max-height: 92vh;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 1.2rem 1.5rem;
+            background: linear-gradient(135deg, #4a7c2a 0%, #2d5016 100%);
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .btn-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.3s;
         }
 
-        .alert-item:hover {
-            transform: translateX(-5px);
+        .btn-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
         }
 
-        .alert-item.critical {
-            border-right-color: #e74c3c;
-            background: #fee;
-        }
-
-        .alert-item.high {
-            border-right-color: #f39c12;
-            background: #fff3cd;
-        }
-
-        .alert-item.medium {
-            border-right-color: #3498db;
-            background: #e8f4fd;
-        }
-
-        .alert-item.low {
-            border-right-color: #95a5a6;
-            background: #f8f9fa;
-        }
-
-        .alert-content {
+        .modal-body {
             flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
+            overflow: hidden;
+            position: relative;
+            min-height: 0;
         }
 
-        .alert-icon {
-            font-size: 1.5rem;
+        .modal-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
         }
 
-        .alert-text {
-            flex: 1;
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4a7c2a;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
         }
 
-        .alert-title {
-            font-weight: 600;
-            margin-bottom: 0.2rem;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .alert-message {
-            font-size: 0.85rem;
+        .modal-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
             color: #666;
         }
 
-        .alert-actions {
-            display: flex;
-            gap: 0.5rem;
+        .modal-loading .spinner {
+            margin-bottom: 1rem;
         }
 
-        /* Buttons */
-        .btn {
-            padding: 0.6rem 1.2rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Cairo', sans-serif;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary {
-            background: #4a7c2a;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #2d5016;
-        }
-
-        .btn-secondary {
-            background: #95a5a6;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #7f8c8d;
-        }
-
-        .btn-sm {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
-        }
-
-        .btn-icon {
-            background: transparent;
-            color: #7f8c8d;
-            padding: 0.3rem;
-        }
-
-        .btn-icon:hover {
-            color: #2d5016;
-        }
-
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 3rem;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            color: #999;
         }
 
         .empty-state-icon {
@@ -422,82 +569,44 @@
             margin-bottom: 1rem;
         }
 
-        .empty-state h3 {
-            font-size: 1.3rem;
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
         }
 
-        .empty-state p {
-            color: #7f8c8d;
-            margin-bottom: 1.5rem;
-        }
-
-        /* Skeleton Loading */
-        .skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s ease-in-out infinite;
-            border-radius: 5px;
-        }
-
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        .skeleton-card {
-            height: 150px;
-            border-radius: 10px;
-        }
-
-        .skeleton-text {
-            height: 20px;
-            margin-bottom: 10px;
-        }
-
-        .skeleton-title {
-            height: 30px;
-            width: 60%;
-            margin-bottom: 15px;
-        }
-
-        /* Badge */
-        .badge {
-            display: inline-block;
-            padding: 0.2rem 0.6rem;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            background: #e74c3c;
-            color: white;
+        .loading .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4a7c2a;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
         }
 
         /* Responsive */
-        @media (max-width: 768px) {
-            .main-content {
-                padding: 1rem;
+        @media (max-width: 1024px) {
+            .modal-content {
+                width: 98%;
+                height: 95vh;
+                max-height: 95vh;
             }
+        }
 
-            .header {
+        @media (max-width: 768px) {
+            .navbar-container {
                 flex-direction: column;
                 gap: 1rem;
-                align-items: stretch;
             }
 
-            .header h1 {
-                font-size: 1.3rem;
-                text-align: center;
-            }
-
-            .user-info {
+            .navbar-menu {
+                flex-wrap: wrap;
                 justify-content: center;
-                gap: 0.5rem;
             }
 
-            .logout-btn {
-                padding: 0.4rem 0.8rem;
-                font-size: 0.85rem;
+            .nav-link span {
+                display: none;
             }
 
             .stats-grid {
@@ -508,597 +617,857 @@
                 grid-template-columns: 1fr;
             }
 
-            .project-stats {
-                grid-template-columns: 1fr;
+            .section-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .modal {
+                padding: 0;
+            }
+
+            .modal-content {
+                width: 100%;
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+                margin: 0;
+            }
+
+            .modal-header {
+                padding: 1rem 1.5rem;
+            }
+
+            .modal-title {
+                font-size: 1.1rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="authLoading">
-        <div class="spinner"></div>
-        <p style="margin-top: 1rem; color: #7f8c8d;">جاري التحميل...</p>
-    </div>
-
-    <!-- Header -->
-    <div class="header">
-        <h1>🌾 نظام إدارة المزرعة</h1>
-        <div class="user-info">
-            <button class="logout-btn" style="background: #8e44ad;" onclick="window.location.href='employees.html'">
-             👥 الموظفين
-            </button>
-            <button class="logout-btn" style="background: #a7ae27;" onclick="window.location.href='lands.html'">
-                🏞️ الأراضي
-            </button>
-            <button class="logout-btn" style="background: #27ae60;" onclick="window.location.href='finance.html'">
-                💰 المالية
-            </button>
-            <button class="logout-btn" style="background: #3498db;" onclick="window.location.href='inventory.html'">
-                📦 المخزن
-            </button>
-            <button class="logout-btn" style="background: #95a5a6;" onclick="window.location.href='settings.html'">
-                ⚙️ الإعدادات
-            </button>
-            <span class="user-name" id="userName">المدير</span>
-            <button class="logout-btn" onclick="logout()">تسجيل خروج</button>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <i class="fas fa-seedling"></i>
+                <span id="farmName">منصة إدارة المزرعة</span>
+            </div>
+            <div class="navbar-menu">
+                <a href="settings.html" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>الإعدادات</span>
+                </a>
+                <a href="finance.html" class="nav-link">
+                    <i class="fas fa-coins"></i>
+                    <span>المالية</span>
+                </a>
+                <a href="employees.html" class="nav-link">
+                    <i class="fas fa-users"></i>
+                    <span>الموظفين</span>
+                </a>
+                <a href="equipment.html" class="nav-link">
+                    <i class="fas fa-tractor"></i>
+                    <span>المعدات</span>
+                </a>
+                <a href="inventory.html" class="nav-link">
+                    <i class="fas fa-boxes"></i>
+                    <span>المخزون</span>
+                </a>
+                <a href="lands.html" class="nav-link">
+                    <i class="fas fa-map"></i>
+                    <span>الأراضي</span>
+                </a>
+                <button class="nav-link logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
         </div>
-    </div>
+    </nav>
 
-    <!-- Main Content -->
-    <div class="main-content">
+    <!-- Main Container -->
+    <div class="container">
         <!-- Stats Cards -->
-        <div class="stats-grid" id="statsGrid">
-            <!-- Skeleton Loading -->
-            <div class="skeleton skeleton-card"></div>
-            <div class="skeleton skeleton-card"></div>
-            <div class="skeleton skeleton-card"></div>
-            <div class="skeleton skeleton-card"></div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon projects">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>المشاريع النشطة</h3>
+                    <div class="value" id="activeProjects">-</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon expenses">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>إجمالي المصاريف (السنة الحالية)</h3>
+                    <div class="value" id="totalExpenses">-</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon sales">
+                    <i class="fas fa-arrow-up"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>إجمالي المبيعات (السنة الحالية)</h3>
+                    <div class="value" id="totalSales">-</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon profit">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>صافي الربح/الخسارة</h3>
+                    <div class="value" id="netProfit">-</div>
+                </div>
+            </div>
         </div>
 
         <!-- Projects Section -->
-        <div class="projects-section">
+        <div class="section">
             <div class="section-header">
-                <h2 class="section-title">📊 مشاريعي</h2>
-                <button class="btn btn-primary" onclick="addNewProject()">
-                    ➕ إضافة مشروع جديد
-                </button>
+                <h2>المشاريع</h2>
+                <button class="btn-primary" onclick="openAddProjectModal()">+ إضافة مشروع</button>
             </div>
-            <div class="projects-grid" id="projectsGrid">
-                <!-- Projects will be loaded here -->
-                <div class="skeleton skeleton-card"></div>
-                <div class="skeleton skeleton-card"></div>
-                <div class="skeleton skeleton-card"></div>
+            <div id="projectsContainer" class="loading">
+                <div class="spinner"></div>
+                <p>جاري تحميل المشاريع...</p>
             </div>
         </div>
 
-        <!-- Alerts Section -->
-        <div class="alerts-section">
+        <!-- Notifications Section -->
+        <div class="section">
             <div class="section-header">
-                <h2 class="section-title">
-                    ⚠️ التنبيهات 
-                    <span class="badge" id="unreadBadge" style="display: none;">0</span>
-                </h2>
-                <button class="btn btn-secondary btn-sm" onclick="markAllAlertsAsRead()">
-                    وضع علامة مقروء للكل
-                </button>
+                <h2>التنبيهات</h2>
             </div>
-            <div id="alertsContainer">
-                <!-- Alerts will be loaded here -->
-                <div class="skeleton skeleton-text"></div>
-                <div class="skeleton skeleton-text"></div>
-                <div class="skeleton skeleton-text"></div>
+            <div id="notificationsContainer" class="loading">
+                <div class="spinner"></div>
+                <p>جاري تحميل التنبيهات...</p>
             </div>
         </div>
     </div>
 
-    <!-- Supabase CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+    <!-- Add Project Modal -->
+    <div class="modal" id="addProjectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">إضافة مشروع جديد</h3>
+                <button class="btn-close" onclick="closeAddProjectModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-loading" id="modalLoading">
+                    <div class="spinner"></div>
+                    <p>جاري التحميل...</p>
+                </div>
+                <iframe 
+                    id="projectIframe" 
+                    class="modal-iframe" 
+                    src="" 
+                    style="display: none;"
+                    onload="hideModalLoading()">
+                </iframe>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // ============================================
-        // Supabase Configuration
-        // ============================================
+        // Supabase Config
         const SUPABASE_URL = 'https://sstvsknmmhbwubzajeix.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzdHZza25tbWhid3ViemFqZWl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNDM0NjIsImV4cCI6MjA3NDkxOTQ2Mn0.EeVUU9DxRYUi38nUHgWEsnG8li7KZjqAGPNW9IDokhg';
-        
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentUser = null;
 
-        // ============================================
-        // Authentication Guard
-        // ============================================
+        // Check Authentication
         async function checkAuth() {
-            try {
-                const { data: { session }, error } = await supabase.auth.getSession();
-                
-                if (error || !session) {
-                    window.location.href = 'login.html';
-                    return false;
-                }
-
-                currentUser = session.user;
-                updateUserUI();
-                
-                return true;
-            } catch (error) {
-                console.error('Auth check error:', error);
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
                 window.location.href = 'login.html';
                 return false;
             }
+            currentUser = session.user;
+            return true;
         }
 
-        function updateUserUI() {
-            const userName = currentUser.user_metadata?.name || currentUser.email?.split('@')[0] || 'المدير';
-            document.getElementById('userName').textContent = userName;
-        }
-
-        // ============================================
-        // Logout Function
-        // ============================================
+        // Logout
         async function logout() {
-            if (!confirm('هل تريد تسجيل الخروج؟')) {
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
+        }
+
+        // Load Dashboard Data
+        async function loadDashboard() {
+            if (!await checkAuth()) return;
+
+            // Clean hidden notifications
+            checkHiddenNotifications();
+
+            // Load user profile
+            await loadUserProfile();
+
+            await Promise.all([
+                loadStats(),
+                loadProjects(),
+                loadNotifications()
+            ]);
+        }
+
+        // Load User Profile
+        async function loadUserProfile() {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('farm_name')
+                .eq('id', currentUser.id)
+                .single();
+
+            if (data && data.farm_name) {
+                document.getElementById('farmName').textContent = data.farm_name;
+            }
+        }
+
+        // Load Statistics
+        async function loadStats() {
+            const currentYear = new Date().getFullYear();
+
+            // Active Projects Count
+            const { data: projects, error: projectsError } = await supabase
+                .from('projects')
+                .select('*', { count: 'exact' })
+                .eq('user_id', currentUser.id)
+                .eq('status', 'active');
+
+            if (!projectsError) {
+                document.getElementById('activeProjects').textContent = projects?.length || 0;
+            }
+
+            // Total Expenses
+            const { data: expenses, error: expensesError } = await supabase
+                .from('expenses')
+                .select('amount')
+                .eq('user_id', currentUser.id)
+                .gte('expense_date', `${currentYear}-01-01`)
+                .lte('expense_date', `${currentYear}-12-31`);
+
+            let totalExpenses = 0;
+            if (!expensesError) {
+                totalExpenses = expenses?.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0) || 0;
+                document.getElementById('totalExpenses').textContent = formatCurrency(totalExpenses);
+            }
+
+            // Total Sales
+            const { data: sales, error: salesError } = await supabase
+                .from('sales')
+                .select('total_amount')
+                .eq('user_id', currentUser.id)
+                .gte('sale_date', `${currentYear}-01-01`)
+                .lte('sale_date', `${currentYear}-12-31`);
+
+            let totalSales = 0;
+            if (!salesError) {
+                totalSales = sales?.reduce((sum, s) => sum + (parseFloat(s.total_amount) || 0), 0) || 0;
+                document.getElementById('totalSales').textContent = formatCurrency(totalSales);
+
+                // Net Profit
+                const netProfit = totalSales - totalExpenses;
+                const netProfitEl = document.getElementById('netProfit');
+                
+                if (netProfit >= 0) {
+                    netProfitEl.textContent = formatCurrency(Math.abs(netProfit));
+                    netProfitEl.classList.remove('negative');
+                } else {
+                    netProfitEl.textContent = formatCurrency(Math.abs(netProfit));
+                    netProfitEl.classList.add('negative');
+                }
+            }
+        }
+
+        // Load Projects
+        async function loadProjects() {
+            const container = document.getElementById('projectsContainer');
+
+            const { data: projects, error } = await supabase
+                .from('projects')
+                .select(`
+                    *,
+                    project_types(name, category)
+                `)
+                .eq('user_id', currentUser.id)
+                .order('created_at', { ascending: false });
+
+            console.log('Projects loaded:', projects);
+            console.log('Projects error:', error);
+
+            if (error) {
+                console.error('Error loading projects:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <p>حدث خطأ في تحميل المشاريع</p>
+                        <p style="color: #999; margin-top: 0.5rem; font-size: 0.85rem;">${error.message}</p>
+                    </div>
+                `;
                 return;
             }
 
-            try {
-                document.getElementById('authLoading').classList.remove('hidden');
-                
-                const { error } = await supabase.auth.signOut();
-                
-                if (error) throw error;
-
-                window.location.href = 'login.html';
-            } catch (error) {
-                console.error('Logout error:', error);
-                alert('حدث خطأ أثناء تسجيل الخروج');
-                document.getElementById('authLoading').classList.add('hidden');
-            }
-        }
-
-        // ============================================
-        // Load Statistics
-        // ============================================
-        async function loadStats() {
-            try {
-                const currentMonth = new Date();
-                const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-                const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
-
-                // Get active projects count
-                const { count: projectsCount } = await supabase
-                    .from('projects')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('status', 'active');
-
-                // Get expenses for current month
-                const { data: expensesData } = await supabase
-                    .from('expenses')
-                    .select('amount')
-                    .gte('expense_date', startOfMonth.toISOString().split('T')[0])
-                    .lte('expense_date', endOfMonth.toISOString().split('T')[0]);
-
-                const totalExpenses = expensesData?.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0) || 0;
-
-                // Get sales for current month
-                const { data: salesData } = await supabase
-                    .from('sales')
-                    .select('total_amount')
-                    .gte('sale_date', startOfMonth.toISOString().split('T')[0])
-                    .lte('sale_date', endOfMonth.toISOString().split('T')[0]);
-
-                const totalSales = salesData?.reduce((sum, item) => sum + (parseFloat(item.total_amount) || 0), 0) || 0;
-
-                const netProfit = totalSales - totalExpenses;
-
-                // Update UI
-                const statsGrid = document.getElementById('statsGrid');
-                statsGrid.innerHTML = `
-                    <div class="stat-card">
-                        <div class="stat-card-title">المشاريع النشطة</div>
-                        <div class="stat-card-value">${projectsCount || 0}</div>
-                        <div class="stat-card-subtitle">مشروع</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-title">مصاريف الشهر الحالي</div>
-                        <div class="stat-card-value">${formatCurrency(totalExpenses)}</div>
-                        <div class="stat-card-subtitle">دينار</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-title">مبيعات الشهر الحالي</div>
-                        <div class="stat-card-value">${formatCurrency(totalSales)}</div>
-                        <div class="stat-card-subtitle">دينار</div>
-                    </div>
-                    <div class="stat-card ${netProfit >= 0 ? 'positive' : 'negative'}">
-                        <div class="stat-card-title">صافي الربح/الخسارة</div>
-                        <div class="stat-card-value">${netProfit >= 0 ? '+' : ''}${formatCurrency(netProfit)}</div>
-                        <div class="stat-card-subtitle">${netProfit >= 0 ? 'ربح' : 'خسارة'}</div>
+            if (!projects || projects.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p>لا توجد مشاريع حالياً</p>
+                        <p style="color: #999; margin-top: 0.5rem;">ابدأ بإضافة مشروع جديد</p>
                     </div>
                 `;
-            } catch (error) {
-                console.error('Error loading stats:', error);
-                showError('حدث خطأ في تحميل الإحصائيات');
+                return;
             }
-        }
 
-        // ============================================
-        // Load Projects
-        // ============================================
-        async function loadProjects() {
-            try {
-                const { data: projects, error } = await supabase
-                    .from('projects')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+            container.innerHTML = '<div class="projects-grid"></div>';
+            const grid = container.querySelector('.projects-grid');
 
-                if (error) throw error;
-
-                const projectsGrid = document.getElementById('projectsGrid');
-
-                if (!projects || projects.length === 0) {
-                    projectsGrid.innerHTML = `
-                        <div class="empty-state" style="grid-column: 1 / -1;">
-                            <div class="empty-state-icon">📋</div>
-                            <h3>لا توجد مشاريع حالياً</h3>
-                            <p>ابدأ بإضافة مشروعك الأول لإدارة مزرعتك بكفاءة</p>
-                            <button class="btn btn-primary" onclick="addNewProject()">
-                                ➕ إضافة مشروع جديد
+            projects.forEach((project, index) => {
+                console.log('Rendering project:', project.name, 'Type:', project.project_types);
+                
+                const icon = getProjectIcon(project.project_types?.name || project.name);
+                const card = document.createElement('div');
+                card.className = 'project-card';
+                card.style.animationDelay = `${index * 0.1}s`;
+                
+                card.innerHTML = `
+                    <div class="project-card-header">
+                        <div class="project-icon-wrapper">
+                            <div class="project-icon">${icon}</div>
+                            <h3 class="project-name">${project.name}</h3>
+                        </div>
+                        <div class="project-actions">
+                            <button class="project-action-btn toggle" 
+                                    title="${project.status === 'active' ? 'إيقاف المشروع' : 'تفعيل المشروع'}">
+                                <i class="fas fa-${project.status === 'active' ? 'pause' : 'play'}"></i>
+                            </button>
+                            <button class="project-action-btn delete" 
+                                    title="حذف المشروع">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
-                    `;
-                    return;
-                }
-
-                // Load stats for each project
-                const projectsWithStats = await Promise.all(
-                    projects.map(async (project) => {
-                        const stats = await getProjectStats(project.id, project.project_type);
-                        return { ...project, stats };
-                    })
-                );
-
-                projectsGrid.innerHTML = projectsWithStats.map(project => {
-                    const icon = getProjectIcon(project.project_type);
-                    const statusClass = `status-${project.status}`;
-                    const statusText = getStatusText(project.status);
-                    const revenueLabel = project.project_type === 'tractor' ? 'الإيرادات' : 'المبيعات';
-
-                    return `
-                        <div class="project-card" onclick="redirectToProject('${project.id}', '${project.project_type}')">
-                            <div class="project-card-header">
-                                <div class="project-icon">${icon}</div>
-                                <div class="project-info">
-                                    <h3>${project.name}</h3>
-                                    <div class="project-type">${getProjectTypeText(project.project_type)}</div>
-                                </div>
+                    </div>
+                    <div class="project-card-body">
+                        <div class="project-info">
+                            <div class="project-info-item">
+                                <i class="fas fa-tag"></i>
+                                <span>النوع: ${project.project_types?.name || 'غير محدد'}</span>
                             </div>
-                            <div class="project-status ${statusClass}">${statusText}</div>
-                            <div class="project-stats">
-                                <div class="project-stat">
-                                    <div class="project-stat-label">المصاريف</div>
-                                    <div class="project-stat-value expense">${formatCurrency(project.stats.expenses)}</div>
-                                </div>
-                                <div class="project-stat">
-                                    <div class="project-stat-label">${revenueLabel}</div>
-                                    <div class="project-stat-value income">${formatCurrency(project.stats.sales)}</div>
-                                </div>
-                                <div class="project-stat">
-                                    <div class="project-stat-label">الربح</div>
-                                    <div class="project-stat-value profit">${formatCurrency(project.stats.profit)}</div>
-                                </div>
+                            <div class="project-info-item">
+                                <i class="fas fa-circle"></i>
+                                <span>الحالة: <span class="project-status ${project.status}">${getStatusText(project.status)}</span></span>
+                            </div>
+                            <div class="project-info-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>${formatDate(project.start_date)}</span>
                             </div>
                         </div>
-                    `;
-                }).join('');
-            } catch (error) {
-                console.error('Error loading projects:', error);
-                showError('حدث خطأ في تحميل المشاريع');
-            }
+                    </div>
+                `;
+                
+                // Add event listeners
+                const header = card.querySelector('.project-card-header');
+                const body = card.querySelector('.project-card-body');
+                const toggleBtn = card.querySelector('.project-action-btn.toggle');
+                const deleteBtn = card.querySelector('.project-action-btn.delete');
+                
+                // Open project on header or body click
+                header.addEventListener('click', (e) => {
+                    if (!e.target.closest('.project-actions')) {
+                        openProject(project);
+                    }
+                });
+                body.addEventListener('click', () => openProject(project));
+                
+                // Toggle status
+                toggleBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleProjectStatus(project.id, project.status);
+                });
+                
+                // Delete project
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteProject(project.id, project.name);
+                });
+                
+                grid.appendChild(card);
+            });
         }
 
-        // ============================================
-        // Get Project Stats - محدثة لدعم الجرار
-        // ============================================
-        async function getProjectStats(projectId, projectType) {
-            try {
-                let totalExpenses = 0;
-                let totalRevenue = 0;
+        // Toggle Project Status
+        async function toggleProjectStatus(projectId, currentStatus) {
+            const newStatus = currentStatus === 'active' ? 'paused' : 'active';
+            const statusText = newStatus === 'active' ? 'نشط' : 'متوقف';
+            
+            const confirmed = confirm(`هل تريد تغيير حالة المشروع إلى "${statusText}"؟`);
+            if (!confirmed) return;
 
-                // Get expenses from expenses table
-                const { data: expensesData } = await supabase
-                    .from('expenses')
-                    .select('amount')
+            const { error } = await supabase
+                .from('projects')
+                .update({ status: newStatus, updated_at: new Date().toISOString() })
+                .eq('id', projectId)
+                .eq('user_id', currentUser.id);
+
+            if (error) {
+                console.error('Error updating project status:', error);
+                alert('❌ حدث خطأ في تحديث حالة المشروع');
+                return;
+            }
+
+            alert(`✅ تم تغيير حالة المشروع إلى "${statusText}"`);
+            await loadProjects();
+            await loadStats();
+        }
+
+        // Delete Project
+        async function deleteProject(projectId, projectName) {
+            const confirmed = confirm(`⚠️ هل أنت متأكد من حذف المشروع "${projectName}"؟\n\nسيتم حذف جميع البيانات المرتبطة بالمشروع (الحيوانات، السجلات، إلخ)\n\nهذا الإجراء لا يمكن التراجع عنه!`);
+            if (!confirmed) return;
+
+            const doubleConfirm = confirm(`⚠️⚠️ تأكيد نهائي!\n\nهل أنت متأكد 100% من حذف المشروع "${projectName}"؟`);
+            if (!doubleConfirm) return;
+
+            try {
+                console.log('Deleting related data for project:', projectId);
+
+                // 1. حذف بيانات القمح
+                await supabase.from('wheat_harvest').delete().eq('project_id', projectId);
+                await supabase.from('wheat_fertilizers').delete().eq('project_id', projectId);
+                await supabase.from('wheat_irrigation').delete().eq('project_id', projectId);
+                await supabase.from('wheat_project_stages').delete().eq('project_id', projectId);
+
+                // 2. حذف بيانات الأغنام
+                await supabase.from('sheep_eid_debts').delete().eq('project_id', projectId);
+                await supabase.from('sheep_sales').delete().eq('project_id', projectId);
+                
+                const { data: feedLogs } = await supabase
+                    .from('sheep_feed_logs')
+                    .select('id')
                     .eq('project_id', projectId);
-
-                totalExpenses += expensesData?.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0) || 0;
-
-                // If it's a tractor project, add equipment-specific costs and revenue
-                if (projectType === 'tractor') {
-                    // Get maintenance costs
-                    const { data: maintenanceData } = await supabase
-                        .from('equipment_maintenance')
-                        .select('total_cost')
-                        .eq('project_id', projectId);
-
-                    totalExpenses += maintenanceData?.reduce((sum, item) => sum + (parseFloat(item.total_cost) || 0), 0) || 0;
-
-                    // Get operations costs
-                    const { data: operationsData } = await supabase
-                        .from('equipment_operations')
-                        .select('total_cost')
-                        .eq('project_id', projectId);
-
-                    totalExpenses += operationsData?.reduce((sum, item) => sum + (parseFloat(item.total_cost) || 0), 0) || 0;
-
-                    // Get services revenue
-                    const { data: servicesData } = await supabase
-                        .from('equipment_services')
-                        .select('amount')
-                        .eq('project_id', projectId);
-
-                    totalRevenue = servicesData?.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0) || 0;
-                } else {
-                    // For other projects, get sales
-                    const { data: salesData } = await supabase
-                        .from('sales')
-                        .select('total_amount')
-                        .eq('project_id', projectId);
-
-                    totalRevenue = salesData?.reduce((sum, item) => sum + (parseFloat(item.total_amount) || 0), 0) || 0;
+                
+                if (feedLogs && feedLogs.length > 0) {
+                    const feedLogIds = feedLogs.map(log => log.id);
+                    await supabase.from('sheep_feed_details').delete().in('feed_log_id', feedLogIds);
                 }
-
-                return {
-                    expenses: totalExpenses,
-                    sales: totalRevenue,
-                    profit: totalRevenue - totalExpenses
-                };
-            } catch (error) {
-                console.error('Error getting project stats:', error);
-                return { expenses: 0, sales: 0, profit: 0 };
-            }
-        }
-
-        // ============================================
-        // Load Alerts
-        // ============================================
-        async function loadAlerts() {
-            try {
-                const { data: alerts, error } = await supabase
-                    .from('alerts')
-                    .select('*')
-                    .eq('is_resolved', false)
-                    .order('created_at', { ascending: false })
-                    .limit(10);
-
-                if (error) throw error;
-
-                const alertsContainer = document.getElementById('alertsContainer');
-                const unreadCount = alerts?.filter(a => !a.is_read).length || 0;
-
-                // Update badge
-                const badge = document.getElementById('unreadBadge');
-                if (unreadCount > 0) {
-                    badge.textContent = unreadCount;
-                    badge.style.display = 'inline-block';
-                } else {
-                    badge.style.display = 'none';
+                
+                await supabase.from('sheep_feed_logs').delete().eq('project_id', projectId);
+                await supabase.from('sheep_births').delete().eq('project_id', projectId);
+                
+                const { data: animals } = await supabase
+                    .from('sheep_animals')
+                    .select('id')
+                    .eq('project_id', projectId);
+                
+                if (animals && animals.length > 0) {
+                    const animalIds = animals.map(animal => animal.id);
+                    await supabase.from('sheep_health_records').delete().in('animal_id', animalIds);
                 }
+                
+                await supabase.from('sheep_animals').delete().eq('project_id', projectId);
 
-                if (!alerts || alerts.length === 0) {
-                    alertsContainer.innerHTML = `
-                        <div style="text-align: center; padding: 2rem; color: #7f8c8d;">
-                            ✅ لا توجد تنبيهات حالياً
-                        </div>
-                    `;
+                // 3. حذف بيانات المشروع العامة
+                await supabase.from('project_inventory_usage').delete().eq('project_id', projectId);
+                await supabase.from('project_employee_logs').delete().eq('project_id', projectId);
+                await supabase.from('project_employees').delete().eq('project_id', projectId);
+                await supabase.from('project_equipment').delete().eq('project_id', projectId);
+                await supabase.from('project_lands').delete().eq('project_id', projectId);
+
+                // 4. تحديث المصاريف والمبيعات
+                await supabase.from('expenses').update({ project_id: null }).eq('project_id', projectId);
+                await supabase.from('sales').update({ project_id: null }).eq('project_id', projectId);
+                await supabase.from('inventory_movements').update({ project_id: null }).eq('project_id', projectId);
+
+                // 5. حذف المشروع نفسه
+                const { error } = await supabase
+                    .from('projects')
+                    .delete()
+                    .eq('id', projectId)
+                    .eq('user_id', currentUser.id);
+
+                if (error) {
+                    console.error('Error deleting project:', error);
+                    alert('❌ حدث خطأ في حذف المشروع\n\n' + error.message);
                     return;
                 }
 
-                alertsContainer.innerHTML = alerts.map(alert => {
-                    const icon = getAlertIcon(alert.alert_type);
-                    const severityClass = alert.severity;
+                alert('✅ تم حذف المشروع بنجاح');
+                await loadProjects();
+                await loadStats();
 
-                    return `
-                        <div class="alert-item ${severityClass}" id="alert-${alert.id}">
-                            <div class="alert-content">
-                                <div class="alert-icon">${icon}</div>
-                                <div class="alert-text">
-                                    <div class="alert-title">${alert.title}</div>
-                                    <div class="alert-message">${alert.message}</div>
-                                </div>
-                            </div>
-                            <div class="alert-actions">
-                                ${!alert.is_read ? `
-                                    <button class="btn btn-icon btn-sm" onclick="markAlertAsRead('${alert.id}')" title="وضع علامة مقروء">
-                                        ✔
-                                    </button>
-                                ` : ''}
-                                <button class="btn btn-icon btn-sm" onclick="resolveAlert('${alert.id}')" title="حل المشكلة">
-                                    ✕
-                                </button>
-                            </div>
+            } catch (error) {
+                console.error('Error in delete process:', error);
+                alert('❌ حدث خطأ أثناء عملية الحذف\n\n' + error.message);
+            }
+        }
+
+        // Open Project
+        function openProject(project) {
+            console.log('Project data:', project);
+            
+            let projectType = project.project_types?.name || project.name || '';
+            console.log('Project type:', projectType);
+            
+            const searchText = (projectType + ' ' + project.name).toLowerCase();
+            
+            if (searchText.includes('غنام') || searchText.includes('أغنام') || searchText.includes('sheep') || searchText.includes('نعاج') || searchText.includes('كباش')) {
+                console.log('Opening sheep project');
+                window.location.href = `sheep.html?id=${project.id}`;
+            } else if (searchText.includes('قمح') || searchText.includes('wheat') || searchText.includes('حبوب')) {
+                console.log('Opening wheat project');
+                window.location.href = `wheat.html?id=${project.id}`;
+            } else if (searchText.includes('دواجن') || searchText.includes('دجاج') || searchText.includes('chicken') || searchText.includes('poultry')) {
+                alert('🚧 مشروع الدواجن قيد التطوير قريباً');
+            } else if (searchText.includes('طماطم') || searchText.includes('tomato')) {
+                alert('🚧 مشروع الطماطم قيد التطوير قريباً');
+            } else {
+                console.log('Unknown project type, showing options');
+                const choice = confirm(`لم يتم تحديد نوع المشروع بوضوح.\n\nاسم المشروع: ${project.name}\n\nهل تريد فتحه كمشروع أغنام؟\n\n(اضغط "موافق" للأغنام، أو "إلغاء" للقمح)`);
+                if (choice) {
+                    window.location.href = `sheep.html?id=${project.id}`;
+                } else {
+                    window.location.href = `wheat.html?id=${project.id}`;
+                }
+            }
+        }
+
+        // Load Notifications
+        async function loadNotifications() {
+            const container = document.getElementById('notificationsContainer');
+
+            const { data: notifications, error } = await supabase
+                .from('notifications')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .eq('is_read', false)
+                .order('created_at', { ascending: false })
+                .limit(5);
+
+            if (error) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <p>حدث خطأ في تحميل التنبيهات</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (!notifications || notifications.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✅</div>
+                        <p>لا توجد تنبيهات جديدة</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Filter hidden notifications
+            const visibleNotifications = filterHiddenNotifications(notifications);
+
+            if (visibleNotifications.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✅</div>
+                        <p>لا توجد تنبيهات جديدة</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            visibleNotifications.forEach(notif => {
+                const div = document.createElement('div');
+                div.className = `notification-item ${getNotificationClass(notif.type)}`;
+                div.setAttribute('data-notification-id', notif.id);
+                div.innerHTML = `
+                    <div class="notification-icon">${getNotificationIcon(notif.type)}</div>
+                    <div class="notification-text">
+                        <strong>${notif.title}</strong><br>
+                        ${notif.message}
+                    </div>
+                    <button class="notification-close" onclick="hideNotification('${notif.id}')" title="إخفاء التنبيه">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Hide Notification
+        function hideNotification(notificationId) {
+            const notificationElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
+            if (!notificationElement) return;
+
+            // Add hidden class for animation
+            notificationElement.classList.add('hidden');
+
+            // Get hidden notifications from localStorage
+            const hiddenNotifications = getHiddenNotifications();
+
+            // Calculate next midnight (00:00)
+            const now = new Date();
+            const nextMidnight = new Date(now);
+            nextMidnight.setHours(24, 0, 0, 0); // Next day at 00:00
+
+            // Add to hidden list
+            hiddenNotifications[notificationId] = nextMidnight.getTime();
+
+            // Save to localStorage
+            localStorage.setItem('hiddenNotifications', JSON.stringify(hiddenNotifications));
+
+            // Remove element after animation
+            setTimeout(() => {
+                notificationElement.remove();
+
+                // Check if container is empty
+                const container = document.getElementById('notificationsContainer');
+                if (container.children.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✅</div>
+                            <p>لا توجد تنبيهات جديدة</p>
                         </div>
                     `;
-                }).join('');
-            } catch (error) {
-                console.error('Error loading alerts:', error);
-                showError('حدث خطأ في تحميل التنبيهات');
-            }
+                }
+            }, 300);
         }
 
-        // ============================================
-        // Alert Actions
-        // ============================================
-        async function markAlertAsRead(alertId) {
+        // Get Hidden Notifications from localStorage
+        function getHiddenNotifications() {
+            const stored = localStorage.getItem('hiddenNotifications');
+            if (!stored) return {};
+
             try {
-                const { error } = await supabase
-                    .from('alerts')
-                    .update({ is_read: true, read_at: new Date().toISOString() })
-                    .eq('id', alertId);
+                const hidden = JSON.parse(stored);
+                const now = Date.now();
+                const cleaned = {};
 
-                if (error) throw error;
+                // Remove expired hidden notifications
+                for (const [id, timestamp] of Object.entries(hidden)) {
+                    if (timestamp > now) {
+                        cleaned[id] = timestamp;
+                    }
+                }
 
-                loadAlerts();
-            } catch (error) {
-                console.error('Error marking alert as read:', error);
-                showError('حدث خطأ');
+                // Update localStorage with cleaned data
+                localStorage.setItem('hiddenNotifications', JSON.stringify(cleaned));
+                return cleaned;
+            } catch (e) {
+                console.error('Error parsing hidden notifications:', e);
+                return {};
             }
         }
 
-        async function resolveAlert(alertId) {
-            try {
-                const { error } = await supabase
-                    .from('alerts')
-                    .update({ is_resolved: true, resolved_at: new Date().toISOString() })
-                    .eq('id', alertId);
-
-                if (error) throw error;
-
-                loadAlerts();
-            } catch (error) {
-                console.error('Error resolving alert:', error);
-                showError('حدث خطأ');
-            }
+        // Filter Hidden Notifications
+        function filterHiddenNotifications(notifications) {
+            const hiddenNotifications = getHiddenNotifications();
+            return notifications.filter(notif => !hiddenNotifications[notif.id]);
         }
 
-        async function markAllAlertsAsRead() {
-            try {
-                const { error } = await supabase
-                    .from('alerts')
-                    .update({ is_read: true, read_at: new Date().toISOString() })
-                    .eq('is_read', false)
-                    .eq('is_resolved', false);
-
-                if (error) throw error;
-
-                loadAlerts();
-            } catch (error) {
-                console.error('Error marking all as read:', error);
-                showError('حدث خطأ');
-            }
+        // Check and Clean Hidden Notifications (run on load)
+        function checkHiddenNotifications() {
+            getHiddenNotifications(); // This will automatically clean expired ones
         }
 
-        // ============================================
-        // Navigation
-        // ============================================
-        function addNewProject() {
-            window.location.href = 'project-new.html';
-        }
-
-        function redirectToProject(projectId, projectType) {
-            // Map project types to their pages
-            const typePages = {
-                'sheep': 'sheep.html',
-                'wheat': 'wheat.html',
-                'tractor': 'tractor.html'
-            };
-
-            const page = typePages[projectType] || 'pages/projects/sheep.html';
-            window.location.href = `${page}?id=${projectId}`;
-        }
-
-        // ============================================
         // Helper Functions
-        // ============================================
-        function getProjectIcon(type) {
-            const icons = {
-                'sheep': '🐑',
-                'goat': '🐐',
-                'cow': '🐄',
-                'chicken': '🐔',
-                'wheat': '🌾',
-                'corn': '🌽',
-                'tomato': '🍅',
-                'vegetables': '🥗',
-                'tractor': '🚜',
-                'harvester': '🚜',
-                'equipment': '⚙️'
-            };
-            return icons[type] || '📊';
-        }
-
-        function getProjectTypeText(type) {
-            const types = {
-                'sheep': 'تربية الأغنام',
-                'goat': 'تربية الماعز',
-                'cow': 'تربية الأبقار',
-                'chicken': 'تربية الدواجن',
-                'wheat': 'زراعة القمح',
-                'corn': 'زراعة الذرة',
-                'tomato': 'زراعة الطماطم',
-                'vegetables': 'زراعة الخضروات',
-                'tractor': 'جرار زراعي',
-                'harvester': 'حصادة',
-                'equipment': 'معدات'
-            };
-            return types[type] || type;
+        function getProjectIcon(projectTypeOrName) {
+            if (!projectTypeOrName) return '📊';
+            
+            const text = projectTypeOrName.toLowerCase();
+            
+            if (text.includes('أغنام') || text.includes('غنام') || text.includes('sheep') || text.includes('نعاج')) {
+                return '🐑';
+            } else if (text.includes('قمح') || text.includes('wheat')) {
+                return '🌾';
+            } else if (text.includes('دواجن') || text.includes('دجاج') || text.includes('chicken')) {
+                return '🐔';
+            } else if (text.includes('طماطم') || text.includes('tomato')) {
+                return '🍅';
+            } else if (text.includes('بقر') || text.includes('cattle')) {
+                return '🐄';
+            } else if (text.includes('نحل') || text.includes('bee')) {
+                return '🐝';
+            } else {
+                return '📊';
+            }
         }
 
         function getStatusText(status) {
             const statuses = {
-                'planning': 'قيد التخطيط',
                 'active': 'نشط',
-                'paused': 'متوقف مؤقتاً',
+                'paused': 'متوقف',
                 'completed': 'مكتمل',
                 'cancelled': 'ملغي'
             };
             return statuses[status] || status;
         }
 
-        function getAlertIcon(type) {
-            const icons = {
-                'low_inventory': '📦',
-                'maintenance_due': '🔧',
-                'vaccination_due': '💉',
-                'birth_expected': '🐑',
-                'loan_due': '💰',
-                'payment_overdue': '⚠️',
-                'custom': '🔔'
-            };
-            return icons[type] || '⚠️';
+        function getNotificationClass(type) {
+            if (type.includes('error') || type.includes('due') || type.includes('low')) return 'error';
+            if (type.includes('success')) return 'success';
+            return '';
+        }
+
+        function getNotificationIcon(type) {
+            if (type.includes('low_stock')) return '📦';
+            if (type.includes('vaccination')) return '💉';
+            if (type.includes('maintenance')) return '🔧';
+            if (type.includes('loan')) return '💰';
+            return '⚠️';
+        }
+
+        // Mark Notification as Read (للحذف النهائي عند حل المشكلة)
+        // يمكن استدعاء هذه الدالة من صفحات المخزون/الصيانة/الصحة عند حل المشكلة
+        async function markNotificationAsRead(notificationId) {
+            const { error } = await supabase
+                .from('notifications')
+                .update({ is_read: true })
+                .eq('id', notificationId)
+                .eq('user_id', currentUser.id);
+
+            if (error) {
+                console.error('Error marking notification as read:', error);
+                return false;
+            }
+
+            // Remove from hidden list
+            const hiddenNotifications = getHiddenNotifications();
+            delete hiddenNotifications[notificationId];
+            localStorage.setItem('hiddenNotifications', JSON.stringify(hiddenNotifications));
+
+            return true;
+        }
+
+        // Delete Notification Permanently (للحذف الكامل)
+        async function deleteNotification(notificationId) {
+            const { error } = await supabase
+                .from('notifications')
+                .delete()
+                .eq('id', notificationId)
+                .eq('user_id', currentUser.id);
+
+            if (error) {
+                console.error('Error deleting notification:', error);
+                return false;
+            }
+
+            // Remove from hidden list
+            const hiddenNotifications = getHiddenNotifications();
+            delete hiddenNotifications[notificationId];
+            localStorage.setItem('hiddenNotifications', JSON.stringify(hiddenNotifications));
+
+            return true;
         }
 
         function formatCurrency(amount) {
-            if (amount === 0) return '0';
-            
-            const num = parseFloat(amount);
-            if (num >= 1000000) {
-                return (num / 1000000).toFixed(1) + 'M';
-            } else if (num >= 1000) {
-                return (num / 1000).toFixed(1) + 'K';
-            }
-            return num.toLocaleString('ar-DZ');
+            return new Intl.NumberFormat('ar-DZ', {
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount) + ' د';
         }
 
-        function showError(message) {
-            alert(message);
+        function formatDate(dateString) {
+            if (!dateString) return 'غير محدد';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ar-DZ', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+            });
         }
 
-        // ============================================
-        // Initialize
-        // ============================================
-        window.addEventListener('DOMContentLoaded', async () => {
-            const isAuthenticated = await checkAuth();
+        // Modal Functions
+        function openAddProjectModal() {
+            const modal = document.getElementById('addProjectModal');
+            const iframe = document.getElementById('projectIframe');
+            const loading = document.getElementById('modalLoading');
             
-            if (isAuthenticated) {
-                await Promise.all([
-                    loadStats(),
-                    loadProjects(),
-                    loadAlerts()
-                ]);
-                
-                document.getElementById('authLoading').classList.add('hidden');
-                
-                console.log('✅ Dashboard loaded successfully');
+            modal.classList.add('active');
+            
+            loading.style.display = 'block';
+            iframe.style.display = 'none';
+            
+            iframe.src = 'pages/project-new.html';
+        }
+
+        function closeAddProjectModal() {
+            const modal = document.getElementById('addProjectModal');
+            const iframe = document.getElementById('projectIframe');
+            
+            modal.classList.remove('active');
+            
+            setTimeout(() => {
+                iframe.src = '';
+            }, 300);
+            
+            loadProjects();
+            loadStats();
+        }
+
+        function hideModalLoading() {
+            const loading = document.getElementById('modalLoading');
+            const iframe = document.getElementById('projectIframe');
+            
+            loading.style.display = 'none';
+            iframe.style.display = 'block';
+        }
+
+        document.getElementById('addProjectModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAddProjectModal();
             }
         });
 
-        // Listen for auth state changes
-        supabase.auth.onAuthStateChange((event, session) => {
-            if (event === 'SIGNED_OUT') {
-                window.location.href = 'login.html';
+        window.addEventListener('message', function(event) {
+            if (event.data === 'projectAdded') {
+                closeAddProjectModal();
+                alert('✅ تم إضافة المشروع بنجاح!');
+                loadProjects();
+                loadStats();
             }
         });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('addProjectModal');
+                if (modal.classList.contains('active')) {
+                    closeAddProjectModal();
+                }
+            }
+        });
+
+        // Check for hidden notifications at midnight
+        function scheduleNextMidnightCheck() {
+            const now = new Date();
+            const nextMidnight = new Date(now);
+            nextMidnight.setHours(24, 0, 0, 0); // Next day at 00:00
+
+            const timeUntilMidnight = nextMidnight.getTime() - now.getTime();
+
+            setTimeout(() => {
+                console.log('Midnight reached - refreshing notifications');
+                loadNotifications();
+                scheduleNextMidnightCheck(); // Schedule next check
+            }, timeUntilMidnight);
+        }
+
+        // Start midnight check scheduler
+        scheduleNextMidnightCheck();
+
+        document.addEventListener('DOMContentLoaded', loadDashboard);
     </script>
 </body>
 </html>
